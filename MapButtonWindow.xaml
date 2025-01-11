@@ -1,0 +1,27 @@
+﻿<Window x:Class="MarvinsAIRA.MapButtonWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MarvinsAIRA"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        mc:Ignorable="d"
+        Title="Button Mapping"
+        Height="Auto"
+        Width="600"
+        SizeToContent="Height"
+        ResizeMode="CanMinimize"
+        Icon="/icon.ico"
+        WindowStartupLocation="CenterOwner"
+        Activated="Window_Activated"
+        Closing="Window_Closing"
+        ui:WindowHelper.UseModernWindowStyle="True">
+    <StackPanel Margin="10,10,10,20">
+        <Label FontSize="18" Content="Press any button on any controller to select it." HorizontalAlignment="Center" FontWeight="Bold" />
+        <Label x:Name="ButtonNameLabel" FontSize="16" Content="Currently using Button 24 on device name" HorizontalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <Button Content="Update" Margin="10,0,10,0" FontSize="18" Width="100" Click="UpdateButton_Click" />
+            <Button Content="Cancel" Margin="10,0,10,0" FontSize="18" Width="100" Click="CancelButton_Click" />
+        </StackPanel>
+    </StackPanel>
+</Window>
