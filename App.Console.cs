@@ -22,7 +22,7 @@ namespace MarvinsAIRA
 			{
 				var lastWriteTime = File.GetLastWriteTime( filePath );
 
-				if ( lastWriteTime.CompareTo( DateTime.Now.AddHours( -4 ) ) < 0 )
+				if ( lastWriteTime.CompareTo( DateTime.Now.AddMinutes( -15 ) ) < 0 )
 				{
 					File.Delete( filePath );
 				}
@@ -44,6 +44,8 @@ namespace MarvinsAIRA
 
 		public void WriteLine( string message )
 		{
+			var messageWithTime = $"{DateTime.Now}   {message}";
+
 			Debug.WriteLine( message );
 
 			if ( _fileStream != null )
@@ -54,7 +56,7 @@ namespace MarvinsAIRA
 
 					try
 					{
-						var bytes = new UTF8Encoding( true ).GetBytes( $"{DateTime.Now}   {message}\r\n" );
+						var bytes = new UTF8Encoding( true ).GetBytes( $"{messageWithTime}\r\n" );
 
 						_fileStream.Write( bytes, 0, bytes.Length );
 						_fileStream.Flush();
@@ -76,32 +78,11 @@ namespace MarvinsAIRA
 
 				if ( mainWindow != null )
 				{
-					mainWindow.ConsoleTextBox.Text += $"{message}\n";
-
+					mainWindow.ConsoleTextBox.Text += $"{messageWithTime}\r\n";
+					mainWindow.ConsoleTextBox.CaretIndex = mainWindow.ConsoleTextBox.Text.Length;
 					mainWindow.ConsoleTextBox.ScrollToEnd();
 				}
 			} );
-		}
-
-		public string[] ReadAllLines()
-		{
-			WriteLine( "" );
-			WriteLine( "ReadAllLines called." );
-
-			StopConsole();
-
-			var filePath = Path.Combine( DocumentsFolder, "Console.log" );
-
-			string[] consoleLog = [ "Console log file was not found!" ];
-
-			if ( File.Exists( filePath ) )
-			{
-				consoleLog = File.ReadAllLines( filePath );
-			}
-
-			InitializeConsole();
-
-			return consoleLog;
 		}
 	}
 }

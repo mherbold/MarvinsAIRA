@@ -11,6 +11,7 @@ namespace MarvinsAIRA
 	{
 		private bool _initialized = false;
 		private bool _pauseScaleButtons = false;
+		private bool _restartForceFeedback = false;
 
 		private nint _windowHandle = 0;
 
@@ -59,6 +60,16 @@ namespace MarvinsAIRA
 
 				_initialized = true;
 			}
+
+			if ( _restartForceFeedback )
+			{
+				app.ReinitializeForceFeedbackDevice( _windowHandle );
+			}
+		}
+
+		private void Window_Deactivated( object sender, EventArgs e )
+		{
+			_restartForceFeedback = true;
 		}
 
 		private void OnTimer( object? sender, EventArgs e )
@@ -79,7 +90,7 @@ namespace MarvinsAIRA
 
 					if ( _sendForceFeedbackTestSignalCounter > 0 )
 					{
-						app.SendTestForceFeedbackSignal();
+						app.SendTestForceFeedbackSignal( ( _sendForceFeedbackTestSignalCounter & 1 ) == 0 );
 
 						_sendForceFeedbackTestSignalCounter--;
 					}
@@ -99,7 +110,7 @@ namespace MarvinsAIRA
 						else if ( app.Settings.ForceFeedbackEnabled )
 						{
 							ForceFeedbackStatusBarItem.Content = $"FFB: {( app.FFB_CurrentMagnitude * 100f / App.DI_FFNOMINALMAX ):F0}%";
-							ForceFeedbackStatusBarItem.Foreground = Brushes.White;
+							ForceFeedbackStatusBarItem.Foreground = Brushes.ForestGreen;
 						}
 						else
 						{
@@ -115,7 +126,7 @@ namespace MarvinsAIRA
 						else if ( app.Settings.WindSimulatorEnabled )
 						{
 							WindStatusBarItem.Content = $"Wind: {app.Wind_CurrentMagnitude:F0}%";
-							WindStatusBarItem.Foreground = Brushes.White;
+							WindStatusBarItem.Foreground = Brushes.ForestGreen;
 						}
 						else
 						{
@@ -146,16 +157,16 @@ namespace MarvinsAIRA
 
 			if ( checkBox.IsChecked == true )
 			{
-				if ( !app.FFB_TaskIsRunning )
+				if ( !app.FFB_ThreadIsRunning )
 				{
-					app.StartForceFeedbackTask();
+					app.StartForceFeedbackThread();
 				}
 			}
 			else
 			{
-				if ( app.FFB_TaskIsRunning )
+				if ( app.FFB_ThreadIsRunning )
 				{
-					app.StopForceFeedbackTask();
+					app.StopForceFeedbackThread();
 
 					app.UpdateMagnitude( 0 );
 				}
@@ -364,11 +375,9 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "SendMarvinYourConsoleLog_Click called." );
 
-			var consoleLog = app.ReadAllLines();
+			var text = ConsoleTextBox.Text.Replace( "\r\n", "\r\n\t" );
 
-			var text = string.Join( "\r\n\t", consoleLog );
-
-			Clipboard.SetText( $"\r\n\t{text}\r\n" );
+			Clipboard.SetText( $"\r\n\r\n\t{text}\r\n" );
 
 			string url = "https://forums.iracing.com/messages/add/Marvin%20Herbold";
 

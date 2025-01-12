@@ -74,19 +74,17 @@ namespace MarvinsAIRA
 						leftWindForce = _wind_currentMagnitude;
 						rightWindForce = _wind_currentMagnitude;
 					}
-					else if ( _telemetryDataInitialized )
+					else if ( _irsdk.IsConnected )
 					{
-						if ( _irsdk.Data.GetBool( _isOnTrackDatum ) )
+						if ( _isOnTrack )
 						{
-							var velocityX = _irsdk.Data.GetFloat( _velocityXDatum );
-							var velocityY = _irsdk.Data.GetFloat( _velocityYDatum );
+							var velocityX = _velocityX;
+							var velocityY = _velocityY;
 
 							var leftWindForceScale = 1f - 0.85f * Math.Max( 0, Math.Min( 1, velocityY * 5f ) );
 							var rightWindForceScale = 1f - 0.85f * Math.Max( 0, Math.Min( 1, -velocityY * 5f ) );
 
-							var displayUnits = _irsdk.Data.GetInt( _displayUnitsDatum );
-
-							if ( displayUnits == 0 )
+							if ( _displayUnits == 0 )
 							{
 								velocityX *= WIND_MPS_TO_MPH;
 							}

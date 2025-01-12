@@ -15,7 +15,7 @@
         ResizeMode="CanMinimize"
         Icon="/icon.ico"
         WindowStartupLocation="CenterScreen"
-        ui:WindowHelper.UseModernWindowStyle="True">
+        ui:WindowHelper.UseModernWindowStyle="True" Deactivated="Window_Deactivated">
     <Window.DataContext>
         <local:Settings />
     </Window.DataContext>
@@ -31,25 +31,30 @@
                 <StackPanel Margin="10,10,10,10">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
-                        <ComboBox x:Name="ForceFeedbackDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding DeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedDeviceId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="ForceFeedbackDeviceComboBox_SelectionChanged" />
-                        <Button x:Name="ForceFeedbackTestButton" Grid.Column="2" Margin="10,0,0,0" Content="Test" Width="64" Click="ForceFeedbackTestButton_Click" />
-                    </Grid>
-                    <Grid Margin="0,5,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="90"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="78"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
-                        <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" />
-                        <Label Grid.Column="3"/>
+                        <StackPanel Grid.Column="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
+                                <ComboBox x:Name="ForceFeedbackDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding DeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedDeviceId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="ForceFeedbackDeviceComboBox_SelectionChanged" />
+                            </Grid>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
+                                <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+                        </StackPanel>
+                        <Button Grid.Column="1" x:Name="ForceFeedbackTestButton" Margin="15,5,5,5" Content="TEST" Click="ForceFeedbackTestButton_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" FontSize="16" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
                     </Grid>
                     <Grid Margin="0,5,0,0">
                         <Grid.ColumnDefinitions>
@@ -61,7 +66,7 @@
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
                         <TextBox Grid.Column="1" Text="{Binding OverallScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="2000" SmallChange="1" LargeChange="50" TickPlacement="TopLeft" Value="{Binding OverallScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="50" />
+                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OverallScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
                         <Button Grid.Column="3" x:Name="DecreaseOverallScaleButton" Margin="10,0,0,0" Click="DecreaseOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                             <Image Source="/minus-button.png"/>
                         </Button>
@@ -79,7 +84,7 @@
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
                         <TextBox Grid.Column="1" Text="{Binding DetailScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="5" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="10" />
+                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
                         <Button Grid.Column="3" x:Name="DecreaseDetailScaleButton" Margin="10,0,0,0" Click="DecreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                             <Image Source="/minus-button.png"/>
                         </Button>
@@ -260,7 +265,7 @@
                     <Button x:Name="SeeHelpDocumentation" HorizontalAlignment="Stretch" Content="See the Documentation" Click="SeeHelpDocumentation_Click" />
                     <Button x:Name="GoToIracingForumThread" HorizontalAlignment="Stretch" Content="Go to the iRacing Forum Thread" Click="GoToIRacingForumThread_Click" Margin="0,5,0,0" />
                     <Button x:Name="SendMarvinYourConsoleLog" HorizontalAlignment="Stretch" Content="Send Marvin Your Console Log" Click="SendMarvinYourConsoleLog_Click" Margin="0,5,0,0" />
-                    <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Justify" Margin="0,5,0,0">You must have an iRacing Forums account to use the above button. When you click on the button, your console log will be copied to the Windows clipboard. A browser window will be opened, taking you to the iRacing Forum New Message page. Type in a short description of the problem in the message body, and then hit Ctrl+V to paste your console log into the message body.</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Justify" Margin="0,5,0,0">You must have an iRacing Forums account to use the above button. When you click on the button, your console log will be copied to the Windows clipboard. A browser window will be opened, taking you to the iRacing Forum New Message page. Type in a short description of the problem, and then hit Ctrl+V on a blank line, to paste your console log into the message.</TextBlock>
                 </StackPanel>
             </TabItem>
         </TabControl>
@@ -274,8 +279,10 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="90" />
                         </Grid.ColumnDefinitions>
                     </Grid>
                 </ItemsPanelTemplate>
@@ -285,8 +292,10 @@
             <StatusBarItem Grid.Column="2" x:Name="CurrentCarStatusBarItem" Content="No Car" Foreground="Gray"/>
             <Separator Grid.Column="3" />
             <StatusBarItem Grid.Column="4" x:Name="CurrentTrackStatusBarItem" Content="No Track" Foreground="Gray"/>
-            <StatusBarItem Grid.Column="5" x:Name="ForceFeedbackStatusBarItem" Content="FFB" Foreground="Gray"/>
-            <StatusBarItem Grid.Column="6" x:Name="WindStatusBarItem" Content="Wind" Foreground="Gray"/>
+            <Separator Grid.Column="5" />
+            <StatusBarItem Grid.Column="6" x:Name="ForceFeedbackStatusBarItem" Content="FFB" Foreground="Gray"/>
+            <Separator Grid.Column="7" />
+            <StatusBarItem Grid.Column="8" x:Name="WindStatusBarItem" Content="Wind" Foreground="Gray"/>
         </StatusBar>
     </StackPanel>
 </Window>

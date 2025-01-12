@@ -13,9 +13,9 @@ namespace MarvinsAIRA
 	public partial class App : Application
 	{
 		public const int DI_FFNOMINALMAX = 10000;
-		private const int DIEB_NOTRIGGER = -1;
+		public const int DIEB_NOTRIGGER = -1;
 
-		private const int FFB_SAMPLES_PER_FRAME = 6;
+		private const int FFB_SAMPLES_PER_FRAME = IRSDK_360HZ_SAMPLES_PER_FRAME;
 		private const int FFB_UPDATE_FREQUENCY = 360;
 		private const int FFB_MICROSECONDS_PER_SECOND = 1000000;
 		private const int FFB_MICROSECONDS_PER_UPDATE = FFB_MICROSECONDS_PER_SECOND / FFB_UPDATE_FREQUENCY;
@@ -41,11 +41,11 @@ namespace MarvinsAIRA
 		private int _ffb_currentMagnitude = 0;
 		private float _ffb_clippedTimer = 0;
 
-		private readonly float[] _ffb_scaledMagnitudeArray = new float[ FFB_SAMPLES_PER_FRAME ];
-		private int _ffb_scaledMagnitudeIndex = 0;
+		private readonly float[] _ffb_forceFeedbackMagnitude = new float[ FFB_SAMPLES_PER_FRAME ];
+		private int _ffb_forceFeedbackMagnitudeIndex = 0;
 
-		private float _ffb_previousOriginalMagnitude = 0;
-		private float _ffb_scaledMagnitude = 0;
+		private float _ffb_previousSteeringWheelTorque = 0;
+		private float _ffb_scaledSteeringWheelTorque = 0;
 
 		private readonly SoundPlayer _ffb_clickSoundPlayer = new( new MemoryStream( MarvinsAIRA.Properties.Resources.Click ) );
 
@@ -57,16 +57,20 @@ namespace MarvinsAIRA
 		private readonly WriteableBitmap _ffb_writeableBitmap = new( FFB_WRITEABLE_BITMAP_WIDTH, FFB_WRITEABLE_BITMAP_HEIGHT, FFB_WRITEABLE_BITMAP_DPI, FFB_WRITEABLE_BITMAP_DPI, PixelFormats.Bgra32, null );
 		private readonly byte[] _ffb_pixels = new byte[ FFB_PIXELS_BUFFER_STRIDE * FFB_PIXELS_BUFFER_HEIGHT ];
 
-		private bool _ffb_pauseTask = false;
-		private bool _ffb_taskPaused = false;
+		private Thread? _ffb_thread = null;
 
-		private bool _ffb_stopTask = false;
-		private bool _ffb_taskStopped = true;
+		private bool _ffb_pauseThread = false;
+		private bool _ffb_threadPaused = false;
+
+		private bool _ffb_stopThread = false;
+		private bool _ffb_threadStopped = true;
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
-		public bool FFB_TaskIsRunning { get => !_ffb_taskStopped; }
+		public bool FFB_ThreadIsRunning { get => !_ffb_threadStopped; }
 		public int FFB_CurrentMagnitude { get => _ffb_currentMagnitude; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
+
+		private int _ffb_tempCounter = 0;
 
 		public void InitializeForceFeedback( nint windowHandle )
 		{
@@ -176,7 +180,7 @@ namespace MarvinsAIRA
 
 					if ( Settings.ForceFeedbackEnabled )
 					{
-						StartForceFeedbackTask();
+						StartForceFeedbackThread();
 					}
 				}
 			}
@@ -191,9 +195,9 @@ namespace MarvinsAIRA
 			WriteLine( "" );
 			WriteLine( "UninitializeForceFeedback called." );
 
-			if ( !_ffb_taskStopped )
+			if ( !_ffb_threadStopped )
 			{
-				StopForceFeedbackTask();
+				StopForceFeedbackThread();
 			}
 
 			if ( _ffb_constantForceEffect != null )
@@ -231,10 +235,10 @@ namespace MarvinsAIRA
 			_ffb_initialized = false;
 		}
 
-		public void StartForceFeedbackTask()
+		public void StartForceFeedbackThread()
 		{
 			WriteLine( "" );
-			WriteLine( "StartForceFeedbackTask called." );
+			WriteLine( "StartForceFeedbackThread called." );
 			WriteLine( "Starting the force feedback update thread..." );
 
 			if ( !_ffb_initialized )
@@ -243,26 +247,33 @@ namespace MarvinsAIRA
 			}
 			else
 			{
-				Task.Run( ForceFeedbackUpdateThread );
+				_ffb_thread = new Thread( ForceFeedbackUpdateThread )
+				{
+					Priority = ThreadPriority.AboveNormal
+				};
+
+				_ffb_thread.Start();
 
 				WriteLine( "...the force feedback update thread has been started." );
 			}
 		}
 
-		public void StopForceFeedbackTask()
+		public void StopForceFeedbackThread()
 		{
 			WriteLine( "" );
 			WriteLine( "StopForceFeedbackTask called." );
 			WriteLine( "Stopping the force feedback update thread..." );
 
-			_ffb_stopTask = true;
+			_ffb_stopThread = true;
 
-			while ( !_ffb_taskStopped )
+			while ( !_ffb_threadStopped )
 			{
 				Thread.Sleep( 0 );
 			}
 
-			_ffb_stopTask = false;
+			_ffb_thread = null;
+
+			_ffb_stopThread = false;
 
 			WriteLine( "...the force feedback update thread has been stopped." );
 		}
@@ -409,7 +420,7 @@ namespace MarvinsAIRA
 
 								if ( buttonPresses > 0 )
 								{
-									Settings.OverallScale -= 10 * buttonPresses;
+									Settings.OverallScale -= buttonPresses;
 
 									_ffb_announceOverallScaleTimer = 1;
 
@@ -423,7 +434,7 @@ namespace MarvinsAIRA
 
 								if ( buttonPresses > 0 )
 								{
-									Settings.OverallScale += 10 * buttonPresses;
+									Settings.OverallScale += buttonPresses;
 
 									_ffb_announceOverallScaleTimer = 1;
 
@@ -533,10 +544,10 @@ namespace MarvinsAIRA
 
 				if ( !forceFeedbackSettingsFound )
 				{
-					Settings.OverallScale = 100;
+					Settings.OverallScale = 10;
 					Settings.DetailScale = 100;
 
-					Say( "This is the first time we've seen this car on this track on this track configuration, so we have reset the overall and detail scale to 100 percent." );
+					Say( "This is the first time we've seen this car on this track, with this track configuration, so we have reset the overall and detail scale." );
 				}
 			}
 		}
@@ -548,45 +559,47 @@ namespace MarvinsAIRA
 			return _ffb_drawPrettyGraph;
 		}
 
-		public void PauseTask()
+		public void PauseThread()
 		{
-			if ( FFB_TaskIsRunning )
+			if ( FFB_ThreadIsRunning )
 			{
-				_ffb_pauseTask = true;
+				_ffb_pauseThread = true;
 
-				while ( !_ffb_taskPaused )
+				while ( !_ffb_threadPaused )
 				{
 					Thread.Sleep( 0 );
 				}
 
-				_ffb_taskPaused = false;
+				_ffb_threadPaused = false;
 			}
 		}
 
-		public void UnpauseTask()
+		public void UnpauseThread()
 		{
-			if ( FFB_TaskIsRunning )
+			if ( FFB_ThreadIsRunning )
 			{
-				_ffb_pauseTask = false;
+				_ffb_pauseThread = false;
 			}
 		}
 
-		public void SendTestForceFeedbackSignal()
+		public void SendTestForceFeedbackSignal( bool invert )
 		{
-			PauseTask();
+			PauseThread();
 
-			_ffb_scaledMagnitudeArray[ 0 ] = 3000;
-			_ffb_scaledMagnitudeArray[ 1 ] = 0;
-			_ffb_scaledMagnitudeArray[ 2 ] = -3000;
-			_ffb_scaledMagnitudeArray[ 3 ] = 0;
-			_ffb_scaledMagnitudeArray[ 4 ] = 3000;
-			_ffb_scaledMagnitudeArray[ 5 ] = 0;
+			var magnitude = invert ? -1500 : 1500;
 
-			_ffb_previousOriginalMagnitude = 0;
-			_ffb_scaledMagnitude = 0;
-			_ffb_scaledMagnitudeIndex = 0;
+			_ffb_forceFeedbackMagnitude[ 0 ] = magnitude * 1;
+			_ffb_forceFeedbackMagnitude[ 1 ] = magnitude * 2;
+			_ffb_forceFeedbackMagnitude[ 2 ] = magnitude * 3;
+			_ffb_forceFeedbackMagnitude[ 3 ] = magnitude * 2;
+			_ffb_forceFeedbackMagnitude[ 4 ] = magnitude * 1;
+			_ffb_forceFeedbackMagnitude[ 5 ] = 0;
 
-			UnpauseTask();
+			_ffb_previousSteeringWheelTorque = 0;
+			_ffb_scaledSteeringWheelTorque = 0;
+			_ffb_forceFeedbackMagnitudeIndex = 0;
+
+			UnpauseThread();
 		}
 
 		public void UpdateMagnitude( int newMagnitude )
@@ -599,13 +612,13 @@ namespace MarvinsAIRA
 				{
 					_ffb_currentMagnitude = DI_FFNOMINALMAX;
 
-					_ffb_clippedTimer = 1;
+					_ffb_clippedTimer = 3;
 				}
 				else if ( _ffb_currentMagnitude < -DI_FFNOMINALMAX )
 				{
 					_ffb_currentMagnitude = -DI_FFNOMINALMAX;
 
-					_ffb_clippedTimer = 1;
+					_ffb_clippedTimer = 3;
 				}
 
 				if ( !_ffb_reacquireNeeded )
@@ -651,19 +664,11 @@ namespace MarvinsAIRA
 
 		private void ProcessSteeringWheelTorque( bool drawPrettyGraph )
 		{
-			if ( _irsdk.Data.GetBool( _isOnTrackDatum ) )
+			if ( _isOnTrack )
 			{
 				// we want to reduce forces while the car is moving very slow or parked
 
-				var speed = _irsdk.Data.GetFloat( _speedDatum );
-
-				var speedScale = ( speed >= 5 ) ? 1 : Math.Max( 0.1f, ( speed / 5 ) );
-
-				// get the next 6 FFB samples from iRacing
-
-				var originalMagnitudeArray = new float[ FFB_SAMPLES_PER_FRAME ];
-
-				_irsdk.Data.GetFloatArray( _steeringWheelTorque_STDatum, originalMagnitudeArray, 0, originalMagnitudeArray.Length );
+				var speedScale = ( _speed >= 5 ) ? 1 : Math.Max( 0.05f, _speed / 5 );
 
 				// calculate the conversion scale from Newton-meters to DI_FFNOMINALMAX
 
@@ -679,41 +684,52 @@ namespace MarvinsAIRA
 
 				// go through each sample
 
-				for ( var x = 0; x < originalMagnitudeArray.Length; x++ )
+				for ( var x = 0; x < _steeringWheelTorque_ST.Length; x++ )
 				{
-					// get the FFB magnitude (it is in Newton-meters)
+					// get the next steering wheel torque sample (it is in Newton-meters)
 
-					var currentOriginalMagnitude = originalMagnitudeArray[ x ];
+					var currentSteeringWheelTorque = _steeringWheelTorque_ST[ x ];
 
-					// calculate the impulse (change in FFB magnitude compared to the last sample)
+					// calculate the impulse (change in steering wheel torque compared to the last sample)
 
-					var deltaOriginalMagnitude = currentOriginalMagnitude - _ffb_previousOriginalMagnitude;
+					var deltaSteeringWheelTorque = currentSteeringWheelTorque - _ffb_previousSteeringWheelTorque;
 
-					_ffb_previousOriginalMagnitude = currentOriginalMagnitude;
+					_ffb_previousSteeringWheelTorque = currentSteeringWheelTorque;
 
-					// scale the impulse by our detail scale and add it to our running scaled magnitude
+					// scale the impulse by our detail scale and add it to our running scaled steering wheel torque
 
-					_ffb_scaledMagnitude += deltaOriginalMagnitude * detailScale;
+					_ffb_scaledSteeringWheelTorque += deltaSteeringWheelTorque * detailScale;
 
-					// ramp our running scaled magnitude towards the original signal
+					// ramp our running scaled magnitude towards the original signal (feed in steady state signal)
 
-					_ffb_scaledMagnitude = ( _ffb_scaledMagnitude * 0.97f ) + ( currentOriginalMagnitude * overallScale * 0.03f );
+					_ffb_scaledSteeringWheelTorque = ( _ffb_scaledSteeringWheelTorque * 0.97f ) + ( currentSteeringWheelTorque * overallScale * 0.03f );
 
-					// apply the speed scale and update the array that the background thread uses
+					// apply the speed scale and update the array that the force feedback thread uses
 
-					_ffb_scaledMagnitudeArray[ x ] = _ffb_scaledMagnitude * speedScale;
+					_ffb_forceFeedbackMagnitude[ x ] = _ffb_scaledSteeringWheelTorque * speedScale;
+
+					// TEMPORARY CODE - REMOVE BEFORE PUBLISHING!!!
+					//_ffb_tempCounter++;
+
+					//if ( _ffb_tempCounter == 360 )
+					//{
+					//_ffb_tempCounter = 0;
+
+					//WriteLine( $"\r\nconversionScale={conversionScale}\r\noverallScale={overallScale}\r\ndetailScale={detailScale}\r\ncurrentSteeringWheelTorque={currentSteeringWheelTorque}\r\ndeltaSteeringWheelTorque={deltaSteeringWheelTorque}\r\n_ffb_scaledSteeringWheelTorque={_ffb_scaledSteeringWheelTorque}\r\n_ffb_forceFeedbackMagnitude={_ffb_forceFeedbackMagnitude[ x ]}\r\n" );
+					//}
+					// TEMPORARY CODE - REMOVE BEFORE PUBLISHING!!!
 
 					// update the pretty graph
 
 					if ( drawPrettyGraph )
 					{
-						var forceToImageHeightScale = (float) Settings.OverallScale / 100;
-						var forceToImageHeightOffset = 100;
+						var forceFeedbackMaxToPixelBufferHeightScale = DI_FFNOMINALMAX / FFB_PIXELS_BUFFER_HEIGHT;
+						var halfPixelBufferOffset = FFB_PIXELS_BUFFER_HEIGHT / 2;
 
-						var oY2 = (int) ( currentOriginalMagnitude * forceToImageHeightScale + forceToImageHeightOffset ) + 1;
+						var oY2 = (int) ( currentSteeringWheelTorque * overallScale / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
 						var oY1 = oY2 - 2;
 
-						var sY2 = (int) ( _ffb_scaledMagnitudeArray[ x ] / 100 + forceToImageHeightOffset ) + 1;
+						var sY2 = (int) ( _ffb_forceFeedbackMagnitude[ x ] / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
 						var sY1 = sY2 - 2;
 
 						for ( var y = 0; y < 200; y++ )
@@ -784,36 +800,36 @@ namespace MarvinsAIRA
 			}
 			else
 			{
-				for ( var i = 0; i < _ffb_scaledMagnitudeArray.Length; i++ )
+				for ( var i = 0; i < _ffb_forceFeedbackMagnitude.Length; i++ )
 				{
-					_ffb_scaledMagnitudeArray[ i ] = 0;
+					_ffb_forceFeedbackMagnitude[ i ] = 0;
 				}
 
-				_ffb_previousOriginalMagnitude = 0;
-				_ffb_scaledMagnitude = 0;
+				_ffb_previousSteeringWheelTorque = 0;
+				_ffb_scaledSteeringWheelTorque = 0;
 			}
 
-			_ffb_scaledMagnitudeIndex = 0;
+			_ffb_forceFeedbackMagnitudeIndex = 0;
 		}
 
 		private void UpdateForceFeedback()
 		{
-			PauseTask();
+			PauseThread();
 
 			ProcessSteeringWheelTorque( true );
 
-			UnpauseTask();
+			UnpauseThread();
 		}
 
 		private void ForceFeedbackUpdateThread()
 		{
-			_ffb_taskStopped = false;
+			_ffb_threadStopped = false;
 
 			var stopwatch = new Stopwatch();
 
 			stopwatch.Start();
 
-			while ( !_ffb_stopTask )
+			while ( !_ffb_stopThread )
 			{
 				Thread.Sleep( 0 );
 
@@ -823,21 +839,21 @@ namespace MarvinsAIRA
 				{
 					stopwatch.Restart();
 
-					if ( _ffb_scaledMagnitudeIndex < _ffb_scaledMagnitudeArray.Length )
+					if ( _ffb_forceFeedbackMagnitudeIndex < _ffb_forceFeedbackMagnitude.Length )
 					{
-						UpdateMagnitude( (int) _ffb_scaledMagnitudeArray[ _ffb_scaledMagnitudeIndex++ ] );
+						UpdateMagnitude( (int) _ffb_forceFeedbackMagnitude[ _ffb_forceFeedbackMagnitudeIndex++ ] );
 					}
 				}
 
-				if ( _ffb_pauseTask )
+				if ( _ffb_pauseThread )
 				{
-					_ffb_taskPaused = true;
+					_ffb_threadPaused = true;
 
-					while ( _ffb_pauseTask )
+					while ( _ffb_pauseThread )
 					{
 						Thread.Sleep( 0 );
 
-						if ( _ffb_stopTask )
+						if ( _ffb_stopThread )
 						{
 							break;
 						}
@@ -847,7 +863,7 @@ namespace MarvinsAIRA
 
 			UpdateMagnitude( 0 );
 
-			_ffb_taskStopped = true;
+			_ffb_threadStopped = true;
 		}
 	}
 }

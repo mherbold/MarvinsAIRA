@@ -7,10 +7,10 @@ namespace MarvinsAIRA
 	public partial class App : Application
 	{
 		private const string NO_TRACK_DISPLAY_NAME = "No Track";
-		private const string NO_TRACK_CONFIG_NAME = "";
+		private const string NO_TRACK_CONFIG_NAME = "No Track Configuration";
 
 		private string _currentTrackDisplayName = NO_TRACK_DISPLAY_NAME;
-		private string _currentTrackConfigName = "";
+		private string _currentTrackConfigName = NO_TRACK_CONFIG_NAME;
 
 		private bool _trackChanged = false;
 
@@ -35,15 +35,23 @@ namespace MarvinsAIRA
 
 			if ( ( _currentTrackDisplayName != trackDisplayName ) || ( _currentTrackConfigName != trackConfigName ) )
 			{
-				WriteLine( "" );
-				WriteLine( $"You are now racing at {trackDisplayName} ({trackConfigName})." );
-
 				_currentTrackDisplayName = trackDisplayName;
 				_currentTrackConfigName = trackConfigName;
 
-				Say( $"You are now racing at {trackDisplayName} ({trackConfigName})." );
+				if ( _currentTrackDisplayName == NO_TRACK_DISPLAY_NAME )
+				{
+					WriteLine( "" );
+					WriteLine( "You are no longer on a track." );
+				}
+				else
+				{
+					WriteLine( "" );
+					WriteLine( $"You are racing at {_currentTrackDisplayName} ({_currentTrackConfigName})." );
 
-				_trackChanged = true;
+					Say( $"You are racing at {_currentTrackDisplayName} ({_currentTrackConfigName})." );
+
+					_trackChanged = true;
+				}
 
 				Dispatcher.BeginInvoke( () =>
 				{
@@ -52,8 +60,7 @@ namespace MarvinsAIRA
 					if ( mainWindow != null )
 					{
 						mainWindow.CurrentTrackStatusBarItem.Content = $"{_currentTrackDisplayName} ({_currentTrackConfigName})";
-						mainWindow.CurrentTrackStatusBarItem.Foreground = ( _currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.White;
-					}
+						mainWindow.CurrentTrackStatusBarItem.Foreground = ( _currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;					}
 				} );
 			}
 		}

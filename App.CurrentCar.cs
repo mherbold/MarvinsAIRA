@@ -38,14 +38,22 @@ namespace MarvinsAIRA
 
 			if ( _currentCarScreenName != carScreenName )
 			{
-				WriteLine( "" );
-				WriteLine( $"You are now driving a {carScreenName}." );
-
 				_currentCarScreenName = carScreenName;
 
-				Say( $"You are now driving a {carScreenName}." );
+				if ( _currentCarScreenName == NO_CAR_SCREEN_NAME )
+				{
+					WriteLine( "" );
+					WriteLine( $"You are no longer driving a car." );
+				}
+				else
+				{
+					WriteLine( "" );
+					WriteLine( $"You are now driving a {_currentCarScreenName}." );
 
-				_carChanged = true;
+					Say( $"You are now driving a {_currentCarScreenName}." );
+
+					_carChanged = true;
+				}
 
 				Dispatcher.BeginInvoke( () =>
 				{
@@ -54,10 +62,11 @@ namespace MarvinsAIRA
 					if ( mainWindow != null )
 					{
 						mainWindow.CurrentCarStatusBarItem.Content = _currentCarScreenName;
-						mainWindow.CurrentCarStatusBarItem.Foreground = ( _currentCarScreenName == NO_CAR_SCREEN_NAME ) ? Brushes.Gray : Brushes.White;
+						mainWindow.CurrentCarStatusBarItem.Foreground = ( _currentCarScreenName == NO_CAR_SCREEN_NAME ) ? Brushes.Gray : Brushes.ForestGreen;
 					}
 				} );
 			}
+
 		}
 	}
 }

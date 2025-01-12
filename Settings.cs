@@ -149,7 +149,7 @@ namespace MarvinsAIRA
 
 		/* Force feedback settings - overall scale */
 
-		private int _overallScale = 100;
+		private int _overallScale = 10;
 
 		public int OverallScale
 		{
@@ -157,7 +157,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 20000, value ) );
+				value = Math.Max( 0, Math.Min( 250, value ) );
 
 				if ( _overallScale != value )
 				{
@@ -170,7 +170,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _overallScaleString = "100%";
+		private string _overallScaleString = "10%";
 
 		public string OverallScaleString
 		{
@@ -197,7 +197,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 200, value ) );
+				value = Math.Max( 0, Math.Min( 250, value ) );
 
 				if ( _detailScale != value )
 				{
@@ -644,7 +644,7 @@ namespace MarvinsAIRA
 			public string TrackDisplayName = "";
 			public string TrackConfigName = "";
 
-			public int OverallScale = 100;
+			public int OverallScale = 10;
 			public int DetailScale = 100;
 		}
 

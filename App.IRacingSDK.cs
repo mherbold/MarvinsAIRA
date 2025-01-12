@@ -8,6 +8,8 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
+		private const int IRSDK_360HZ_SAMPLES_PER_FRAME = 6;
+
 		private IRacingSdk _irsdk = new();
 
 		private IRacingSdkDatum? _steeringWheelTorque_STDatum = null;
@@ -18,6 +20,13 @@ namespace MarvinsAIRA
 		private IRacingSdkDatum? _displayUnitsDatum = null;
 
 		private bool _telemetryDataInitialized = false;
+
+		private float[] _steeringWheelTorque_ST = new float[ IRSDK_360HZ_SAMPLES_PER_FRAME ];
+		private bool _isOnTrack = false;
+		private float _speed = 0;
+		private float _velocityX = 0;
+		private float _velocityY = 0;
+		private int _displayUnits = 0;
 
 		private void InitializeIRacingSDK()
 		{
@@ -68,6 +77,8 @@ namespace MarvinsAIRA
 			WriteLine( "" );
 			WriteLine( "OnConnected called." );
 
+			Say( "We are now connected to the iRacing simulator." );
+
 			Dispatcher.BeginInvoke( () =>
 			{
 				var mainWindow = (MainWindow) MainWindow;
@@ -75,7 +86,7 @@ namespace MarvinsAIRA
 				if ( mainWindow != null )
 				{
 					mainWindow.ConnectionStatusBarItem.Content = "Connected";
-					mainWindow.ConnectionStatusBarItem.Foreground = Brushes.White;
+					mainWindow.ConnectionStatusBarItem.Foreground = Brushes.ForestGreen;
 				}
 			} );
 		}
@@ -84,6 +95,8 @@ namespace MarvinsAIRA
 		{
 			WriteLine( "" );
 			WriteLine( "OnDisconnected called." );
+
+			Say( "We have been disconnected from the iRacing simulator." );
 
 			Dispatcher.BeginInvoke( () =>
 			{
@@ -119,6 +132,14 @@ namespace MarvinsAIRA
 
 				_telemetryDataInitialized = true;
 			}
+
+			_irsdk.Data.GetFloatArray( _steeringWheelTorque_STDatum, _steeringWheelTorque_ST, 0, _steeringWheelTorque_ST.Length );
+
+			_isOnTrack = _irsdk.Data.GetBool( _isOnTrackDatum );
+			_speed = _irsdk.Data.GetFloat( _speedDatum );
+			_velocityX = _irsdk.Data.GetFloat( _velocityXDatum );
+			_velocityY = _irsdk.Data.GetFloat( _velocityYDatum );
+			_displayUnits = _irsdk.Data.GetInt( _displayUnitsDatum );
 
 			UpdateForceFeedback();
 		}
