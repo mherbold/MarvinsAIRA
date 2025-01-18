@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.8"
+        Title="Marvin's Awesome iRacing App v0.10"
         Height="Auto"
-        Width="800"
+        Width="790"
         Closing="Window_Closing"
         Activated="Window_Activated"
         SizeToContent="Height"
@@ -84,7 +84,7 @@
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
                         <TextBox Grid.Column="1" Text="{Binding DetailScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
+                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
                         <Button Grid.Column="3" x:Name="DecreaseDetailScaleButton" Margin="10,0,0,0" Click="DecreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                             <Image Source="/minus-button.png"/>
                         </Button>
@@ -94,7 +94,7 @@
                     </Grid>
                     <StackPanel Margin="0,10,0,0">
                         <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
-                            <Image x:Name="WheelForceFeedbackImage" Height="200" Width="768" />
+                            <Image x:Name="WheelForceFeedbackImage" Height="200" Width="768"/>
                         </Border>
                         <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
                     </StackPanel>
@@ -237,16 +237,25 @@
                     <Label Content="General Settings" VerticalAlignment="Center" />
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <CheckBox Grid.Column="0" Content="Enable Speech Synthesizer" IsChecked="{Binding EnableSpeechSynthesizer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Slider x:Name="SpeechSynthesizerVolume" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="SpeechSynthesizerVolume_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center"  Margin="10,0,0,0"/>
-                    </Grid>
+                    <GroupBox Header="Voice" Padding="10,0,10,15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Content="Enable Speech Synthesizer" IsChecked="{Binding EnableSpeechSynthesizer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Slider x:Name="SpeechSynthesizerVolume" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="SpeechSynthesizerVolume_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center"  Margin="10,0,0,0"/>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Save File" Padding="10,0,10,15">
+                        <StackPanel>
+                            <CheckBox Content="Save separate force feedback settings for each car" IsChecked="{Binding SaveSettingsPerCar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="Save separate force feedback settings for each track" IsChecked="{Binding SaveSettingsPerTrack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="Save separate force feedback settings for each track configuration" IsChecked="{Binding SaveSettingsPerTrackConfiguration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </GroupBox>
                 </StackPanel>
             </TabItem>
             <TabItem>

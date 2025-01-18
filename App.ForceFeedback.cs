@@ -19,6 +19,8 @@ namespace MarvinsAIRA
 		private const int FFB_UPDATE_FREQUENCY = 360;
 		private const int FFB_MICROSECONDS_PER_SECOND = 1000000;
 		private const int FFB_MICROSECONDS_PER_UPDATE = FFB_MICROSECONDS_PER_SECOND / FFB_UPDATE_FREQUENCY;
+		private const int FFB_NANOSECONDS_PER_SECOND = 1000000000;
+		private const double FFB_NANOSECONDS_PER_UPDATE = (double) FFB_NANOSECONDS_PER_SECOND / FFB_UPDATE_FREQUENCY;
 
 		private const int FFB_WRITEABLE_BITMAP_WIDTH = 768;
 		private const int FFB_WRITEABLE_BITMAP_HEIGHT = 200;
@@ -35,14 +37,14 @@ namespace MarvinsAIRA
 		private Effect? _ffb_constantForceEffect = null;
 
 		private bool _ffb_initialized = false;
+		private bool _ffb_skipNextUpdate = false;
 		private bool _ffb_reacquireNeeded = false;
 		private float _ffb_reacquireTimer = 0;
 
-		private int _ffb_currentMagnitude = 0;
 		private float _ffb_clippedTimer = 0;
+		private Stopwatch _ffb_stopwatch = new();
 
-		private readonly float[] _ffb_forceFeedbackMagnitude = new float[ FFB_SAMPLES_PER_FRAME ];
-		private int _ffb_forceFeedbackMagnitudeIndex = 0;
+		private readonly int[] _ffb_forceFeedbackMagnitude = new int[ FFB_SAMPLES_PER_FRAME ];
 
 		private float _ffb_previousSteeringWheelTorque = 0;
 		private float _ffb_scaledSteeringWheelTorque = 0;
@@ -57,25 +59,19 @@ namespace MarvinsAIRA
 		private readonly WriteableBitmap _ffb_writeableBitmap = new( FFB_WRITEABLE_BITMAP_WIDTH, FFB_WRITEABLE_BITMAP_HEIGHT, FFB_WRITEABLE_BITMAP_DPI, FFB_WRITEABLE_BITMAP_DPI, PixelFormats.Bgra32, null );
 		private readonly byte[] _ffb_pixels = new byte[ FFB_PIXELS_BUFFER_STRIDE * FFB_PIXELS_BUFFER_HEIGHT ];
 
-		private Thread? _ffb_thread = null;
-
-		private bool _ffb_pauseThread = false;
-		private bool _ffb_threadPaused = false;
-
-		private bool _ffb_stopThread = false;
-		private bool _ffb_threadStopped = true;
-
 		public bool FFB_Initialized { get => _ffb_initialized; }
-		public bool FFB_ThreadIsRunning { get => !_ffb_threadStopped; }
-		public int FFB_CurrentMagnitude { get => _ffb_currentMagnitude; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
-
-		private int _ffb_tempCounter = 0;
+		public int FFB_CurrentMagnitude { get => _ffb_forceFeedbackMagnitude[ 0 ]; }
 
 		public void InitializeForceFeedback( nint windowHandle )
 		{
 			WriteLine( "" );
 			WriteLine( "InitializeForceFeedback called." );
+
+			if ( !Stopwatch.IsHighResolution )
+			{
+				WriteLine( "--- Warning --- Stopwatch is not high resolution on this system --- Warning ---" );
+			}
 
 			var mainWindow = (MainWindow) MainWindow;
 
@@ -177,11 +173,6 @@ namespace MarvinsAIRA
 					_ffb_initialized = true;
 
 					ReinitializeForceFeedbackDevice( windowHandle );
-
-					if ( Settings.ForceFeedbackEnabled )
-					{
-						StartForceFeedbackThread();
-					}
 				}
 			}
 			else
@@ -194,11 +185,6 @@ namespace MarvinsAIRA
 		{
 			WriteLine( "" );
 			WriteLine( "UninitializeForceFeedback called." );
-
-			if ( !_ffb_threadStopped )
-			{
-				StopForceFeedbackThread();
-			}
 
 			if ( _ffb_constantForceEffect != null )
 			{
@@ -233,49 +219,6 @@ namespace MarvinsAIRA
 			}
 
 			_ffb_initialized = false;
-		}
-
-		public void StartForceFeedbackThread()
-		{
-			WriteLine( "" );
-			WriteLine( "StartForceFeedbackThread called." );
-			WriteLine( "Starting the force feedback update thread..." );
-
-			if ( !_ffb_initialized )
-			{
-				WriteLine( "...the force feedback system has not been initialized, so we will not start the force feedback background thread." );
-			}
-			else
-			{
-				_ffb_thread = new Thread( ForceFeedbackUpdateThread )
-				{
-					Priority = ThreadPriority.AboveNormal
-				};
-
-				_ffb_thread.Start();
-
-				WriteLine( "...the force feedback update thread has been started." );
-			}
-		}
-
-		public void StopForceFeedbackThread()
-		{
-			WriteLine( "" );
-			WriteLine( "StopForceFeedbackTask called." );
-			WriteLine( "Stopping the force feedback update thread..." );
-
-			_ffb_stopThread = true;
-
-			while ( !_ffb_threadStopped )
-			{
-				Thread.Sleep( 0 );
-			}
-
-			_ffb_thread = null;
-
-			_ffb_stopThread = false;
-
-			WriteLine( "...the force feedback update thread has been stopped." );
 		}
 
 		public void ReinitializeForceFeedbackDevice( nint windowHandle )
@@ -380,6 +323,13 @@ namespace MarvinsAIRA
 
 				_ffb_reacquireTimer = 2;
 			}
+		}
+
+		public void StopForceFeedback()
+		{
+			UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
+
+			UninitializeForceFeedback();
 		}
 
 		public void UpdateForceFeedback( float deltaTime, bool checkButtons, nint windowHandle )
@@ -513,16 +463,20 @@ namespace MarvinsAIRA
 				}
 			}
 
-			if ( _carChanged || _trackChanged )
+			if ( _carChanged || _trackChanged || _trackConfigChanged )
 			{
+				WriteLine( "" );
+				WriteLine( $"Loading configuration [{_carSaveName}, {_trackSaveName}, {_trackConfigSaveName}]" );
+
 				_carChanged = false;
 				_trackChanged = false;
+				_trackConfigChanged = false;
 
 				var forceFeedbackSettingsFound = false;
 
 				foreach ( var forceFeedbackSettings in Settings.ForceFeedbackSettingsList )
 				{
-					if ( ( forceFeedbackSettings.CarScreenName == _currentCarScreenName ) && ( forceFeedbackSettings.TrackDisplayName == _currentTrackDisplayName ) && ( forceFeedbackSettings.TrackConfigName == _currentTrackConfigName ) )
+					if ( ( forceFeedbackSettings.CarScreenName == _carSaveName ) && ( forceFeedbackSettings.TrackDisplayName == _trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _trackConfigSaveName ) )
 					{
 						Settings.OverallScale = forceFeedbackSettings.OverallScale;
 						Settings.DetailScale = forceFeedbackSettings.DetailScale;
@@ -547,7 +501,7 @@ namespace MarvinsAIRA
 					Settings.OverallScale = 10;
 					Settings.DetailScale = 100;
 
-					Say( "This is the first time we've seen this car on this track, with this track configuration, so we have reset the overall and detail scale." );
+					Say( "This is the first time you have driven this combination, so we have reset the overall and detail scale." );
 				}
 			}
 		}
@@ -559,64 +513,30 @@ namespace MarvinsAIRA
 			return _ffb_drawPrettyGraph;
 		}
 
-		public void PauseThread()
-		{
-			if ( FFB_ThreadIsRunning )
-			{
-				_ffb_pauseThread = true;
-
-				while ( !_ffb_threadPaused )
-				{
-					Thread.Sleep( 0 );
-				}
-
-				_ffb_threadPaused = false;
-			}
-		}
-
-		public void UnpauseThread()
-		{
-			if ( FFB_ThreadIsRunning )
-			{
-				_ffb_pauseThread = false;
-			}
-		}
-
 		public void SendTestForceFeedbackSignal( bool invert )
 		{
-			PauseThread();
-
 			var magnitude = invert ? -1500 : 1500;
 
-			_ffb_forceFeedbackMagnitude[ 0 ] = magnitude * 1;
-			_ffb_forceFeedbackMagnitude[ 1 ] = magnitude * 2;
-			_ffb_forceFeedbackMagnitude[ 2 ] = magnitude * 3;
-			_ffb_forceFeedbackMagnitude[ 3 ] = magnitude * 2;
-			_ffb_forceFeedbackMagnitude[ 4 ] = magnitude * 1;
-			_ffb_forceFeedbackMagnitude[ 5 ] = 0;
-
+			_ffb_skipNextUpdate = true;
 			_ffb_previousSteeringWheelTorque = 0;
 			_ffb_scaledSteeringWheelTorque = 0;
-			_ffb_forceFeedbackMagnitudeIndex = 0;
 
-			UnpauseThread();
+			UpdateConstantForce( [ magnitude * 1, magnitude * 2, magnitude * 3, magnitude * 2, magnitude * 1, 0 ] );
 		}
 
-		public void UpdateMagnitude( int newMagnitude )
+		public void UpdateConstantForce( int[] forceMagnitudeList )
 		{
-			if ( newMagnitude != _ffb_currentMagnitude )
+			for ( int i = 0; i < forceMagnitudeList.Length; i++ )
 			{
-				_ffb_currentMagnitude = newMagnitude;
-
-				if ( _ffb_currentMagnitude > DI_FFNOMINALMAX )
+				if ( forceMagnitudeList[ i ] > DI_FFNOMINALMAX )
 				{
-					_ffb_currentMagnitude = DI_FFNOMINALMAX;
+					forceMagnitudeList[ i ] = DI_FFNOMINALMAX;
 
 					_ffb_clippedTimer = 3;
 				}
-				else if ( _ffb_currentMagnitude < -DI_FFNOMINALMAX )
+				else if ( forceMagnitudeList[ i ] < -DI_FFNOMINALMAX )
 				{
-					_ffb_currentMagnitude = -DI_FFNOMINALMAX;
+					forceMagnitudeList[ i ] = -DI_FFNOMINALMAX;
 
 					_ffb_clippedTimer = 3;
 				}
@@ -625,11 +545,23 @@ namespace MarvinsAIRA
 				{
 					if ( ( _ffb_effectParameters != null ) && ( _ffb_constantForceEffect != null ) )
 					{
-						( (ConstantForce) _ffb_effectParameters.Parameters ).Magnitude = _ffb_currentMagnitude;
+						( (ConstantForce) _ffb_effectParameters.Parameters ).Magnitude = forceMagnitudeList[ i ];
 
 						try
 						{
+							_ffb_stopwatch.Restart();
+
 							_ffb_constantForceEffect.SetParameters( _ffb_effectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
+
+							if ( i < ( forceMagnitudeList.Length - 1 ) )
+							{
+								Thread.Sleep( 1 );
+
+								while ( _ffb_stopwatch.Elapsed.TotalNanoseconds < FFB_NANOSECONDS_PER_UPDATE )
+								{
+									Thread.Sleep( 0 );
+								}
+							}
 						}
 						catch ( Exception exception )
 						{
@@ -662,7 +594,7 @@ namespace MarvinsAIRA
 			return buttonPressCount;
 		}
 
-		private void ProcessSteeringWheelTorque( bool drawPrettyGraph )
+		private void ProcessSteeringWheelTorque()
 		{
 			if ( _isOnTrack )
 			{
@@ -702,28 +634,17 @@ namespace MarvinsAIRA
 
 					// ramp our running scaled magnitude towards the original signal (feed in steady state signal)
 
-					_ffb_scaledSteeringWheelTorque = ( _ffb_scaledSteeringWheelTorque * 0.97f ) + ( currentSteeringWheelTorque * overallScale * 0.03f );
+					_ffb_scaledSteeringWheelTorque = ( _ffb_scaledSteeringWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScale * 0.1f );
 
 					// apply the speed scale and update the array that the force feedback thread uses
 
-					_ffb_forceFeedbackMagnitude[ x ] = _ffb_scaledSteeringWheelTorque * speedScale;
-
-					// TEMPORARY CODE - REMOVE BEFORE PUBLISHING!!!
-					//_ffb_tempCounter++;
-
-					//if ( _ffb_tempCounter == 360 )
-					//{
-					//_ffb_tempCounter = 0;
-
-					//WriteLine( $"\r\nconversionScale={conversionScale}\r\noverallScale={overallScale}\r\ndetailScale={detailScale}\r\ncurrentSteeringWheelTorque={currentSteeringWheelTorque}\r\ndeltaSteeringWheelTorque={deltaSteeringWheelTorque}\r\n_ffb_scaledSteeringWheelTorque={_ffb_scaledSteeringWheelTorque}\r\n_ffb_forceFeedbackMagnitude={_ffb_forceFeedbackMagnitude[ x ]}\r\n" );
-					//}
-					// TEMPORARY CODE - REMOVE BEFORE PUBLISHING!!!
+					_ffb_forceFeedbackMagnitude[ x ] = (int) ( _ffb_scaledSteeringWheelTorque * speedScale );
 
 					// update the pretty graph
 
-					if ( drawPrettyGraph )
+					if ( _ffb_drawPrettyGraph )
 					{
-						var forceFeedbackMaxToPixelBufferHeightScale = DI_FFNOMINALMAX / FFB_PIXELS_BUFFER_HEIGHT;
+						var forceFeedbackMaxToPixelBufferHeightScale = DI_FFNOMINALMAX * 2 / FFB_PIXELS_BUFFER_HEIGHT;
 						var halfPixelBufferOffset = FFB_PIXELS_BUFFER_HEIGHT / 2;
 
 						var oY2 = (int) ( currentSteeringWheelTorque * overallScale / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
@@ -785,7 +706,7 @@ namespace MarvinsAIRA
 
 				// update the pretty graph
 
-				if ( drawPrettyGraph )
+				if ( _ffb_drawPrettyGraph )
 				{
 					for ( var y = 0; y < 200; y++ )
 					{
@@ -808,62 +729,23 @@ namespace MarvinsAIRA
 				_ffb_previousSteeringWheelTorque = 0;
 				_ffb_scaledSteeringWheelTorque = 0;
 			}
-
-			_ffb_forceFeedbackMagnitudeIndex = 0;
 		}
 
 		private void UpdateForceFeedback()
 		{
-			PauseThread();
-
-			ProcessSteeringWheelTorque( true );
-
-			UnpauseThread();
-		}
-
-		private void ForceFeedbackUpdateThread()
-		{
-			_ffb_threadStopped = false;
-
-			var stopwatch = new Stopwatch();
-
-			stopwatch.Start();
-
-			while ( !_ffb_stopThread )
+			if ( Settings.ForceFeedbackEnabled )
 			{
-				Thread.Sleep( 0 );
+				ProcessSteeringWheelTorque();
 
-				var elapsed = stopwatch.Elapsed;
-
-				if ( elapsed.TotalMicroseconds >= FFB_MICROSECONDS_PER_UPDATE )
+				if ( _ffb_skipNextUpdate )
 				{
-					stopwatch.Restart();
-
-					if ( _ffb_forceFeedbackMagnitudeIndex < _ffb_forceFeedbackMagnitude.Length )
-					{
-						UpdateMagnitude( (int) _ffb_forceFeedbackMagnitude[ _ffb_forceFeedbackMagnitudeIndex++ ] );
-					}
+					_ffb_skipNextUpdate = false;
 				}
-
-				if ( _ffb_pauseThread )
+				else
 				{
-					_ffb_threadPaused = true;
-
-					while ( _ffb_pauseThread )
-					{
-						Thread.Sleep( 0 );
-
-						if ( _ffb_stopThread )
-						{
-							break;
-						}
-					}
+					UpdateConstantForce( _ffb_forceFeedbackMagnitude );
 				}
 			}
-
-			UpdateMagnitude( 0 );
-
-			_ffb_threadStopped = true;
 		}
 	}
 }

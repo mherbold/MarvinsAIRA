@@ -7,8 +7,10 @@ namespace MarvinsAIRA
 	public partial class App : Application
 	{
 		private const string NO_CAR_SCREEN_NAME = "No Car";
+		private const string ALL_CARS_SCREEN_NAME = "All";
 
 		private string _currentCarScreenName = NO_CAR_SCREEN_NAME;
+		private string _carSaveName = ALL_CARS_SCREEN_NAME;
 
 		private bool _carChanged = false;
 
@@ -38,9 +40,7 @@ namespace MarvinsAIRA
 
 			if ( _currentCarScreenName != carScreenName )
 			{
-				_currentCarScreenName = carScreenName;
-
-				if ( _currentCarScreenName == NO_CAR_SCREEN_NAME )
+				if ( carScreenName == NO_CAR_SCREEN_NAME )
 				{
 					WriteLine( "" );
 					WriteLine( $"You are no longer driving a car." );
@@ -48,12 +48,15 @@ namespace MarvinsAIRA
 				else
 				{
 					WriteLine( "" );
-					WriteLine( $"You are now driving a {_currentCarScreenName}." );
+					WriteLine( $"You are now driving a {carScreenName}." );
 
-					Say( $"You are now driving a {_currentCarScreenName}." );
+					Say( $"You are now driving a {carScreenName}." );
 
 					_carChanged = true;
 				}
+
+				_currentCarScreenName = carScreenName;
+				_carSaveName = Settings.SaveSettingsPerCar ? _currentCarScreenName : ALL_CARS_SCREEN_NAME;
 
 				Dispatcher.BeginInvoke( () =>
 				{

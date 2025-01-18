@@ -42,7 +42,7 @@ namespace MarvinsAIRA
 			try
 			{
 				StopIRacingSDK();
-				StopForceFeedbackThread();
+				StopForceFeedback();
 				StopWindSimulator();
 				StopConsole();
 			}

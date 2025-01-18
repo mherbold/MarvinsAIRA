@@ -7,12 +7,19 @@ namespace MarvinsAIRA
 	public partial class App : Application
 	{
 		private const string NO_TRACK_DISPLAY_NAME = "No Track";
+		private const string ALL_TRACKS_DISPLAY_NAME = "All";
+
 		private const string NO_TRACK_CONFIG_NAME = "No Track Configuration";
+		private const string ALL_TRACK_CONFIGS_DISPLAY_NAME = "All";
 
 		private string _currentTrackDisplayName = NO_TRACK_DISPLAY_NAME;
+		private string _trackSaveName = ALL_TRACKS_DISPLAY_NAME;
+
 		private string _currentTrackConfigName = NO_TRACK_CONFIG_NAME;
+		private string _trackConfigSaveName = ALL_TRACK_CONFIGS_DISPLAY_NAME;
 
 		private bool _trackChanged = false;
+		private bool _trackConfigChanged = false;
 
 		private void InitializeCurrentTrack()
 		{
@@ -35,10 +42,7 @@ namespace MarvinsAIRA
 
 			if ( ( _currentTrackDisplayName != trackDisplayName ) || ( _currentTrackConfigName != trackConfigName ) )
 			{
-				_currentTrackDisplayName = trackDisplayName;
-				_currentTrackConfigName = trackConfigName;
-
-				if ( _currentTrackDisplayName == NO_TRACK_DISPLAY_NAME )
+				if ( trackDisplayName == NO_TRACK_DISPLAY_NAME )
 				{
 					WriteLine( "" );
 					WriteLine( "You are no longer on a track." );
@@ -46,12 +50,19 @@ namespace MarvinsAIRA
 				else
 				{
 					WriteLine( "" );
-					WriteLine( $"You are racing at {_currentTrackDisplayName} ({_currentTrackConfigName})." );
+					WriteLine( $"You are racing at {trackDisplayName} ({trackConfigName})." );
 
-					Say( $"You are racing at {_currentTrackDisplayName} ({_currentTrackConfigName})." );
+					Say( $"You are racing at {trackDisplayName} ({trackConfigName})." );
 
-					_trackChanged = true;
+					_trackChanged = ( _currentTrackDisplayName != trackDisplayName );
+					_trackConfigChanged = ( _currentTrackConfigName != trackConfigName );
 				}
+
+				_currentTrackDisplayName = trackDisplayName;
+				_trackSaveName = Settings.SaveSettingsPerTrack ? _currentTrackDisplayName : ALL_TRACKS_DISPLAY_NAME;
+
+				_currentTrackConfigName = trackConfigName;
+				_trackConfigSaveName = Settings.SaveSettingsPerTrackConfig ? _currentTrackConfigName : ALL_TRACK_CONFIGS_DISPLAY_NAME;
 
 				Dispatcher.BeginInvoke( () =>
 				{

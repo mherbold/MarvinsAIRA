@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Xml.Linq;
 
 namespace MarvinsAIRA
 {
@@ -40,6 +39,59 @@ namespace MarvinsAIRA
 				if ( _speechSynthesizerVolume != value )
 				{
 					_speechSynthesizerVolume = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Force feedback settings save options*/
+
+		private bool _saveSettingsPerCar = true;
+
+		public bool SaveSettingsPerCar
+		{
+			get => _saveSettingsPerCar;
+
+			set
+			{
+				if ( _saveSettingsPerCar != value )
+				{
+					_saveSettingsPerCar = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _saveSettingsPerTrack = false;
+
+		public bool SaveSettingsPerTrack
+		{
+			get => _saveSettingsPerTrack;
+
+			set
+			{
+				if ( _saveSettingsPerTrack != value )
+				{
+					_saveSettingsPerTrack = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _saveSettingsPerTrackConfiguration = false;
+
+		public bool SaveSettingsPerTrackConfig
+		{
+			get => _saveSettingsPerTrackConfiguration;
+
+			set
+			{
+				if ( _saveSettingsPerTrackConfiguration != value )
+				{
+					_saveSettingsPerTrackConfiguration = value;
 
 					OnPropertyChanged();
 				}
@@ -197,7 +249,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 250, value ) );
+				value = Math.Max( 0, Math.Min( 500, value ) );
 
 				if ( _detailScale != value )
 				{

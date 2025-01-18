@@ -155,21 +155,9 @@ namespace MarvinsAIRA
 
 			var checkBox = (CheckBox) sender;
 
-			if ( checkBox.IsChecked == true )
+			if ( checkBox.IsChecked != true )
 			{
-				if ( !app.FFB_ThreadIsRunning )
-				{
-					app.StartForceFeedbackThread();
-				}
-			}
-			else
-			{
-				if ( app.FFB_ThreadIsRunning )
-				{
-					app.StopForceFeedbackThread();
-
-					app.UpdateMagnitude( 0 );
-				}
+				app.UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
 			}
 		}
 
