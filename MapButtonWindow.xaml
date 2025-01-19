@@ -18,10 +18,16 @@
         ui:WindowHelper.UseModernWindowStyle="True">
     <StackPanel Margin="10,10,10,20">
         <Label FontSize="18" Content="Press any button on any controller to select it." HorizontalAlignment="Center" FontWeight="Bold" />
-        <Label x:Name="ButtonNameLabel" FontSize="16" Content="Currently using Button 24 on device name" HorizontalAlignment="Center" />
+        <Label x:Name="ButtonNameLabel" FontSize="16" Content="" HorizontalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <CheckBox x:Name="ShiftCheckBox" Content="SHIFT" MinWidth="0" />
+            <CheckBox x:Name="CtrlCheckBox" Content="CTRL" MinWidth="0" Margin="20,0,0,0" />
+            <CheckBox x:Name="AltCheckBox" Content="ALT" MinWidth="0" Margin="20,0,0,0" />
+        </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-            <Button Content="Update" Margin="10,0,10,0" FontSize="18" Width="100" Click="UpdateButton_Click" />
             <Button Content="Cancel" Margin="10,0,10,0" FontSize="18" Width="100" Click="CancelButton_Click" />
+            <Button Content="Clear" Margin="10,0,10,0" FontSize="18" Width="100" Click="ClearButton_Click" />
+            <Button Content="Update" Margin="10,0,10,0" FontSize="18" Width="100" Click="UpdateButton_Click" />
         </StackPanel>
     </StackPanel>
 </Window>

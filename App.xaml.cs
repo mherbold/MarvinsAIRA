@@ -20,7 +20,8 @@ namespace MarvinsAIRA
 				InitializeConsole();
 				InitializeSettings();
 				InitializeVoice();
-				InitializeJoysticks( windowHandle );
+				InitializeSounds();
+				InitializeInputs( windowHandle );
 				InitializeForceFeedback( windowHandle );
 				InitializeIRacingSDK();
 				InitializeCurrentCar();

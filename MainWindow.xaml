@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.10"
+        Title="Marvin's Awesome iRacing App v0.13"
         Height="Auto"
         Width="790"
         Closing="Window_Closing"
@@ -237,23 +237,42 @@
                     <Label Content="General Settings" VerticalAlignment="Center" />
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <GroupBox Header="Voice" Padding="10,0,10,15">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <CheckBox Grid.Column="0" Content="Enable Speech Synthesizer" IsChecked="{Binding EnableSpeechSynthesizer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Slider x:Name="SpeechSynthesizerVolume" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="SpeechSynthesizerVolume_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center"  Margin="10,0,0,0"/>
-                        </Grid>
+                    <GroupBox Header="Audio" Padding="10,0,10,15">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" Content="Enable Speech Synthesizer" IsChecked="{Binding EnableSpeechSynthesizer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <Slider x:Name="SpeechSynthesizerVolume" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="SpeechSynthesizerVolume_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center"  Margin="10,0,0,0"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" Content="Enable Click Sound" IsChecked="{Binding EnableClickSound, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <Slider x:Name="ClickSoundVolume" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="ClickSoundVolume_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding ClickSoundVolume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center"  Margin="10,0,0,0"/>
+                            </Grid>
+                        </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Save File" Padding="10,0,10,15">
                         <StackPanel>
+                            <CheckBox Content="Save separate force feedback settings for each steering wheel device" IsChecked="{Binding SaveSettingsPerWheel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="Save separate force feedback settings for each car" IsChecked="{Binding SaveSettingsPerCar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="Save separate force feedback settings for each track" IsChecked="{Binding SaveSettingsPerTrack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="Save separate force feedback settings for each track configuration" IsChecked="{Binding SaveSettingsPerTrackConfiguration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Application Control" Padding="10,0,10,15">
+                        <StackPanel>
+                            <CheckBox Content="Start minimized" IsChecked="{Binding StartMinimized, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Button x:Name="SetForegroundWindowButton" Content="Map button to force this app to the foreground and reacquire the FFB device" Margin="0,5,0,0" HorizontalAlignment="Stretch" Click="SetForegroundWindowButton_Click"/>
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>

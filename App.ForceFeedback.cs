@@ -1,7 +1,6 @@
 ﻿
 using System.Diagnostics;
-using System.IO;
-using System.Media;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -12,6 +11,9 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
+		[DllImport( "user32.dll" )]
+		static extern bool SetForegroundWindow( IntPtr hWnd );
+
 		public const int DI_FFNOMINALMAX = 10000;
 		public const int DIEB_NOTRIGGER = -1;
 
@@ -31,6 +33,8 @@ namespace MarvinsAIRA
 		private const int FFB_PIXELS_BUFFER_BYTES_PER_PIXEL = 4;
 		private const int FFB_PIXELS_BUFFER_STRIDE = FFB_PIXELS_BUFFER_WIDTH * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
 
+		private const string ALL_WHEELS_SAVE_NAME = "All";
+
 		private Joystick? _ffb_drivingJoystick = null;
 		private EffectInfo? _ffb_constantForceEffectInfo = null;
 		private EffectParameters? _ffb_effectParameters = null;
@@ -41,6 +45,9 @@ namespace MarvinsAIRA
 		private bool _ffb_reacquireNeeded = false;
 		private float _ffb_reacquireTimer = 0;
 
+		private bool _ffb_wheelChanged = false;
+		private string _ffb_wheelSaveName = ALL_WHEELS_SAVE_NAME;
+
 		private float _ffb_clippedTimer = 0;
 		private Stopwatch _ffb_stopwatch = new();
 
@@ -48,8 +55,6 @@ namespace MarvinsAIRA
 
 		private float _ffb_previousSteeringWheelTorque = 0;
 		private float _ffb_scaledSteeringWheelTorque = 0;
-
-		private readonly SoundPlayer _ffb_clickSoundPlayer = new( new MemoryStream( MarvinsAIRA.Properties.Resources.Click ) );
 
 		private float _ffb_announceOverallScaleTimer = 0;
 		private float _ffb_announceDetailScaleTimer = 0;
@@ -171,6 +176,14 @@ namespace MarvinsAIRA
 					WriteLine( "...we are good to go with this force feedback driving device." );
 
 					_ffb_initialized = true;
+					_ffb_wheelChanged = true;
+
+					_ffb_wheelSaveName = ALL_WHEELS_SAVE_NAME;
+
+					if ( Settings.SaveSettingsPerWheel )
+					{
+						_ffb_wheelSaveName = _ffb_drivingJoystick.Information.ProductName;
+					}
 
 					ReinitializeForceFeedbackDevice( windowHandle );
 				}
@@ -356,17 +369,15 @@ namespace MarvinsAIRA
 
 				foreach ( var joystick in _joystickList )
 				{
-					if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScaleDeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScaleDeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScaleDeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScaleDeviceInstanceGuid )
+					if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
 					{
 						try
 						{
-							joystick.Poll();
-
 							var joystickUpdateArray = joystick.GetBufferedData();
 
-							if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScaleDeviceInstanceGuid )
+							if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid )
 							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseOverallScaleButtonNumber );
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseOverallScale );
 
 								if ( buttonPresses > 0 )
 								{
@@ -378,9 +389,9 @@ namespace MarvinsAIRA
 								}
 							}
 
-							if ( joystick.Information.InstanceGuid == Settings.IncreaseOverallScaleDeviceInstanceGuid )
+							if ( joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid )
 							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseOverallScaleButtonNumber );
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseOverallScale );
 
 								if ( buttonPresses > 0 )
 								{
@@ -392,9 +403,9 @@ namespace MarvinsAIRA
 								}
 							}
 
-							if ( joystick.Information.InstanceGuid == Settings.DecreaseDetailScaleDeviceInstanceGuid )
+							if ( joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid )
 							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseDetailScaleButtonNumber );
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseDetailScale );
 
 								if ( buttonPresses > 0 )
 								{
@@ -406,9 +417,9 @@ namespace MarvinsAIRA
 								}
 							}
 
-							if ( joystick.Information.InstanceGuid == Settings.IncreaseDetailScaleDeviceInstanceGuid )
+							if ( joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid )
 							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseDetailScaleButtonNumber );
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseDetailScale );
 
 								if ( buttonPresses > 0 )
 								{
@@ -417,6 +428,16 @@ namespace MarvinsAIRA
 									_ffb_announceDetailScaleTimer = 1;
 
 									playSound = true;
+								}
+							}
+
+							if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
+							{
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.SetForegroundWindow );
+
+								if ( buttonPresses > 0 )
+								{
+									SetForegroundWindow( windowHandle );
 								}
 							}
 						}
@@ -429,7 +450,7 @@ namespace MarvinsAIRA
 
 				if ( playSound )
 				{
-					_ffb_clickSoundPlayer.Play();
+					PlayClick();
 				}
 			}
 
@@ -463,11 +484,12 @@ namespace MarvinsAIRA
 				}
 			}
 
-			if ( _carChanged || _trackChanged || _trackConfigChanged )
+			if ( _ffb_wheelChanged || _carChanged || _trackChanged || _trackConfigChanged )
 			{
 				WriteLine( "" );
-				WriteLine( $"Loading configuration [{_carSaveName}, {_trackSaveName}, {_trackConfigSaveName}]" );
+				WriteLine( $"Loading configuration [{_ffb_wheelSaveName}, {_carSaveName}, {_trackSaveName}, {_trackConfigSaveName}]" );
 
+				_ffb_wheelChanged = false;
 				_carChanged = false;
 				_trackChanged = false;
 				_trackConfigChanged = false;
@@ -476,7 +498,7 @@ namespace MarvinsAIRA
 
 				foreach ( var forceFeedbackSettings in Settings.ForceFeedbackSettingsList )
 				{
-					if ( ( forceFeedbackSettings.CarScreenName == _carSaveName ) && ( forceFeedbackSettings.TrackDisplayName == _trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _trackConfigSaveName ) )
+					if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _carSaveName ) && ( forceFeedbackSettings.TrackName == _trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _trackConfigSaveName ) )
 					{
 						Settings.OverallScale = forceFeedbackSettings.OverallScale;
 						Settings.DetailScale = forceFeedbackSettings.DetailScale;
@@ -555,8 +577,6 @@ namespace MarvinsAIRA
 
 							if ( i < ( forceMagnitudeList.Length - 1 ) )
 							{
-								Thread.Sleep( 1 );
-
 								while ( _ffb_stopwatch.Elapsed.TotalNanoseconds < FFB_NANOSECONDS_PER_UPDATE )
 								{
 									Thread.Sleep( 0 );
@@ -574,24 +594,6 @@ namespace MarvinsAIRA
 					}
 				}
 			}
-		}
-
-		private static int GetButtonPressCount( JoystickUpdate[] joystickUpdateArray, int buttonNumber )
-		{
-			var buttonPressCount = 0;
-
-			foreach ( var joystickUpdate in joystickUpdateArray )
-			{
-				if ( joystickUpdate.Offset == JoystickOffset.Buttons0 + buttonNumber )
-				{
-					if ( joystickUpdate.Value != 0 )
-					{
-						buttonPressCount++;
-					}
-				}
-			}
-
-			return buttonPressCount;
 		}
 
 		private void ProcessSteeringWheelTorque()

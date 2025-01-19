@@ -9,6 +9,8 @@ namespace MarvinsAIRA
 {
 	public partial class MainWindow : Window
 	{
+		#region Properties
+
 		private bool _initialized = false;
 		private bool _pauseScaleButtons = false;
 		private bool _restartForceFeedback = false;
@@ -19,6 +21,10 @@ namespace MarvinsAIRA
 
 		private int _timerMutex = 0;
 		private int _sendForceFeedbackTestSignalCounter = 0;
+
+		#endregion
+
+		#region Window
 
 		public MainWindow()
 		{
@@ -55,8 +61,16 @@ namespace MarvinsAIRA
 
 				app.Initialize( _windowHandle );
 
+				app.WriteLine( "" );
+				app.WriteLine( $"{Title} has been initialized!" );
+
 				_timer.Elapsed += OnTimer;
 				_timer.Start();
+
+				if ( app.Settings.StartMinimized )
+				{
+					WindowState = WindowState.Minimized;
+				}
 
 				_initialized = true;
 			}
@@ -72,6 +86,10 @@ namespace MarvinsAIRA
 			_restartForceFeedback = true;
 		}
 
+		#endregion
+
+		#region Timer
+
 		private void OnTimer( object? sender, EventArgs e )
 		{
 			var timerMutex = Interlocked.Exchange( ref _timerMutex, 1 );
@@ -85,6 +103,7 @@ namespace MarvinsAIRA
 					var deltaTime = 0.1f;
 
 					app.UpdateSettings( deltaTime );
+					app.UpdateInputs();
 					app.UpdateForceFeedback( deltaTime, !_pauseScaleButtons, _windowHandle );
 					app.UpdateWindSimulator();
 
@@ -146,6 +165,10 @@ namespace MarvinsAIRA
 			}
 		}
 
+		#endregion
+
+		#region Force feedback tab
+
 		private void ForceFeedback_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -161,12 +184,67 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void WindSimulator_CheckBox_Click( object sender, RoutedEventArgs e )
+		private void ForceFeedbackDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
+		{
+			if ( _initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "ForceFeedbackDeviceComboBox_SelectionChanged called." );
+
+				app.InitializeForceFeedback( _windowHandle );
+			}
+		}
+
+		private void ForceFeedbackTestButton_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "WindSimulator_CheckBox_Click called." );
+			app.WriteLine( "ForceFeedbackTestButton_Click called." );
+
+			_sendForceFeedbackTestSignalCounter = 10;
+		}
+
+		private void DecreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "DecreaseOverallScaleButton_Click called." );
+
+			app.Settings.DecreaseOverallScale = ShowMapButtonWindow( app.Settings.DecreaseOverallScale );
+		}
+
+		private void IncreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "IncreaseOverallScaleButton_Click called." );
+
+			app.Settings.IncreaseOverallScale = ShowMapButtonWindow( app.Settings.IncreaseOverallScale );
+		}
+
+		private void DecreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "DecreaseDetailScaleButton_Click called." );
+
+			app.Settings.DecreaseDetailScale = ShowMapButtonWindow( app.Settings.DecreaseDetailScale );
+		}
+
+		private void IncreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "IncreaseDetailScaleButton_Click called." );
+
+			app.Settings.IncreaseDetailScale = ShowMapButtonWindow( app.Settings.IncreaseDetailScale );
 		}
 
 		private void TogglePrettyGraph_Button_Click( object sender, RoutedEventArgs e )
@@ -192,83 +270,16 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void DecreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
+		#endregion
+
+		#region Wind simulator tab
+
+		private void WindSimulator_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "DecreaseOverallScaleButton_Click called." );
-
-			(app.Settings.DecreaseOverallScaleDeviceInstanceGuid, app.Settings.DecreaseOverallScaleDeviceProductName, app.Settings.DecreaseOverallScaleButtonNumber) = ShowMapButtonWindow( app.Settings.DecreaseOverallScaleDeviceInstanceGuid, app.Settings.DecreaseOverallScaleDeviceProductName, app.Settings.DecreaseOverallScaleButtonNumber );
-		}
-
-		private void IncreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "IncreaseOverallScaleButton_Click called." );
-
-			(app.Settings.IncreaseOverallScaleDeviceInstanceGuid, app.Settings.IncreaseOverallScaleDeviceProductName, app.Settings.IncreaseOverallScaleButtonNumber) = ShowMapButtonWindow( app.Settings.IncreaseOverallScaleDeviceInstanceGuid, app.Settings.IncreaseOverallScaleDeviceProductName, app.Settings.IncreaseOverallScaleButtonNumber );
-		}
-
-		private void DecreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "DecreaseDetailScaleButton_Click called." );
-
-			(app.Settings.DecreaseDetailScaleDeviceInstanceGuid, app.Settings.DecreaseDetailScaleDeviceProductName, app.Settings.DecreaseDetailScaleButtonNumber) = ShowMapButtonWindow( app.Settings.DecreaseDetailScaleDeviceInstanceGuid, app.Settings.DecreaseDetailScaleDeviceProductName, app.Settings.DecreaseDetailScaleButtonNumber );
-		}
-
-		private void IncreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "IncreaseDetailScaleButton_Click called." );
-
-			(app.Settings.IncreaseDetailScaleDeviceInstanceGuid, app.Settings.IncreaseDetailScaleDeviceProductName, app.Settings.IncreaseDetailScaleButtonNumber) = ShowMapButtonWindow( app.Settings.IncreaseDetailScaleDeviceInstanceGuid, app.Settings.IncreaseDetailScaleDeviceProductName, app.Settings.IncreaseDetailScaleButtonNumber );
-		}
-
-		private (Guid, string, int) ShowMapButtonWindow( Guid deviceInstanceGuid, string deviceProductName, int buttonNumber )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "Showing the map button dialog window..." );
-
-			_pauseScaleButtons = true;
-
-			var window = new MapButtonWindow
-			{
-				Owner = this,
-				deviceInstanceGuid = deviceInstanceGuid,
-				deviceProductName = deviceProductName,
-				buttonNumber = buttonNumber
-			};
-
-			window.ShowDialog();
-
-			if ( !window.canceled )
-			{
-				app.WriteLine( "...dialog window was closed..." );
-
-				deviceInstanceGuid = window.deviceInstanceGuid;
-				deviceProductName = window.deviceProductName;
-				buttonNumber = window.buttonNumber;
-
-				app.WriteLine( $"...control mapping was changed to {deviceProductName} button {buttonNumber + 1}." );
-			}
-			else
-			{
-				app.WriteLine( "...dialog window was closed (canceled)." );
-			}
-
-			_pauseScaleButtons = false;
-
-			return (deviceInstanceGuid, deviceProductName, buttonNumber);
+			app.WriteLine( "WindSimulator_CheckBox_Click called." );
 		}
 
 		private void Test_CheckBox_Click( object sender, RoutedEventArgs e )
@@ -307,6 +318,10 @@ namespace MarvinsAIRA
 			}
 		}
 
+		#endregion
+
+		#region General settings tab
+
 		private void SpeechSynthesizerVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
 			if ( _initialized )
@@ -321,6 +336,33 @@ namespace MarvinsAIRA
 				app.Say( $"My voice is now at {app.Settings.SpeechSynthesizerVolume} percent.", true );
 			}
 		}
+
+		private void ClickSoundVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			if ( _initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "ClickSoundVolume_ValueChanged called." );
+
+				app.PlayClick();
+			}
+		}
+
+		private void SetForegroundWindowButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "SetForegroundWindowButton_Click called." );
+
+			app.Settings.SetForegroundWindow = ShowMapButtonWindow( app.Settings.SetForegroundWindow );
+		}
+
+		#endregion
+
+		#region Help tab
 
 		private void SeeHelpDocumentation_Click( object sender, RoutedEventArgs e )
 		{
@@ -377,27 +419,57 @@ namespace MarvinsAIRA
 			Process.Start( processStartInfo );
 		}
 
-		private void ForceFeedbackDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
-		{
-			if ( _initialized )
-			{
-				var app = (App) Application.Current;
+		#endregion
 
-				app.WriteLine( "" );
-				app.WriteLine( "ForceFeedbackDeviceComboBox_SelectionChanged called." );
+		#region Map button window
 
-				app.InitializeForceFeedback( _windowHandle );
-			}
-		}
-
-		private void ForceFeedbackTestButton_Click( object sender, RoutedEventArgs e )
+		private Settings.MappedButton ShowMapButtonWindow( Settings.MappedButton mappedButton )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "ForceFeedbackTestButton_Click called." );
+			app.WriteLine( "Showing the map button dialog window..." );
 
-			_sendForceFeedbackTestSignalCounter = 10;
+			_pauseScaleButtons = true;
+
+			var window = new MapButtonWindow
+			{
+				Owner = this,
+				useShift = mappedButton.UseShift,
+				useCtrl = mappedButton.UseCtrl,
+				useAlt = mappedButton.UseAlt,
+				deviceInstanceGuid = mappedButton.DeviceInstanceGuid,
+				deviceProductName = mappedButton.DeviceProductName,
+				buttonNumber = mappedButton.ButtonNumber
+			};
+
+			window.ShowDialog();
+
+			if ( !window.canceled )
+			{
+				app.WriteLine( "...dialog window was closed..." );
+
+				mappedButton.UseShift = window.useShift;
+				mappedButton.UseCtrl = window.useCtrl;
+				mappedButton.UseAlt = window.useAlt;
+				mappedButton.DeviceInstanceGuid = window.deviceInstanceGuid;
+				mappedButton.DeviceProductName = window.deviceProductName;
+				mappedButton.ButtonNumber = window.buttonNumber;
+
+				app.QueueForSerialization();
+
+				app.WriteLine( $"...control mapping was changed to {mappedButton.DeviceProductName} button {mappedButton.ButtonNumber + 1}." );
+			}
+			else
+			{
+				app.WriteLine( "...dialog window was closed (canceled)." );
+			}
+
+			_pauseScaleButtons = false;
+
+			return mappedButton;
 		}
+
+		#endregion
 	}
 }

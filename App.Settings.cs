@@ -53,13 +53,13 @@ namespace MarvinsAIRA
 					_serializationTimer = 0;
 
 					WriteLine( "" );
-					WriteLine( $"Saving configuration [{_carSaveName}, {_trackSaveName}, {_trackConfigSaveName}]" );
+					WriteLine( $"Saving configuration [{_ffb_wheelSaveName}, {_carSaveName}, {_trackSaveName}, {_trackConfigSaveName}]" );
 
 					var forceFeedbackSettingsFound = false;
 
 					foreach ( var forceFeedbackSettings in Settings.ForceFeedbackSettingsList )
 					{
-						if ( ( forceFeedbackSettings.CarScreenName == _carSaveName ) && ( forceFeedbackSettings.TrackDisplayName == _trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _trackConfigSaveName ) )
+						if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _carSaveName ) && ( forceFeedbackSettings.TrackName == _trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _trackConfigSaveName ) )
 						{
 							forceFeedbackSettings.OverallScale = Settings.OverallScale;
 							forceFeedbackSettings.DetailScale = Settings.DetailScale;
@@ -74,8 +74,9 @@ namespace MarvinsAIRA
 					{
 						var forceFeedbackSettings = new ForceFeedbackSettings
 						{
-							CarScreenName = _carSaveName,
-							TrackDisplayName = _trackSaveName,
+							WheelName = _ffb_wheelSaveName,
+							CarName = _carSaveName,
+							TrackName = _trackSaveName,
 							TrackConfigName = _trackConfigSaveName,
 							OverallScale = Settings.OverallScale,
 							DetailScale = Settings.DetailScale,

@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="click.wav" />
     <None Remove="icon.ico" />
     <None Remove="minus-button.png" />
     <None Remove="plus-button.png" />
@@ -24,34 +25,21 @@
   <ItemGroup>
     <PackageReference Include="IRSDKSharper" Version="1.1.3" />
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
-    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Speech" Version="9.0.0" />
+    <PackageReference Include="System.Speech" Version="9.0.1" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="click.wav" />
     <Resource Include="icon.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="minus-button.png" />
     <Resource Include="plus-button.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

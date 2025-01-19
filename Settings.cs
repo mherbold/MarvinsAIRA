@@ -7,96 +7,18 @@ namespace MarvinsAIRA
 {
 	public class Settings : INotifyPropertyChanged
 	{
-		/* Enable speech synthesizer */
-
-		private bool _enableSpeechSynthesizer = true;
-
-		public bool EnableSpeechSynthesizer
+		public class MappedButton
 		{
-			get => _enableSpeechSynthesizer;
-
-			set
-			{
-				if ( _enableSpeechSynthesizer != value )
-				{
-					_enableSpeechSynthesizer = value;
-
-					OnPropertyChanged();
-				}
-			}
+			public bool IsKeyboard = false;
+			public bool UseShift = false;
+			public bool UseCtrl = false;
+			public bool UseAlt = false;
+			public Guid DeviceInstanceGuid = Guid.Empty;
+			public string DeviceProductName = string.Empty;
+			public int ButtonNumber = 0;
 		}
 
-		/* Speech synthesizer volume */
-
-		private int _speechSynthesizerVolume = 100;
-
-		public int SpeechSynthesizerVolume
-		{
-			get => _speechSynthesizerVolume;
-
-			set
-			{
-				if ( _speechSynthesizerVolume != value )
-				{
-					_speechSynthesizerVolume = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Force feedback settings save options*/
-
-		private bool _saveSettingsPerCar = true;
-
-		public bool SaveSettingsPerCar
-		{
-			get => _saveSettingsPerCar;
-
-			set
-			{
-				if ( _saveSettingsPerCar != value )
-				{
-					_saveSettingsPerCar = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		private bool _saveSettingsPerTrack = false;
-
-		public bool SaveSettingsPerTrack
-		{
-			get => _saveSettingsPerTrack;
-
-			set
-			{
-				if ( _saveSettingsPerTrack != value )
-				{
-					_saveSettingsPerTrack = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		private bool _saveSettingsPerTrackConfiguration = false;
-
-		public bool SaveSettingsPerTrackConfig
-		{
-			get => _saveSettingsPerTrackConfiguration;
-
-			set
-			{
-				if ( _saveSettingsPerTrackConfiguration != value )
-				{
-					_saveSettingsPerTrackConfiguration = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
+		#region Force feedback tab
 
 		/* Force feedback enabled */
 
@@ -117,32 +39,13 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Wind simulator enabled */
-
-		private bool _windSimulatorEnabled = true;
-
-		public bool WindSimulatorEnabled
-		{
-			get => _windSimulatorEnabled;
-
-			set
-			{
-				if ( _windSimulatorEnabled != value )
-				{
-					_windSimulatorEnabled = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Force feedback settings - device list */
+		/* Device list */
 
 		private SerializableDictionary<Guid, string> _deviceList = [];
 
 		public SerializableDictionary<Guid, string> DeviceList { get => _deviceList; }
 
-		/* Force feedback settings - selected device */
+		/* Selected device */
 
 		private Guid _selectedDeviceId = Guid.Empty;
 
@@ -161,7 +64,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Force feedback settings - wheel max force */
+		/* Wheel max force */
 
 		private float _wheelMaxForce = 10.9f;
 
@@ -199,7 +102,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Force feedback settings - overall scale */
+		/* Overall scale */
 
 		private int _overallScale = 10;
 
@@ -239,7 +142,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Force feedback settings - detail scale */
+		/* Detail scale */
 
 		private int _detailScale = 100;
 
@@ -279,7 +182,121 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Wind settings - car speed */
+		/* Decrease overall scale */
+
+		private MappedButton _decreaseOverallScale = new();
+
+		public MappedButton DecreaseOverallScale
+		{
+			get => _decreaseOverallScale;
+
+			set
+			{
+				if ( _decreaseOverallScale != value )
+				{
+					_decreaseOverallScale = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Increase overall scale */
+
+		private MappedButton _increaseOverallScale = new();
+
+		public MappedButton IncreaseOverallScale
+		{
+			get => _increaseOverallScale;
+
+			set
+			{
+				if ( _increaseOverallScale != value )
+				{
+					_increaseOverallScale = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Decrease detail scale */
+
+		private MappedButton _decreaseDetailScale = new();
+
+		public MappedButton DecreaseDetailScale
+		{
+			get => _decreaseDetailScale;
+
+			set
+			{
+				if ( _decreaseDetailScale != value )
+				{
+					_decreaseDetailScale = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Increase detail scale */
+
+		private MappedButton _increaseDetailScale = new();
+
+		public MappedButton IncreaseDetailScale
+		{
+			get => _increaseDetailScale;
+
+			set
+			{
+				if ( _increaseDetailScale != value )
+				{
+					_increaseDetailScale = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Per-car/track/track config force feedback settings */
+
+		public class ForceFeedbackSettings
+		{
+			public string WheelName = "";
+			public string CarName = "";
+			public string TrackName = "";
+			public string TrackConfigName = "";
+
+			public int OverallScale = 10;
+			public int DetailScale = 100;
+		}
+
+		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
+
+		#endregion
+
+		#region Wind simulator tab
+
+		/* Wind simulator enabled */
+
+		private bool _windSimulatorEnabled = true;
+
+		public bool WindSimulatorEnabled
+		{
+			get => _windSimulatorEnabled;
+
+			set
+			{
+				if ( _windSimulatorEnabled != value )
+				{
+					_windSimulatorEnabled = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Car speed */
 
 		private int _carSpeed1 = 0;
 		private int _carSpeed2 = 5;
@@ -410,7 +427,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Wind settings - wind force */
+		/* Wind force */
 
 		private float _windForce1 = 0;
 		private float _windForce2 = 3.5f;
@@ -557,7 +574,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Wind settings - wind force string */
+		/* Wind force string */
 
 		private string _windForceString1 = "0%";
 		private string _windForceString2 = "3.5%";
@@ -688,227 +705,193 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Per-car/track/track config force feedback settings */
+		#endregion
 
-		public class ForceFeedbackSettings
+		#region General settings tab
+
+		/* Enable speech synthesizer */
+
+		private bool _enableSpeechSynthesizer = true;
+
+		public bool EnableSpeechSynthesizer
 		{
-			public string CarScreenName = "";
-			public string TrackDisplayName = "";
-			public string TrackConfigName = "";
-
-			public int OverallScale = 10;
-			public int DetailScale = 100;
-		}
-
-		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
-
-		/* Button mappings */
-
-		private Guid _decreaseOverallScaleDeviceInstanceGuid = Guid.Empty;
-
-		public Guid DecreaseOverallScaleDeviceInstanceGuid
-		{
-			get => _decreaseOverallScaleDeviceInstanceGuid;
+			get => _enableSpeechSynthesizer;
 
 			set
 			{
-				if ( _decreaseOverallScaleDeviceInstanceGuid != value )
+				if ( _enableSpeechSynthesizer != value )
 				{
-					_decreaseOverallScaleDeviceInstanceGuid = value;
+					_enableSpeechSynthesizer = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private Guid _increaseOverallScaleDeviceInstanceGuid = Guid.Empty;
+		/* Speech synthesizer volume */
 
-		public Guid IncreaseOverallScaleDeviceInstanceGuid
+		private int _speechSynthesizerVolume = 100;
+
+		public int SpeechSynthesizerVolume
 		{
-			get => _increaseOverallScaleDeviceInstanceGuid;
+			get => _speechSynthesizerVolume;
 
 			set
 			{
-				if ( _increaseOverallScaleDeviceInstanceGuid != value )
+				if ( _speechSynthesizerVolume != value )
 				{
-					_increaseOverallScaleDeviceInstanceGuid = value;
+					_speechSynthesizerVolume = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private Guid _decreaseDetailScaleDeviceInstanceGuid = Guid.Empty;
+		/* Enable click sound */
 
-		public Guid DecreaseDetailScaleDeviceInstanceGuid
+		private bool _enableClickSound = true;
+
+		public bool EnableClickSound
 		{
-			get => _decreaseDetailScaleDeviceInstanceGuid;
+			get => _enableClickSound;
 
 			set
 			{
-				if ( _decreaseDetailScaleDeviceInstanceGuid != value )
+				if ( _enableClickSound != value )
 				{
-					_decreaseDetailScaleDeviceInstanceGuid = value;
+					_enableClickSound = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private Guid _increaseDetailScaleDeviceInstanceGuid = Guid.Empty;
+		/* Click sound volume */
 
-		public Guid IncreaseDetailScaleDeviceInstanceGuid
+		private int _clickSoundVolume = 75;
+
+		public int ClickSoundVolume
 		{
-			get => _increaseDetailScaleDeviceInstanceGuid;
+			get => _clickSoundVolume;
 
 			set
 			{
-				if ( _increaseDetailScaleDeviceInstanceGuid != value )
+				if ( _clickSoundVolume != value )
 				{
-					_increaseDetailScaleDeviceInstanceGuid = value;
+					_clickSoundVolume = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _decreaseOverallScaleDeviceProductName = string.Empty;
+		/* Force feedback settings save options*/
 
-		public string DecreaseOverallScaleDeviceProductName
+		private bool _saveSettingsPerWheel = true;
+
+		public bool SaveSettingsPerWheel
 		{
-			get => _decreaseOverallScaleDeviceProductName;
+			get => _saveSettingsPerWheel;
 
 			set
 			{
-				if ( _decreaseOverallScaleDeviceProductName != value )
+				if ( _saveSettingsPerWheel != value )
 				{
-					_decreaseOverallScaleDeviceProductName = value;
+					_saveSettingsPerWheel = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _increaseOverallScaleDeviceProductName = string.Empty;
+		private bool _saveSettingsPerCar = true;
 
-		public string IncreaseOverallScaleDeviceProductName
+		public bool SaveSettingsPerCar
 		{
-			get => _increaseOverallScaleDeviceProductName;
+			get => _saveSettingsPerCar;
 
 			set
 			{
-				if ( _increaseOverallScaleDeviceProductName != value )
+				if ( _saveSettingsPerCar != value )
 				{
-					_increaseOverallScaleDeviceProductName = value;
+					_saveSettingsPerCar = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _decreaseDetailScaleDeviceProductName = string.Empty;
+		private bool _saveSettingsPerTrack = false;
 
-		public string DecreaseDetailScaleDeviceProductName
+		public bool SaveSettingsPerTrack
 		{
-			get => _decreaseDetailScaleDeviceProductName;
+			get => _saveSettingsPerTrack;
 
 			set
 			{
-				if ( _decreaseDetailScaleDeviceProductName != value )
+				if ( _saveSettingsPerTrack != value )
 				{
-					_decreaseDetailScaleDeviceProductName = value;
+					_saveSettingsPerTrack = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _increaseDetailScaleDeviceProductName = string.Empty;
+		private bool _saveSettingsPerTrackConfiguration = false;
 
-		public string IncreaseDetailScaleDeviceProductName
+		public bool SaveSettingsPerTrackConfig
 		{
-			get => _increaseDetailScaleDeviceProductName;
+			get => _saveSettingsPerTrackConfiguration;
 
 			set
 			{
-				if ( _increaseDetailScaleDeviceProductName != value )
+				if ( _saveSettingsPerTrackConfiguration != value )
 				{
-					_increaseDetailScaleDeviceProductName = value;
+					_saveSettingsPerTrackConfiguration = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private int _decreaseOverallScaleButtonNumber = 0;
+		/* Set foreground window */
 
-		public int DecreaseOverallScaleButtonNumber
+		public MappedButton SetForegroundWindow = new();
+
+		/* Start minimized */
+
+		private bool _startMinimized = false;
+
+		public bool StartMinimized
 		{
-			get => _decreaseOverallScaleButtonNumber;
+			get => _startMinimized;
 
 			set
 			{
-				if ( _decreaseOverallScaleButtonNumber != value )
+				if ( _startMinimized != value )
 				{
-					_decreaseOverallScaleButtonNumber = value;
+					_startMinimized = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private int _increaseOverallScaleButtonNumber = 0;
+		#endregion
 
-		public int IncreaseOverallScaleButtonNumber
+		#region Device list
+
+		public void UpdateDeviceList( SerializableDictionary<Guid, string> deviceList )
 		{
-			get => _increaseOverallScaleButtonNumber;
+			_deviceList = deviceList;
 
-			set
-			{
-				if ( _increaseOverallScaleButtonNumber != value )
-				{
-					_increaseOverallScaleButtonNumber = value;
-
-					OnPropertyChanged();
-				}
-			}
+			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( DeviceList ) ) );
 		}
 
-		private int _decreaseDetailScaleButtonNumber = 0;
+		#endregion
 
-		public int DecreaseDetailScaleButtonNumber
-		{
-			get => _decreaseDetailScaleButtonNumber;
-
-			set
-			{
-				if ( _decreaseDetailScaleButtonNumber != value )
-				{
-					_decreaseDetailScaleButtonNumber = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		private int _increaseDetailScaleButtonNumber = 0;
-
-		public int IncreaseDetailScaleButtonNumber
-		{
-			get => _increaseDetailScaleButtonNumber;
-
-			set
-			{
-				if ( _increaseDetailScaleButtonNumber != value )
-				{
-					_increaseDetailScaleButtonNumber = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Notification functions */
+		#region Notification functions
 
 		public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -921,11 +904,6 @@ namespace MarvinsAIRA
 			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( name ) );
 		}
 
-		public void UpdateDeviceList( SerializableDictionary<Guid, string> deviceList )
-		{
-			_deviceList = deviceList;
-
-			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( DeviceList ) ) );
-		}
+		#endregion
 	}
 }

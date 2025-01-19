@@ -7,6 +7,9 @@ namespace MarvinsAIRA
 	{
 		private readonly System.Timers.Timer _timer = new( 200 );
 
+		public bool useShift = false;
+		public bool useCtrl = false;
+		public bool useAlt = false;
 		public Guid deviceInstanceGuid = Guid.Empty;
 		public string deviceProductName = string.Empty;
 		public int buttonNumber = 0;
@@ -23,6 +26,10 @@ namespace MarvinsAIRA
 			if ( deviceInstanceGuid != Guid.Empty )
 			{
 				ButtonNameLabel.Content = $"Currently set to button {buttonNumber + 1} on {deviceProductName}.";
+
+				ShiftCheckBox.IsChecked = useShift;
+				CtrlCheckBox.IsChecked = useCtrl;
+				AltCheckBox.IsChecked = useAlt;
 			}
 			else
 			{
@@ -39,15 +46,33 @@ namespace MarvinsAIRA
 			_timer.Dispose();
 		}
 
-		private void UpdateButton_Click( object sender, RoutedEventArgs e )
+		private void CancelButton_Click( object sender, RoutedEventArgs e )
+		{
+			Close();
+		}
+
+		private void ClearButton_Click( object sender, RoutedEventArgs e )
 		{
 			canceled = false;
+
+			useShift = false;
+			useCtrl = false;
+			useAlt = false;
+			deviceInstanceGuid = Guid.Empty;
+			deviceProductName = string.Empty;
+			buttonNumber = 0;
 
 			Close();
 		}
 
-		private void CancelButton_Click( object sender, RoutedEventArgs e )
+		private void UpdateButton_Click( object sender, RoutedEventArgs e )
 		{
+			canceled = false;
+
+			useShift = ShiftCheckBox.IsChecked == true;
+			useCtrl = CtrlCheckBox.IsChecked == true;
+			useAlt = AltCheckBox.IsChecked == true;
+
 			Close();
 		}
 
