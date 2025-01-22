@@ -51,13 +51,14 @@ namespace MarvinsAIRA
 		private float _ffb_clippedTimer = 0;
 		private Stopwatch _ffb_stopwatch = new();
 
-		private readonly int[] _ffb_forceFeedbackMagnitude = new int[ FFB_SAMPLES_PER_FRAME ];
+		private readonly int[] _ffb_magnitude = new int[ FFB_SAMPLES_PER_FRAME ];
 
 		private float _ffb_previousSteeringWheelTorque = 0;
 		private float _ffb_scaledSteeringWheelTorque = 0;
 
 		private float _ffb_announceOverallScaleTimer = 0;
 		private float _ffb_announceDetailScaleTimer = 0;
+		private float _ffb_announceLFEScaleTimer = 0;
 
 		private bool _ffb_drawPrettyGraph = false;
 		private int _ffb_prettyGraphCurrentX = 0;
@@ -66,7 +67,7 @@ namespace MarvinsAIRA
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
-		public int FFB_CurrentMagnitude { get => _ffb_forceFeedbackMagnitude[ 0 ]; }
+		public int FFB_CurrentMagnitude { get => _ffb_magnitude[ 0 ]; }
 
 		public void InitializeForceFeedback( nint windowHandle )
 		{
@@ -90,7 +91,7 @@ namespace MarvinsAIRA
 				UninitializeForceFeedback();
 			}
 
-			WriteLine( "Initializing DirectInput (FF driving device)..." );
+			WriteLine( "...initializing DirectInput (FF driving device)..." );
 
 			var directInput = new DirectInput();
 
@@ -98,7 +99,7 @@ namespace MarvinsAIRA
 
 			DeviceType[] deviceTypeArray = [ DeviceType.Driving, DeviceType.FirstPerson, DeviceType.Joystick, DeviceType.Gamepad ];
 
-			if ( Settings.SelectedDeviceId == Guid.Empty )
+			if ( Settings.SelectedFFBDeviceGuid == Guid.Empty )
 			{
 				WriteLine( "...there is not already a selected force feedback device, looking for the first attached force feedback driving device..." );
 
@@ -110,7 +111,7 @@ namespace MarvinsAIRA
 
 					if ( forceFeedbackDeviceInstance != null )
 					{
-						Settings.SelectedDeviceId = forceFeedbackDeviceInstance.InstanceGuid;
+						Settings.SelectedFFBDeviceGuid = forceFeedbackDeviceInstance.InstanceGuid;
 						break;
 					}
 				}
@@ -127,7 +128,7 @@ namespace MarvinsAIRA
 
 					foreach ( var deviceInstance in deviceInstanceList )
 					{
-						if ( deviceInstance.InstanceGuid == Settings.SelectedDeviceId )
+						if ( deviceInstance.InstanceGuid == Settings.SelectedFFBDeviceGuid )
 						{
 							forceFeedbackDeviceInstance = deviceInstance;
 							deviceFound = true;
@@ -178,12 +179,7 @@ namespace MarvinsAIRA
 					_ffb_initialized = true;
 					_ffb_wheelChanged = true;
 
-					_ffb_wheelSaveName = ALL_WHEELS_SAVE_NAME;
-
-					if ( Settings.SaveSettingsPerWheel )
-					{
-						_ffb_wheelSaveName = _ffb_drivingJoystick.Information.ProductName;
-					}
+					UpdateWheelSaveName();
 
 					ReinitializeForceFeedbackDevice( windowHandle );
 				}
@@ -194,7 +190,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		public void UninitializeForceFeedback()
+		private void UninitializeForceFeedback()
 		{
 			WriteLine( "" );
 			WriteLine( "UninitializeForceFeedback called." );
@@ -338,7 +334,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		public void StopForceFeedback()
+		private void StopForceFeedback()
 		{
 			UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
 
@@ -369,7 +365,7 @@ namespace MarvinsAIRA
 
 				foreach ( var joystick in _joystickList )
 				{
-					if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
+					if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
 					{
 						try
 						{
@@ -430,6 +426,33 @@ namespace MarvinsAIRA
 									playSound = true;
 								}
 							}
+							if ( joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid )
+							{
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseLFEScale );
+
+								if ( buttonPresses > 0 )
+								{
+									Settings.LFEScale -= buttonPresses;
+
+									_ffb_announceLFEScaleTimer = 1;
+
+									playSound = true;
+								}
+							}
+
+							if ( joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid )
+							{
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseLFEScale );
+
+								if ( buttonPresses > 0 )
+								{
+									Settings.LFEScale += buttonPresses;
+
+									_ffb_announceLFEScaleTimer = 1;
+
+									playSound = true;
+								}
+							}
 
 							if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
 							{
@@ -471,6 +494,16 @@ namespace MarvinsAIRA
 				if ( _ffb_announceDetailScaleTimer <= 0 )
 				{
 					Say( $"The detail scale is now {Settings.DetailScale} percent." );
+				}
+			}
+
+			if ( _ffb_announceLFEScaleTimer > 0 )
+			{
+				_ffb_announceLFEScaleTimer -= deltaTime;
+
+				if ( _ffb_announceLFEScaleTimer <= 0 )
+				{
+					Say( $"The LFE scale is now {Settings.LFEScale} percent." );
 				}
 			}
 
@@ -546,6 +579,19 @@ namespace MarvinsAIRA
 			UpdateConstantForce( [ magnitude * 1, magnitude * 2, magnitude * 3, magnitude * 2, magnitude * 1, 0 ] );
 		}
 
+		public void UpdateWheelSaveName()
+		{
+			_ffb_wheelSaveName = ALL_WHEELS_SAVE_NAME;
+
+			if ( Settings.SaveSettingsPerWheel )
+			{
+				if ( _ffb_drivingJoystick != null )
+				{
+					_ffb_wheelSaveName = _ffb_drivingJoystick.Information.ProductName;
+				}
+			}
+		}
+
 		public void UpdateConstantForce( int[] forceMagnitudeList )
 		{
 			for ( int i = 0; i < forceMagnitudeList.Length; i++ )
@@ -606,15 +652,23 @@ namespace MarvinsAIRA
 
 				// calculate the conversion scale from Newton-meters to DI_FFNOMINALMAX
 
-				var conversionScale = DI_FFNOMINALMAX / Settings.WheelMaxForce;
+				var ffbConversionScale = DI_FFNOMINALMAX / Settings.WheelMaxForce;
 
 				// apply conversion scale to the overall scale
 
-				var overallScale = conversionScale * Settings.OverallScale / 100f;
+				var overallScale = ffbConversionScale * Settings.OverallScale / 100f;
 
 				// calculate the detail scale
 
 				var detailScale = overallScale + overallScale * ( ( Settings.DetailScale - 100f ) / 100f );
+
+				// calculate the lfe scale
+
+				var lfeScale = Settings.LFEScale / 100f * DI_FFNOMINALMAX;
+
+				// grab the lfe read index
+
+				var lfeMagnitudeIndex = _lfe_magnitudeIndex;
 
 				// go through each sample
 
@@ -640,7 +694,11 @@ namespace MarvinsAIRA
 
 					// apply the speed scale and update the array that the force feedback thread uses
 
-					_ffb_forceFeedbackMagnitude[ x ] = (int) ( _ffb_scaledSteeringWheelTorque * speedScale );
+					_ffb_magnitude[ x ] = (int) ( _ffb_scaledSteeringWheelTorque * speedScale );
+
+					// add in the low frequency effects
+
+					_ffb_magnitude[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
 
 					// update the pretty graph
 
@@ -652,7 +710,7 @@ namespace MarvinsAIRA
 						var oY2 = (int) ( currentSteeringWheelTorque * overallScale / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
 						var oY1 = oY2 - 2;
 
-						var sY2 = (int) ( _ffb_forceFeedbackMagnitude[ x ] / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
+						var sY2 = (int) ( _ffb_magnitude[ x ] / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
 						var sY1 = sY2 - 2;
 
 						for ( var y = 0; y < 200; y++ )
@@ -723,9 +781,9 @@ namespace MarvinsAIRA
 			}
 			else
 			{
-				for ( var i = 0; i < _ffb_forceFeedbackMagnitude.Length; i++ )
+				for ( var i = 0; i < _ffb_magnitude.Length; i++ )
 				{
-					_ffb_forceFeedbackMagnitude[ i ] = 0;
+					_ffb_magnitude[ i ] = 0;
 				}
 
 				_ffb_previousSteeringWheelTorque = 0;
@@ -745,7 +803,7 @@ namespace MarvinsAIRA
 				}
 				else
 				{
-					UpdateConstantForce( _ffb_forceFeedbackMagnitude );
+					UpdateConstantForce( _ffb_magnitude );
 				}
 			}
 		}

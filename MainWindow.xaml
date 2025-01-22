@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.13"
+        Title="Marvin's Awesome iRacing App v0.15"
         Height="Auto"
         Width="790"
         Closing="Window_Closing"
@@ -29,75 +29,113 @@
                     </StackPanel>
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="78"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
+                    <GroupBox Header="Steering Wheel (FFB)">
+                        <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="78"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
-                                <ComboBox x:Name="ForceFeedbackDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding DeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedDeviceId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="ForceFeedbackDeviceComboBox_SelectionChanged" />
+                                <StackPanel Grid.Column="0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
+                                        <ComboBox x:Name="FFBDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding FFBDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedFFBDeviceGuid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="FFBDeviceComboBox_SelectionChanged" />
+                                    </Grid>
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
+                                        <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </Grid>
+                                </StackPanel>
+                                <Button Grid.Column="1" x:Name="ForceFeedbackTestButton" Margin="15,5,5,5" Content="TEST" Click="ForceFeedbackTestButton_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" FontSize="16" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
-                                <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
+                                <TextBox Grid.Column="1" Text="{Binding OverallScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OverallScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
+                                <Button Grid.Column="3" x:Name="DecreaseOverallScaleButton" Margin="10,0,0,0" Click="DecreaseOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/minus-button.png"/>
+                                </Button>
+                                <Button Grid.Column="4" x:Name="IncreaseOverallScaleButton" Click="IncreaseOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/plus-button.png"/>
+                                </Button>
+                            </Grid>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
+                                <TextBox Grid.Column="1" Text="{Binding DetailScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
+                                <Button Grid.Column="3" x:Name="DecreaseDetailScaleButton" Margin="10,0,0,0" Click="DecreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/minus-button.png"/>
+                                </Button>
+                                <Button Grid.Column="4" x:Name="IncreaseDetailScaleButton" Click="IncreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/plus-button.png"/>
+                                </Button>
                             </Grid>
                         </StackPanel>
-                        <Button Grid.Column="1" x:Name="ForceFeedbackTestButton" Margin="15,5,5,5" Content="TEST" Click="ForceFeedbackTestButton_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" FontSize="16" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                    </Grid>
-                    <Grid Margin="0,5,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
-                        <TextBox Grid.Column="1" Text="{Binding OverallScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OverallScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
-                        <Button Grid.Column="3" x:Name="DecreaseOverallScaleButton" Margin="10,0,0,0" Click="DecreaseOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                            <Image Source="/minus-button.png"/>
-                        </Button>
-                        <Button Grid.Column="4" x:Name="IncreaseOverallScaleButton" Click="IncreaseOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                            <Image Source="/plus-button.png"/>
-                        </Button>
-                    </Grid>
-                    <Grid Margin="0,5,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
-                        <TextBox Grid.Column="1" Text="{Binding DetailScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
-                        <Button Grid.Column="3" x:Name="DecreaseDetailScaleButton" Margin="10,0,0,0" Click="DecreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                            <Image Source="/minus-button.png"/>
-                        </Button>
-                        <Button Grid.Column="4" x:Name="IncreaseDetailScaleButton" Click="IncreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                            <Image Source="/plus-button.png"/>
-                        </Button>
-                    </Grid>
-                    <StackPanel Margin="0,10,0,0">
-                        <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
-                            <Image x:Name="WheelForceFeedbackImage" Height="200" Width="768"/>
-                        </Border>
-                        <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
-                    </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Low Frequency Effects (LFE to FFB)">
+                        <StackPanel>
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
+                                    <ComboBox x:Name="LFEDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding LFEDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedLFEDeviceGuid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="LFEDeviceComboBox_SelectionChanged" />
+                                </Grid>
+                            </StackPanel>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Scale" VerticalAlignment="Center" ToolTip="This is how strongly to add the low frequency effect signal to the force feedback." />
+                                <TextBox Grid.Column="1" Text="{Binding LFEScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding LFEScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
+                                <Button Grid.Column="3" x:Name="DecreaseLEFScaleButton" Margin="10,0,0,0" Click="DecreaseLFEScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/minus-button.png"/>
+                                </Button>
+                                <Button Grid.Column="4" x:Name="IncreaseLFEScaleButton" Click="IncreaseLFEScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/plus-button.png"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Pretty Graph">
+                        <StackPanel>
+                            <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
+                                <Image x:Name="WheelForceFeedbackImage" Height="200" Width="768"/>
+                            </Border>
+                            <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </GroupBox>
                 </StackPanel>
             </TabItem>
             <TabItem>
@@ -263,15 +301,15 @@
                     </GroupBox>
                     <GroupBox Header="Save File" Padding="10,0,10,15">
                         <StackPanel>
-                            <CheckBox Content="Save separate force feedback settings for each steering wheel device" IsChecked="{Binding SaveSettingsPerWheel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <CheckBox Content="Save separate force feedback settings for each car" IsChecked="{Binding SaveSettingsPerCar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <CheckBox Content="Save separate force feedback settings for each track" IsChecked="{Binding SaveSettingsPerTrack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <CheckBox Content="Save separate force feedback settings for each track configuration" IsChecked="{Binding SaveSettingsPerTrackConfiguration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox x:Name="SaveForEachWheel_CheckBox" Content="Save separate force feedback settings for each steering wheel device" IsChecked="{Binding SaveSettingsPerWheel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="SaveForEachWheel_CheckBox_Click"/>
+                            <CheckBox x:Name="SaveForEachCar_CheckBox" Content="Save separate force feedback settings for each car" IsChecked="{Binding SaveSettingsPerCar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="SaveForEachCar_CheckBox_Click"/>
+                            <CheckBox x:Name="SaveForEachTrack_CheckBox" Content="Save separate force feedback settings for each track" IsChecked="{Binding SaveSettingsPerTrack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="SaveForEachTrack_CheckBox_Click"/>
+                            <CheckBox x:Name="SaveForEachTrackConfig_CheckBox" Content="Save separate force feedback settings for each track configuration" IsChecked="{Binding SaveSettingsPerTrackConfig, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="SaveForEachTrackConfig_CheckBox_Click"/>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Application Control" Padding="10,0,10,15">
                         <StackPanel>
-                            <CheckBox Content="Start minimized" IsChecked="{Binding StartMinimized, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="Start Minimized" IsChecked="{Binding StartMinimized, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             <Button x:Name="SetForegroundWindowButton" Content="Map button to force this app to the foreground and reacquire the FFB device" Margin="0,5,0,0" HorizontalAlignment="Stretch" Click="SetForegroundWindowButton_Click"/>
                         </StackPanel>
                     </GroupBox>

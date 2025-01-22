@@ -59,10 +59,12 @@ namespace MarvinsAIRA
 				}
 
 				_currentTrackDisplayName = trackDisplayName;
-				_trackSaveName = Settings.SaveSettingsPerTrack ? _currentTrackDisplayName : ALL_TRACKS_SAVE_NAME;
+
+				UpdateTrackSaveName();
 
 				_currentTrackConfigName = trackConfigName;
-				_trackConfigSaveName = Settings.SaveSettingsPerTrackConfig ? _currentTrackConfigName : ALL_TRACK_CONFIGS_SAVE_NAME;
+
+				UpdateTrackConfigSaveName();
 
 				Dispatcher.BeginInvoke( () =>
 				{
@@ -74,6 +76,16 @@ namespace MarvinsAIRA
 						mainWindow.CurrentTrackStatusBarItem.Foreground = ( _currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;					}
 				} );
 			}
+		}
+
+		public void UpdateTrackSaveName()
+		{
+			_trackSaveName = Settings.SaveSettingsPerTrack ? _currentTrackDisplayName : ALL_TRACKS_SAVE_NAME;
+		}
+
+		public void UpdateTrackConfigSaveName()
+		{
+			_trackConfigSaveName = Settings.SaveSettingsPerTrackConfig ? _currentTrackConfigName : ALL_TRACK_CONFIGS_SAVE_NAME;
 		}
 	}
 }

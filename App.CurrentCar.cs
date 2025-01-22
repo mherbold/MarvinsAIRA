@@ -56,7 +56,8 @@ namespace MarvinsAIRA
 				}
 
 				_currentCarScreenName = carScreenName;
-				_carSaveName = Settings.SaveSettingsPerCar ? _currentCarScreenName : ALL_CARS_SAVE_NAME;
+
+				UpdateCarSaveName();
 
 				Dispatcher.BeginInvoke( () =>
 				{
@@ -70,6 +71,11 @@ namespace MarvinsAIRA
 				} );
 			}
 
+		}
+
+		public void UpdateCarSaveName()
+		{
+			_carSaveName = Settings.SaveSettingsPerCar ? _currentCarScreenName : ALL_CARS_SAVE_NAME;
 		}
 	}
 }

@@ -23,6 +23,7 @@ namespace MarvinsAIRA
 				InitializeSounds();
 				InitializeInputs( windowHandle );
 				InitializeForceFeedback( windowHandle );
+				InitializeLFE();
 				InitializeIRacingSDK();
 				InitializeCurrentCar();
 				InitializeWindSimulator();
@@ -44,6 +45,7 @@ namespace MarvinsAIRA
 			{
 				StopIRacingSDK();
 				StopForceFeedback();
+				StopLFE();
 				StopWindSimulator();
 				StopConsole();
 			}

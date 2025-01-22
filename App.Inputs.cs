@@ -26,11 +26,11 @@ namespace MarvinsAIRA
 			WriteLine( "InitializeInputs called." );
 			WriteLine( "Initializing DirectInput (all devices)" );
 
-			WriteLine( "...finding all devices..." );
+			WriteLine( "...finding all input controller devices..." );
 
 			var directInput = new DirectInput();
 
-			SerializableDictionary<Guid, string> deviceList = [];
+			SerializableDictionary<Guid, string> ffbDeviceList = [];
 
 			DeviceType[] deviceTypeArray = [ DeviceType.Keyboard, DeviceType.Joystick, DeviceType.Gamepad, DeviceType.Driving, DeviceType.Flight, DeviceType.FirstPerson, DeviceType.ControlDevice, DeviceType.ScreenPointer, DeviceType.Remote, DeviceType.Supplemental ];
 
@@ -46,7 +46,7 @@ namespace MarvinsAIRA
 
 					if ( hasForceFeedback )
 					{
-						deviceList.Add( joystickDeviceInstance.InstanceGuid, joystickDeviceInstance.ProductName );
+						ffbDeviceList.Add( joystickDeviceInstance.InstanceGuid, joystickDeviceInstance.ProductName );
 					}
 
 					WriteLine( $"...this devices identifies as Type: {joystickDeviceInstance.Type}, Subtype: {joystickDeviceInstance.Subtype}, Has FF: {hasForceFeedback}..." );
@@ -70,29 +70,27 @@ namespace MarvinsAIRA
 
 						_keyboardList.Add( keyboard );
 					}
-					else
-					{
-						var joystick = new Joystick( directInput, joystickDeviceInstance.InstanceGuid );
 
-						joystick.Properties.BufferSize = 128;
+					var joystick = new Joystick( directInput, joystickDeviceInstance.InstanceGuid );
 
-						WriteLine( $"...setting the cooperative level (non-exclusive background) on this device..." );
+					joystick.Properties.BufferSize = 128;
 
-						joystick.SetCooperativeLevel( windowHandle, CooperativeLevel.NonExclusive | CooperativeLevel.Background );
+					WriteLine( $"...setting the cooperative level (non-exclusive background) on this device..." );
 
-						WriteLine( $"...cooperative level was set..." );
-						WriteLine( $"...acquiring this device..." );
+					joystick.SetCooperativeLevel( windowHandle, CooperativeLevel.NonExclusive | CooperativeLevel.Background );
 
-						joystick.Acquire();
+					WriteLine( $"...cooperative level was set..." );
+					WriteLine( $"...acquiring this device..." );
 
-						WriteLine( $"...device was acquired..." );
+					joystick.Acquire();
 
-						_joystickList.Add( joystick );
-					}
+					WriteLine( $"...device was acquired..." );
+
+					_joystickList.Add( joystick );
 				}
 			}
 
-			Settings.UpdateDeviceList( deviceList );
+			Settings.UpdateFFBDeviceList( ffbDeviceList );
 
 			WriteLine( $"...a total of {_joystickList.Count} controller devices were found (and {_keyboardList.Count} keyboards)." );
 		}
@@ -124,8 +122,6 @@ namespace MarvinsAIRA
 			{
 				try
 				{
-					joystick.Poll();
-
 					var joystickUpdateArray = joystick.GetBufferedData();
 
 					foreach ( var joystickUpdate in joystickUpdateArray )

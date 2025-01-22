@@ -39,25 +39,29 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Device list */
+		/* Device lists */
 
-		private SerializableDictionary<Guid, string> _deviceList = [];
+		private SerializableDictionary<Guid, string> _ffbDeviceList = [];
 
-		public SerializableDictionary<Guid, string> DeviceList { get => _deviceList; }
+		public SerializableDictionary<Guid, string> FFBDeviceList { get => _ffbDeviceList; }
 
-		/* Selected device */
+		private SerializableDictionary<Guid, string> _lfeDeviceList = [];
 
-		private Guid _selectedDeviceId = Guid.Empty;
+		public SerializableDictionary<Guid, string> LFEDeviceList { get => _lfeDeviceList; }
 
-		public Guid SelectedDeviceId
+		/* Selected FFB device */
+
+		private Guid _selectedFFBDeviceGuid = Guid.Empty;
+
+		public Guid SelectedFFBDeviceGuid
 		{
-			get => _selectedDeviceId;
+			get => _selectedFFBDeviceGuid;
 
 			set
 			{
-				if ( _selectedDeviceId != value )
+				if ( _selectedFFBDeviceGuid != value )
 				{
-					_selectedDeviceId = value;
+					_selectedFFBDeviceGuid = value;
 
 					OnPropertyChanged();
 				}
@@ -252,6 +256,103 @@ namespace MarvinsAIRA
 				if ( _increaseDetailScale != value )
 				{
 					_increaseDetailScale = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Selected LFE device */
+
+		private Guid _selectedLFEDeviceGuid = Guid.Empty;
+
+		public Guid SelectedLFEDeviceGuid
+		{
+			get => _selectedLFEDeviceGuid;
+
+			set
+			{
+				if ( _selectedLFEDeviceGuid != value )
+				{
+					_selectedLFEDeviceGuid = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* LFE scale */
+
+		private int _lfeScale = 10;
+
+		public int LFEScale
+		{
+			get => _lfeScale;
+
+			set
+			{
+				value = Math.Max( 0, Math.Min( 250, value ) );
+
+				if ( _lfeScale != value )
+				{
+					_lfeScale = value;
+
+					LFEScaleString = $"{_lfeScale}%";
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _lfeScaleString = "10%";
+
+		public string LFEScaleString
+		{
+			get => _lfeScaleString;
+
+			set
+			{
+				if ( _lfeScaleString != value )
+				{
+					_lfeScaleString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Decrease LFE scale */
+
+		private MappedButton _decreaseLFEScale = new();
+
+		public MappedButton DecreaseLFEScale
+		{
+			get => _decreaseLFEScale;
+
+			set
+			{
+				if ( _decreaseLFEScale != value )
+				{
+					_decreaseLFEScale = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Increase LEF scale */
+
+		private MappedButton _increaseLFEScale = new();
+
+		public MappedButton IncreaseLFEScale
+		{
+			get => _increaseLFEScale;
+
+			set
+			{
+				if ( _increaseLFEScale != value )
+				{
+					_increaseLFEScale = value;
 
 					OnPropertyChanged();
 				}
@@ -880,13 +981,20 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Device list
+		#region Device lists
 
-		public void UpdateDeviceList( SerializableDictionary<Guid, string> deviceList )
+		public void UpdateFFBDeviceList( SerializableDictionary<Guid, string> ffbDeviceList )
 		{
-			_deviceList = deviceList;
+			_ffbDeviceList = ffbDeviceList;
 
-			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( DeviceList ) ) );
+			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( FFBDeviceList ) ) );
+		}
+
+		public void UpdateLFEDeviceList( SerializableDictionary<Guid, string> lfeDeviceList )
+		{
+			_lfeDeviceList = lfeDeviceList;
+
+			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( LFEDeviceList ) ) );
 		}
 
 		#endregion

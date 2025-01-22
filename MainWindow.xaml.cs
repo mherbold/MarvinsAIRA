@@ -184,14 +184,14 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void ForceFeedbackDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
+		private void FFBDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
 		{
 			if ( _initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "ForceFeedbackDeviceComboBox_SelectionChanged called." );
+				app.WriteLine( "FFBDeviceComboBox_SelectionChanged called." );
 
 				app.InitializeForceFeedback( _windowHandle );
 			}
@@ -245,6 +245,39 @@ namespace MarvinsAIRA
 			app.WriteLine( "IncreaseDetailScaleButton_Click called." );
 
 			app.Settings.IncreaseDetailScale = ShowMapButtonWindow( app.Settings.IncreaseDetailScale );
+		}
+
+		private void LFEDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
+		{
+			if ( _initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "LFEDeviceComboBox_SelectionChanged called." );
+
+				app.InitializeLFE();
+			}
+		}
+
+		private void DecreaseLFEScaleButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "DecreaseLFEScaleButton_Click called." );
+
+			app.Settings.DecreaseLFEScale = ShowMapButtonWindow( app.Settings.DecreaseLFEScale );
+		}
+
+		private void IncreaseLFEScaleButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "IncreaseLFEScaleButton_Click called." );
+
+			app.Settings.IncreaseLFEScale = ShowMapButtonWindow( app.Settings.IncreaseLFEScale );
 		}
 
 		private void TogglePrettyGraph_Button_Click( object sender, RoutedEventArgs e )
@@ -348,6 +381,38 @@ namespace MarvinsAIRA
 
 				app.PlayClick();
 			}
+		}
+
+		private void SaveForEachWheel_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.UpdateWheelSaveName();
+			app.QueueForSerialization();
+		}
+
+		private void SaveForEachCar_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.UpdateCarSaveName();
+			app.QueueForSerialization();
+		}
+
+		private void SaveForEachTrack_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.UpdateTrackSaveName();
+			app.QueueForSerialization();
+		}
+
+		private void SaveForEachTrackConfig_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.UpdateTrackConfigSaveName();
+			app.QueueForSerialization();
 		}
 
 		private void SetForegroundWindowButton_Click( object sender, RoutedEventArgs e )
