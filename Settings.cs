@@ -262,6 +262,74 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private bool _frequency60 = true;
+
+		public bool Frequency60
+		{
+			get => _frequency60;
+
+			set
+			{
+				if ( _frequency60 != value )
+				{
+					_frequency60 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _frequency120 = false;
+
+		public bool Frequency120
+		{
+			get => _frequency120;
+
+			set
+			{
+				if ( _frequency120 != value )
+				{
+					_frequency120 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _frequency180 = false;
+
+		public bool Frequency180
+		{
+			get => _frequency180;
+
+			set
+			{
+				if ( _frequency180 != value )
+				{
+					_frequency180 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _frequency360 = false;
+
+		public bool Frequency360
+		{
+			get => _frequency360;
+
+			set
+			{
+				if ( _frequency360 != value )
+				{
+					_frequency360 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Selected LFE device */
 
 		private Guid _selectedLFEDeviceGuid = Guid.Empty;

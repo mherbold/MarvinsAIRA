@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.15"
+        Title="Marvin's Awesome iRacing App v0.16"
         Height="Auto"
         Width="790"
         Closing="Window_Closing"
@@ -94,6 +94,13 @@
                                     <Image Source="/plus-button.png"/>
                                 </Button>
                             </Grid>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <Label Content="Frequency" VerticalAlignment="Center" Width="90" />
+                                <RadioButton Content="60 Hz" IsChecked="{Binding Frequency60, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <RadioButton Content="120 Hz" IsChecked="{Binding Frequency120, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <RadioButton Content="180 Hz" IsChecked="{Binding Frequency180, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <RadioButton Content="360 Hz" IsChecked="{Binding Frequency360, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Low Frequency Effects (LFE to FFB)">

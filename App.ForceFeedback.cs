@@ -619,7 +619,29 @@ namespace MarvinsAIRA
 						{
 							_ffb_stopwatch.Restart();
 
-							_ffb_constantForceEffect.SetParameters( _ffb_effectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
+							var sendUpdate = false;
+
+							if ( Settings.Frequency360 )
+							{
+								sendUpdate = true;
+							}
+							else if ( Settings.Frequency180 )
+							{
+								sendUpdate = ( ( i & 1 ) == 0 );
+							}
+							else if ( Settings.Frequency120 )
+							{
+								sendUpdate = ( i == 0 ) || ( i == 3 );
+							}
+							else
+							{
+								sendUpdate = ( i == 0 );
+							}
+
+							if ( sendUpdate )
+							{
+								_ffb_constantForceEffect.SetParameters( _ffb_effectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
+							}
 
 							if ( i < ( forceMagnitudeList.Length - 1 ) )
 							{

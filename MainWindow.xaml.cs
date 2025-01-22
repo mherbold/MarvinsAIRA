@@ -109,7 +109,14 @@ namespace MarvinsAIRA
 
 					if ( _sendForceFeedbackTestSignalCounter > 0 )
 					{
-						app.SendTestForceFeedbackSignal( ( _sendForceFeedbackTestSignalCounter & 1 ) == 0 );
+						if ( _sendForceFeedbackTestSignalCounter == 1 )
+						{
+							app.UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
+						}
+						else
+						{
+							app.SendTestForceFeedbackSignal( ( _sendForceFeedbackTestSignalCounter & 1 ) == 0 );
+						}
 
 						_sendForceFeedbackTestSignalCounter--;
 					}
@@ -204,7 +211,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "ForceFeedbackTestButton_Click called." );
 
-			_sendForceFeedbackTestSignalCounter = 10;
+			_sendForceFeedbackTestSignalCounter = 11;
 		}
 
 		private void DecreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
