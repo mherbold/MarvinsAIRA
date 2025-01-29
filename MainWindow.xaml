@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.16"
+        Title="Marvin's Awesome iRacing App v0.17"
         Height="Auto"
         Width="790"
         Closing="Window_Closing"
@@ -33,30 +33,37 @@
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="78"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
-                                        <ComboBox x:Name="FFBDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding FFBDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedFFBDeviceGuid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="FFBDeviceComboBox_SelectionChanged" />
-                                    </Grid>
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
-                                        <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    </Grid>
-                                </StackPanel>
-                                <Button Grid.Column="1" x:Name="ForceFeedbackTestButton" Margin="15,5,5,5" Content="TEST" Click="ForceFeedbackTestButton_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" FontSize="16" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
+                                <ComboBox x:Name="FFBDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding FFBDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedFFBDeviceGuid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="FFBDeviceComboBox_SelectionChanged" />
+                                <Button Grid.Column="2" x:Name="ForceFeedbackTestButton" Margin="15,0,0,0" Content="TEST" Click="ForceFeedbackTestButton_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                <Button Grid.Column="3" x:Name="ResetForceFeedbackButton" Margin="10,0,0,0" Click="ResetForceFeedbackButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/r-button.png"/>
+                                </Button>
+                            </Grid>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
+                                <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="2" />
+                                <Label Grid.Column="3" Content="Target" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="This your target overall scale force in Newton-meters." />
+                                <TextBox Grid.Column="4" Text="{Binding TargetForceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider Grid.Column="5" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="25" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding TargetForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="2" />
+                                <Button Grid.Column="6" x:Name="AutoOverallScaleButton" Margin="10,0,0,0" Click="AutoOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/a-button.png"/>
+                                </Button>
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
@@ -86,7 +93,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
                                 <TextBox Grid.Column="1" Text="{Binding DetailScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="10" />
                                 <Button Grid.Column="3" x:Name="DecreaseDetailScaleButton" Margin="10,0,0,0" Click="DecreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                     <Image Source="/minus-button.png"/>
                                 </Button>
@@ -94,13 +101,26 @@
                                     <Image Source="/plus-button.png"/>
                                 </Button>
                             </Grid>
-                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <Label Content="Frequency" VerticalAlignment="Center" Width="90" />
-                                <RadioButton Content="60 Hz" IsChecked="{Binding Frequency60, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <RadioButton Content="120 Hz" IsChecked="{Binding Frequency120, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <RadioButton Content="180 Hz" IsChecked="{Binding Frequency180, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <RadioButton Content="360 Hz" IsChecked="{Binding Frequency360, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Parked Scale" VerticalAlignment="Center" ToolTip="This is how much to scale forces while parked (or moving very slow) and 100% means no reduction in forces." />
+                                <TextBox Grid.Column="1" Text="{Binding ParkedScaleString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding ParkedScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="2" />
+                            </Grid>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Frequency" VerticalAlignment="Center" Width="90" />
+                                <TextBox Grid.Column="1" Text="{Binding FrequencyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                <Slider x:Name="FrequencySlider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="16" SmallChange="1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding Frequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" ValueChanged="FrequencySlider_ValueChanged" />
+                            </Grid>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Low Frequency Effects (LFE to FFB)">
@@ -317,7 +337,6 @@
                     <GroupBox Header="Application Control" Padding="10,0,10,15">
                         <StackPanel>
                             <CheckBox Content="Start Minimized" IsChecked="{Binding StartMinimized, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <Button x:Name="SetForegroundWindowButton" Content="Map button to force this app to the foreground and reacquire the FFB device" Margin="0,5,0,0" HorizontalAlignment="Stretch" Click="SetForegroundWindowButton_Click"/>
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>

@@ -10,6 +10,7 @@ namespace MarvinsAIRA
 	{
 		private Settings _settings = new();
 
+		private bool _pauseSerialization = false;
 		private float _serializationTimer = 0;
 
 		public Settings Settings
@@ -26,12 +27,16 @@ namespace MarvinsAIRA
 
 			if ( File.Exists( filePath ) )
 			{
+				_pauseSerialization = true;
+
 				var settings = (Settings?) Serializer.Load( filePath, typeof( Settings ) );
 
 				if ( settings != null )
 				{
 					_settings = settings;
 				}
+
+				_pauseSerialization = false;
 			}
 
 			var mainWindow = (MainWindow) MainWindow;
@@ -94,7 +99,10 @@ namespace MarvinsAIRA
 
 		public void QueueForSerialization()
 		{
-			_serializationTimer = 1;
+			if ( !_pauseSerialization )
+			{
+				_serializationTimer = 1;
+			}
 		}
 	}
 }

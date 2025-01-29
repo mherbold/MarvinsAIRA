@@ -68,9 +68,28 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Reset force feedback */
+
+		public MappedButton _setForegroundWindow = new();
+
+		public MappedButton SetForegroundWindow
+		{
+			get => _setForegroundWindow;
+
+			set
+			{
+				if ( _setForegroundWindow != value )
+				{
+					_setForegroundWindow = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Wheel max force */
 
-		private float _wheelMaxForce = 10.9f;
+		private float _wheelMaxForce = 10f;
 
 		public float WheelMaxForce
 		{
@@ -78,6 +97,8 @@ namespace MarvinsAIRA
 
 			set
 			{
+				value = Math.Max( 1, Math.Min( 500, value ) );
+
 				if ( _wheelMaxForce != value )
 				{
 					_wheelMaxForce = value;
@@ -89,7 +110,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _wheelMaxForceString = "10.9 N⋅m";
+		private string _wheelMaxForceString = "10 N⋅m";
 
 		public string WheelMaxForceString
 		{
@@ -106,6 +127,65 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Target force */
+
+		private float _targetForce = 5f;
+
+		public float TargetForce
+		{
+			get => _targetForce;
+
+			set
+			{
+				value = Math.Max( 1, Math.Min( 250, value ) );
+
+				if ( _targetForce != value )
+				{
+					_targetForce = value;
+
+					TargetForceString = $"{_targetForce:F1} N⋅m";
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _targetForceString = "5 N⋅m";
+
+		public string TargetForceString
+		{
+			get => _targetForceString;
+
+			set
+			{
+				if ( _targetForceString != value )
+				{
+					_targetForceString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Auto overall scale */
+
+		public MappedButton _autoOverallScale = new();
+
+		public MappedButton AutoOverallScale
+		{
+			get => _autoOverallScale;
+
+			set
+			{
+				if ( _autoOverallScale != value )
+				{
+					_autoOverallScale = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Overall scale */
 
 		private int _overallScale = 10;
@@ -116,7 +196,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 250, value ) );
+				value = Math.Max( 1, Math.Min( 250, value ) );
 
 				if ( _overallScale != value )
 				{
@@ -262,68 +342,80 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private bool _frequency60 = true;
+		/* Parked scale */
 
-		public bool Frequency60
+		private int _parkedScale = 10;
+
+		public int ParkedScale
 		{
-			get => _frequency60;
+			get => _parkedScale;
 
 			set
 			{
-				if ( _frequency60 != value )
+				value = Math.Max( 0, Math.Min( 100, value ) );
+
+				if ( _parkedScale != value )
 				{
-					_frequency60 = value;
+					_parkedScale = value;
+
+					ParkedScaleString = $"{_parkedScale}%";
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private bool _frequency120 = false;
+		private string _parkedScaleString = "10%";
 
-		public bool Frequency120
+		public string ParkedScaleString
 		{
-			get => _frequency120;
+			get => _parkedScaleString;
 
 			set
 			{
-				if ( _frequency120 != value )
+				if ( _parkedScaleString != value )
 				{
-					_frequency120 = value;
+					_parkedScaleString = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private bool _frequency180 = false;
+		/* Frequency */
 
-		public bool Frequency180
+		private int _frequency = 14;
+
+		public int Frequency
 		{
-			get => _frequency180;
+			get => _frequency;
 
 			set
 			{
-				if ( _frequency180 != value )
+				value = Math.Max( 2, Math.Min( 16, value ) );
+
+				if ( _frequency != value )
 				{
-					_frequency180 = value;
+					_frequency = value;
+
+					FrequencyString = $"{1000.0f / ( 18 - _frequency ):F2} Hz";
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private bool _frequency360 = false;
+		private string _frequencyString = "250 Hz";
 
-		public bool Frequency360
+		public string FrequencyString
 		{
-			get => _frequency360;
+			get => _frequencyString;
 
 			set
 			{
-				if ( _frequency360 != value )
+				if ( _frequencyString != value )
 				{
-					_frequency360 = value;
+					_frequencyString = value;
 
 					OnPropertyChanged();
 				}
@@ -351,7 +443,7 @@ namespace MarvinsAIRA
 
 		/* LFE scale */
 
-		private int _lfeScale = 10;
+		private int _lfeScale = 50;
 
 		public int LFEScale
 		{
@@ -372,7 +464,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _lfeScaleString = "10%";
+		private string _lfeScaleString = "50%";
 
 		public string LFEScaleString
 		{
@@ -1023,10 +1115,6 @@ namespace MarvinsAIRA
 				}
 			}
 		}
-
-		/* Set foreground window */
-
-		public MappedButton SetForegroundWindow = new();
 
 		/* Start minimized */
 

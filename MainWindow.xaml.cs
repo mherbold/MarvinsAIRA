@@ -185,9 +185,13 @@ namespace MarvinsAIRA
 
 			var checkBox = (CheckBox) sender;
 
-			if ( checkBox.IsChecked != true )
+			if ( checkBox.IsChecked == true )
 			{
-				app.UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
+				app.InitializeForceFeedback( _windowHandle );
+			}
+			else
+			{
+				app.StopForceFeedback();
 			}
 		}
 
@@ -212,6 +216,26 @@ namespace MarvinsAIRA
 			app.WriteLine( "ForceFeedbackTestButton_Click called." );
 
 			_sendForceFeedbackTestSignalCounter = 11;
+		}
+
+		private void ResetForceFeedbackButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "ResetForceFeedbackButton_Click called." );
+
+			app.Settings.SetForegroundWindow = ShowMapButtonWindow( app.Settings.SetForegroundWindow );
+		}
+
+		private void AutoOverallScaleButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "AutoOverallScaleButton_Click called." );
+
+			app.Settings.AutoOverallScale = ShowMapButtonWindow( app.Settings.AutoOverallScale );
 		}
 
 		private void DecreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
@@ -252,6 +276,16 @@ namespace MarvinsAIRA
 			app.WriteLine( "IncreaseDetailScaleButton_Click called." );
 
 			app.Settings.IncreaseDetailScale = ShowMapButtonWindow( app.Settings.IncreaseDetailScale );
+		}
+
+		private void FrequencySlider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "FrequencySlider_ValueChanged called." );
+
+			app.ScheduleReinitializeForceFeedback();
 		}
 
 		private void LFEDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
@@ -420,16 +454,6 @@ namespace MarvinsAIRA
 
 			app.UpdateTrackConfigSaveName();
 			app.QueueForSerialization();
-		}
-
-		private void SetForegroundWindowButton_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "SetForegroundWindowButton_Click called." );
-
-			app.Settings.SetForegroundWindow = ShowMapButtonWindow( app.Settings.SetForegroundWindow );
 		}
 
 		#endregion

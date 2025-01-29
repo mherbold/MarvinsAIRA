@@ -8,6 +8,7 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
+		private const int IRSDK_TICK_RATE = 60;
 		private const int IRSDK_360HZ_SAMPLES_PER_FRAME = 6;
 
 		private IRacingSdk _irsdk = new();
@@ -21,6 +22,7 @@ namespace MarvinsAIRA
 
 		private bool _telemetryDataInitialized = false;
 
+		private int _tickRate = 0;
 		private float[] _steeringWheelTorque_ST = new float[ IRSDK_360HZ_SAMPLES_PER_FRAME ];
 		private bool _isOnTrack = false;
 		private float _speed = 0;
@@ -135,19 +137,21 @@ namespace MarvinsAIRA
 
 			_irsdk.Data.GetFloatArray( _steeringWheelTorque_STDatum, _steeringWheelTorque_ST, 0, _steeringWheelTorque_ST.Length );
 
+			_tickRate = _irsdk.Data.TickRate;
 			_isOnTrack = _irsdk.Data.GetBool( _isOnTrackDatum );
 			_speed = _irsdk.Data.GetFloat( _speedDatum );
 			_velocityX = _irsdk.Data.GetFloat( _velocityXDatum );
 			_velocityY = _irsdk.Data.GetFloat( _velocityYDatum );
 			_displayUnits = _irsdk.Data.GetInt( _displayUnitsDatum );
 
+			_irsdk.PauseSessionInfoUpdates = _isOnTrack;
+
 			UpdateForceFeedback();
 		}
 
 		private void OnDebugLog( string message )
 		{
-			WriteLine( "" );
-			WriteLine( message );
+			WriteLine( $"[IRSDK] {message}" );
 		}
 	}
 }

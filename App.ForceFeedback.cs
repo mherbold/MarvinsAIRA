@@ -1,5 +1,6 @@
 ﻿
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
@@ -12,10 +13,25 @@ namespace MarvinsAIRA
 	public partial class App : Application
 	{
 		[DllImport( "user32.dll" )]
-		static extern bool SetForegroundWindow( IntPtr hWnd );
+		private static extern IntPtr GetForegroundWindow();
+
+		[DllImport( "user32.dll" )]
+		[return: MarshalAs( UnmanagedType.Bool )]
+		private static extern bool SetForegroundWindow( IntPtr hWnd );
+
+		private delegate void MultimediaTimerCallback( UInt32 id, UInt32 msg, ref UInt32 userCtx, UInt32 rsv1, UInt32 rsv2 );
+
+		[DllImport( "winmm.dll", SetLastError = true, EntryPoint = "timeSetEvent" )]
+		private static extern UInt32 TimeSetEvent( UInt32 msDelay, UInt32 msResolution, MultimediaTimerCallback callback, ref UInt32 userCtx, UInt32 eventType );
+
+		[DllImport( "winmm.dll", SetLastError = true, EntryPoint = "timeKillEvent" )]
+		private static extern void TimeKillEvent( UInt32 uTimerId );
 
 		public const int DI_FFNOMINALMAX = 10000;
 		public const int DIEB_NOTRIGGER = -1;
+
+		private const int EVENTTYPE_SINGLE = 0;
+		private const int EVENTTYPE_PERIODIC = 1;
 
 		private const int FFB_SAMPLES_PER_FRAME = IRSDK_360HZ_SAMPLES_PER_FRAME;
 		private const int FFB_UPDATE_FREQUENCY = 360;
@@ -41,17 +57,23 @@ namespace MarvinsAIRA
 		private Effect? _ffb_constantForceEffect = null;
 
 		private bool _ffb_initialized = false;
-		private bool _ffb_skipNextUpdate = false;
-		private bool _ffb_reacquireNeeded = false;
-		private float _ffb_reacquireTimer = 0;
+		private int _ffb_updatesToSkip = 0;
+		private bool _ffb_reinitializeNeeded = false;
+		private float _ffb_reinitializeTimer = 0;
+		private bool _ffb_forceFeedbackExceptionThrown = false;
+		private UInt32 _ffb_multimediaTimerId = 0;
 
 		private bool _ffb_wheelChanged = false;
 		private string _ffb_wheelSaveName = ALL_WHEELS_SAVE_NAME;
 
 		private float _ffb_clippedTimer = 0;
-		private Stopwatch _ffb_stopwatch = new();
+
+		private readonly float[] _ffb_steeringWheelTorque = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 10 ];
+		private int _ffb_steeringWheelTorqueIndex = 0;
 
 		private readonly int[] _ffb_magnitude = new int[ FFB_SAMPLES_PER_FRAME ];
+		private float _ffb_magnitudeMilliseconds = 0;
+		private int _ffb_resetMagnitudeMilliseconds = 0;
 
 		private float _ffb_previousSteeringWheelTorque = 0;
 		private float _ffb_scaledSteeringWheelTorque = 0;
@@ -65,19 +87,30 @@ namespace MarvinsAIRA
 		private readonly WriteableBitmap _ffb_writeableBitmap = new( FFB_WRITEABLE_BITMAP_WIDTH, FFB_WRITEABLE_BITMAP_HEIGHT, FFB_WRITEABLE_BITMAP_DPI, FFB_WRITEABLE_BITMAP_DPI, PixelFormats.Bgra32, null );
 		private readonly byte[] _ffb_pixels = new byte[ FFB_PIXELS_BUFFER_STRIDE * FFB_PIXELS_BUFFER_HEIGHT ];
 
+		private Stopwatch _ffb_stopwatch = new Stopwatch();
+
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
 		public int FFB_CurrentMagnitude { get => _ffb_magnitude[ 0 ]; }
+
+		class TestData
+		{
+			public float deltaMilliseconds;
+			public float magnitudeIndex;
+			public int m0;
+			public int m1;
+			public int m2;
+			public int m3;
+			public int magnitude;
+		}
+
+		static int testCounter = 0;
+		static TestData[] testData = new TestData[ 1000 ];
 
 		public void InitializeForceFeedback( nint windowHandle )
 		{
 			WriteLine( "" );
 			WriteLine( "InitializeForceFeedback called." );
-
-			if ( !Stopwatch.IsHighResolution )
-			{
-				WriteLine( "--- Warning --- Stopwatch is not high resolution on this system --- Warning ---" );
-			}
 
 			var mainWindow = (MainWindow) MainWindow;
 
@@ -227,6 +260,19 @@ namespace MarvinsAIRA
 				WriteLine( "...the force feedback device has been disposed of..." );
 			}
 
+			if ( _ffb_multimediaTimerId != 0 )
+			{
+				WriteLine( "...killing the multimedia timer event..." );
+
+				TimeKillEvent( _ffb_multimediaTimerId );
+
+				_ffb_multimediaTimerId = 0;
+
+				WriteLine( "...multimedia timer event killed..." );
+			}
+
+			WriteLine( "...force feedback uninitialized." );
+
 			_ffb_initialized = false;
 		}
 
@@ -234,7 +280,6 @@ namespace MarvinsAIRA
 		{
 			WriteLine( "" );
 			WriteLine( "ReinitializeForceFeedbackDevice called." );
-			WriteLine( "Reinitializing the force feedback device..." );
 
 			if ( !_ffb_initialized )
 			{
@@ -260,6 +305,15 @@ namespace MarvinsAIRA
 
 			try
 			{
+				if ( _ffb_multimediaTimerId != 0 )
+				{
+					WriteLine( "...killing the multimedia timer event..." );
+
+					TimeKillEvent( _ffb_multimediaTimerId );
+
+					WriteLine( "...the multimedia timer event killed..." );
+				}
+
 				if ( _ffb_constantForceEffect != null )
 				{
 					WriteLine( "...disposing of the old constant force effect..." );
@@ -320,34 +374,42 @@ namespace MarvinsAIRA
 				_ffb_constantForceEffect.Start();
 
 				WriteLine( "...the constant force effect has been started..." );
+				WriteLine( "...starting the multimedia timer event..." );
 
-				_ffb_reacquireNeeded = false;
+				UInt32 userCtx = 0;
 
+				var periodInMilliseconds = (UInt32) ( 18 - Settings.Frequency );
+
+				_ffb_multimediaTimerId = TimeSetEvent( periodInMilliseconds, 0, MultimediaTimerEventCallback, ref userCtx, EVENTTYPE_PERIODIC );
+
+				WriteLine( "...the multimedia timer event has been started..." );
 				WriteLine( "...the force feedback device has been reinitialized." );
+
+				_ffb_forceFeedbackExceptionThrown = false;
 			}
 			catch ( Exception exception )
 			{
 				WriteLine( "...failed to reacquire the force feedback device:" );
 				WriteLine( exception.Message.Trim() );
 
-				_ffb_reacquireTimer = 2;
+				_ffb_forceFeedbackExceptionThrown = true;
 			}
 		}
 
-		private void StopForceFeedback()
+		public void StopForceFeedback()
 		{
 			UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
 
 			UninitializeForceFeedback();
 		}
 
+		public void ScheduleReinitializeForceFeedback()
+		{
+			_ffb_reinitializeNeeded = true;
+		}
+
 		public void UpdateForceFeedback( float deltaTime, bool checkButtons, nint windowHandle )
 		{
-			if ( _ffb_clippedTimer > 0 )
-			{
-				_ffb_clippedTimer -= deltaTime;
-			}
-
 			if ( _ffb_drawPrettyGraph )
 			{
 				if ( _ffb_writeableBitmap != null )
@@ -365,11 +427,58 @@ namespace MarvinsAIRA
 
 				foreach ( var joystick in _joystickList )
 				{
-					if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
+					if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.AutoOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid )
 					{
 						try
 						{
 							var joystickUpdateArray = joystick.GetBufferedData();
+
+							if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
+							{
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.SetForegroundWindow );
+
+								if ( buttonPresses > 0 )
+								{
+									IntPtr foregroundWindowHandle = GetForegroundWindow();
+
+									if ( foregroundWindowHandle != windowHandle )
+									{
+										SetForegroundWindow( windowHandle );
+									}
+									else
+									{
+										ReinitializeForceFeedbackDevice( windowHandle );
+									}
+								}
+							}
+
+							if ( joystick.Information.InstanceGuid == Settings.AutoOverallScale.DeviceInstanceGuid )
+							{
+								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.AutoOverallScale );
+
+								if ( buttonPresses > 0 )
+								{
+									var smoothedTorque = 0f;
+									var smoothedPeak = 0f;
+
+									for ( var i = 0; i < _ffb_steeringWheelTorque.Length; i++ )
+									{
+										smoothedTorque = smoothedTorque * 0.9f + Math.Abs( _ffb_steeringWheelTorque[ i ] ) * 0.1f;
+
+										if ( smoothedTorque > smoothedPeak )
+										{
+											smoothedPeak = smoothedTorque;
+										}
+									}
+
+									if ( smoothedPeak > 0 )
+									{
+										var ratio = Math.Min( 1, Settings.TargetForce / smoothedPeak );
+
+										Settings.OverallScale = (int) ( ratio * 100 );
+									}
+								}
+							}
 
 							if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid )
 							{
@@ -453,16 +562,6 @@ namespace MarvinsAIRA
 									playSound = true;
 								}
 							}
-
-							if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.SetForegroundWindow );
-
-								if ( buttonPresses > 0 )
-								{
-									SetForegroundWindow( windowHandle );
-								}
-							}
 						}
 						catch ( Exception )
 						{
@@ -507,11 +606,23 @@ namespace MarvinsAIRA
 				}
 			}
 
-			if ( _ffb_reacquireNeeded )
+			if ( _ffb_reinitializeNeeded )
 			{
-				_ffb_reacquireTimer -= deltaTime;
+				_ffb_reinitializeNeeded = false;
 
-				if ( _ffb_reacquireTimer <= 0 )
+				_ffb_reinitializeTimer = Math.Max( 0.25f, _ffb_reinitializeTimer );
+			}
+
+			if ( _ffb_forceFeedbackExceptionThrown )
+			{
+				_ffb_reinitializeTimer = Math.Max( 1.0f, _ffb_reinitializeTimer );
+			}
+
+			if ( _ffb_reinitializeTimer > 0 )
+			{
+				_ffb_reinitializeTimer -= deltaTime;
+
+				if ( _ffb_reinitializeTimer <= 0 )
 				{
 					ReinitializeForceFeedbackDevice( windowHandle );
 				}
@@ -526,6 +637,8 @@ namespace MarvinsAIRA
 				_carChanged = false;
 				_trackChanged = false;
 				_trackConfigChanged = false;
+
+				_pauseSerialization = true;
 
 				var forceFeedbackSettingsFound = false;
 
@@ -558,6 +671,8 @@ namespace MarvinsAIRA
 
 					Say( "This is the first time you have driven this combination, so we have reset the overall and detail scale." );
 				}
+
+				_pauseSerialization = false;
 			}
 		}
 
@@ -571,10 +686,6 @@ namespace MarvinsAIRA
 		public void SendTestForceFeedbackSignal( bool invert )
 		{
 			var magnitude = invert ? -1500 : 1500;
-
-			_ffb_skipNextUpdate = true;
-			_ffb_previousSteeringWheelTorque = 0;
-			_ffb_scaledSteeringWheelTorque = 0;
 
 			UpdateConstantForce( [ magnitude * 1, magnitude * 2, magnitude * 3, magnitude * 2, magnitude * 1, 0 ] );
 		}
@@ -594,74 +705,15 @@ namespace MarvinsAIRA
 
 		public void UpdateConstantForce( int[] forceMagnitudeList )
 		{
-			for ( int i = 0; i < forceMagnitudeList.Length; i++ )
+			for ( var i = 0; i < forceMagnitudeList.Length; i++ )
 			{
-				if ( forceMagnitudeList[ i ] > DI_FFNOMINALMAX )
-				{
-					forceMagnitudeList[ i ] = DI_FFNOMINALMAX;
-
-					_ffb_clippedTimer = 3;
-				}
-				else if ( forceMagnitudeList[ i ] < -DI_FFNOMINALMAX )
-				{
-					forceMagnitudeList[ i ] = -DI_FFNOMINALMAX;
-
-					_ffb_clippedTimer = 3;
-				}
-
-				if ( !_ffb_reacquireNeeded )
-				{
-					if ( ( _ffb_effectParameters != null ) && ( _ffb_constantForceEffect != null ) )
-					{
-						( (ConstantForce) _ffb_effectParameters.Parameters ).Magnitude = forceMagnitudeList[ i ];
-
-						try
-						{
-							_ffb_stopwatch.Restart();
-
-							var sendUpdate = false;
-
-							if ( Settings.Frequency360 )
-							{
-								sendUpdate = true;
-							}
-							else if ( Settings.Frequency180 )
-							{
-								sendUpdate = ( ( i & 1 ) == 0 );
-							}
-							else if ( Settings.Frequency120 )
-							{
-								sendUpdate = ( i == 0 ) || ( i == 3 );
-							}
-							else
-							{
-								sendUpdate = ( i == 0 );
-							}
-
-							if ( sendUpdate )
-							{
-								_ffb_constantForceEffect.SetParameters( _ffb_effectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
-							}
-
-							if ( i < ( forceMagnitudeList.Length - 1 ) )
-							{
-								while ( _ffb_stopwatch.Elapsed.TotalNanoseconds < FFB_NANOSECONDS_PER_UPDATE )
-								{
-									Thread.Sleep( 0 );
-								}
-							}
-						}
-						catch ( Exception exception )
-						{
-							_ffb_reacquireNeeded = true;
-
-							WriteLine( "" );
-							WriteLine( "An exception was thrown while trying to update the constant force effect parameters!" );
-							WriteLine( exception.Message.Trim() );
-						}
-					}
-				}
+				_ffb_magnitude[ i ] = forceMagnitudeList[ i ];
 			}
+
+			_ffb_updatesToSkip = 6;
+			_ffb_resetMagnitudeMilliseconds = 1;
+			_ffb_previousSteeringWheelTorque = 0;
+			_ffb_scaledSteeringWheelTorque = 0;
 		}
 
 		private void ProcessSteeringWheelTorque()
@@ -670,7 +722,14 @@ namespace MarvinsAIRA
 			{
 				// we want to reduce forces while the car is moving very slow or parked
 
-				var speedScale = ( _speed >= 5 ) ? 1 : Math.Max( 0.05f, _speed / 5 );
+				var speedScale = 1f;
+
+				if ( _speed < 5 )
+				{
+					var t = _speed / 5;
+
+					speedScale = ( Settings.ParkedScale / 100f ) * ( 1 - t ) + t;
+				}
 
 				// calculate the conversion scale from Newton-meters to DI_FFNOMINALMAX
 
@@ -700,6 +759,12 @@ namespace MarvinsAIRA
 
 					var currentSteeringWheelTorque = _steeringWheelTorque_ST[ x ];
 
+					// save the original steering wheel torque (for auto-overall-scale feature)
+
+					_ffb_steeringWheelTorque[ _ffb_steeringWheelTorqueIndex ] = currentSteeringWheelTorque;
+
+					_ffb_steeringWheelTorqueIndex = ( _ffb_steeringWheelTorqueIndex + 1 ) % _ffb_steeringWheelTorque.Length;
+
 					// calculate the impulse (change in steering wheel torque compared to the last sample)
 
 					var deltaSteeringWheelTorque = currentSteeringWheelTorque - _ffb_previousSteeringWheelTorque;
@@ -721,6 +786,10 @@ namespace MarvinsAIRA
 					// add in the low frequency effects
 
 					_ffb_magnitude[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
+
+					// reset the magnitude timer
+
+					_ffb_resetMagnitudeMilliseconds = 1;
 
 					// update the pretty graph
 
@@ -817,17 +886,140 @@ namespace MarvinsAIRA
 		{
 			if ( Settings.ForceFeedbackEnabled )
 			{
-				ProcessSteeringWheelTorque();
-
-				if ( _ffb_skipNextUpdate )
+				if ( Interlocked.Decrement( ref _ffb_updatesToSkip ) < 0 )
 				{
-					_ffb_skipNextUpdate = false;
-				}
-				else
-				{
-					UpdateConstantForce( _ffb_magnitude );
+					ProcessSteeringWheelTorque();
 				}
 			}
+		}
+
+		static private void MultimediaTimerEventCallback( uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2 )
+		{
+			var app = (App) Current;
+
+			// check stopwatch
+
+			var deltaMilliseconds = (float) app._ffb_stopwatch.Elapsed.TotalMilliseconds;
+			var deltaSeconds = deltaMilliseconds / 1000f;
+
+			app._ffb_stopwatch.Restart();
+
+			// update clipped timer
+
+			if ( app._ffb_clippedTimer > 0 )
+			{
+				app._ffb_clippedTimer = app._ffb_clippedTimer - deltaMilliseconds;
+			}
+
+			// reset the magnitude timer when its time
+
+			if ( Interlocked.Exchange( ref app._ffb_resetMagnitudeMilliseconds, 0 ) == 1 )
+			{
+				app._ffb_magnitudeMilliseconds = 0;
+			}
+
+			// figure out where we are at in the 6 sample magnitude array
+
+			var magnitudeIndex = app._ffb_magnitudeMilliseconds * 360 / 1000;
+
+			// get the current magnitude, cubic interpolated
+
+			var maxOffset = app._ffb_magnitude.Length - 1;
+
+			var i1 = Math.Min( maxOffset, (int) Math.Truncate( magnitudeIndex ) );
+			var i2 = Math.Min( maxOffset, i1 + 1 );
+			var i3 = Math.Min( maxOffset, i2 + 1 );
+			var i0 = Math.Max( 0, i1 - 1 );
+
+			var t = Math.Min( 1, magnitudeIndex - i1 );
+
+			var m0 = app._ffb_magnitude[ i0 ];
+			var m1 = app._ffb_magnitude[ i1 ];
+			var m2 = app._ffb_magnitude[ i2 ];
+			var m3 = app._ffb_magnitude[ i3 ];
+
+			var magnitude = (int) InterpolateHermite( m0, m1, m2, m3, t );
+
+			// light clip indicator if we are out of range
+
+			if ( magnitude > DI_FFNOMINALMAX )
+			{
+				magnitude = DI_FFNOMINALMAX;
+
+				app._ffb_clippedTimer = 3;
+			}
+			else if ( magnitude < -DI_FFNOMINALMAX )
+			{
+				magnitude = -DI_FFNOMINALMAX;
+
+				app._ffb_clippedTimer = 3;
+			}
+
+			// send the magnitude to the wheel
+
+			if ( !app._ffb_forceFeedbackExceptionThrown && ( app._ffb_effectParameters != null ) && ( app._ffb_constantForceEffect != null ) )
+			{
+				( (ConstantForce) app._ffb_effectParameters.Parameters ).Magnitude = magnitude;
+
+				try
+				{
+					app._ffb_constantForceEffect.SetParameters( app._ffb_effectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
+				}
+				catch ( Exception exception )
+				{
+					app._ffb_forceFeedbackExceptionThrown = true;
+
+					app.WriteLine( "" );
+					app.WriteLine( "An exception was thrown while trying to update the constant force effect parameters!" );
+					app.WriteLine( exception.Message.Trim() );
+				}
+			}
+
+			// advance timer
+
+			app._ffb_magnitudeMilliseconds += deltaMilliseconds;
+
+			// test
+
+			if ( false )
+			{
+				if ( testCounter < testData.Length )
+				{
+					testData[ testCounter++ ] = new TestData
+					{
+						deltaMilliseconds = deltaMilliseconds,
+						magnitudeIndex = magnitudeIndex,
+						m0 = m0,
+						m1 = m1,
+						m2 = m2,
+						m3 = m3,
+						magnitude = magnitude
+					};
+
+					if ( testCounter == testData.Length )
+					{
+						var targetMilliseconds = 18 - app.Settings.Frequency;
+
+						foreach ( var data in testData )
+						{
+							var skew = data.deltaMilliseconds - targetMilliseconds;
+
+							app.WriteLine( $"d={data.deltaMilliseconds:F3} ({skew:F3}); i={data.magnitudeIndex}; m0={data.m0:F0}; m1={data.m1:F0}; m2={data.m2:F0}; m3={data.m3:F0}; m={data.magnitude:F0}" );
+						}
+					}
+				}
+			}
+		}
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		static float InterpolateHermite( float v0, float v1, float v2, float v3, float t )
+		{
+			var a = 2.0f * v1;
+			var b = v2 - v0;
+			var c = 2.0f * v0 - 5.0f * v1 + 4.0f * v2 - v3;
+			var d = -v0 + 3.0f * v1 - 3.0f * v2 + v3;
+
+			return 0.5f * ( a + ( b * t ) + ( c * t * t ) + ( d * t * t * t ) );
 		}
 	}
 }
