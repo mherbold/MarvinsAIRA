@@ -72,8 +72,8 @@ namespace MarvinsAIRA
 		private int _ffb_steeringWheelTorqueIndex = 0;
 
 		private readonly int[] _ffb_magnitude = new int[ FFB_SAMPLES_PER_FRAME ];
-		private float _ffb_magnitudeMilliseconds = 0;
-		private int _ffb_resetMagnitudeMilliseconds = 0;
+		private float _ffb_magnitudeTimer = 0;
+		private int _ffb_resetMagnitudeTimer = 0;
 
 		private float _ffb_previousSteeringWheelTorque = 0;
 		private float _ffb_scaledSteeringWheelTorque = 0;
@@ -87,7 +87,7 @@ namespace MarvinsAIRA
 		private readonly WriteableBitmap _ffb_writeableBitmap = new( FFB_WRITEABLE_BITMAP_WIDTH, FFB_WRITEABLE_BITMAP_HEIGHT, FFB_WRITEABLE_BITMAP_DPI, FFB_WRITEABLE_BITMAP_DPI, PixelFormats.Bgra32, null );
 		private readonly byte[] _ffb_pixels = new byte[ FFB_PIXELS_BUFFER_STRIDE * FFB_PIXELS_BUFFER_HEIGHT ];
 
-		private Stopwatch _ffb_stopwatch = new Stopwatch();
+		private Stopwatch _ffb_stopwatch = new();
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
@@ -124,7 +124,9 @@ namespace MarvinsAIRA
 				UninitializeForceFeedback();
 			}
 
-			WriteLine( "...initializing DirectInput (FF driving device)..." );
+			_ffb_stopwatch.Restart();
+
+			WriteLine( "...initializing DirectInput (FF devices only)..." );
 
 			var directInput = new DirectInput();
 
@@ -711,7 +713,7 @@ namespace MarvinsAIRA
 			}
 
 			_ffb_updatesToSkip = 6;
-			_ffb_resetMagnitudeMilliseconds = 1;
+			_ffb_resetMagnitudeTimer = 1;
 			_ffb_previousSteeringWheelTorque = 0;
 			_ffb_scaledSteeringWheelTorque = 0;
 		}
@@ -789,7 +791,7 @@ namespace MarvinsAIRA
 
 					// reset the magnitude timer
 
-					_ffb_resetMagnitudeMilliseconds = 1;
+					_ffb_resetMagnitudeTimer = 1;
 
 					// update the pretty graph
 
@@ -900,27 +902,28 @@ namespace MarvinsAIRA
 			// check stopwatch
 
 			var deltaMilliseconds = (float) app._ffb_stopwatch.Elapsed.TotalMilliseconds;
-			var deltaSeconds = deltaMilliseconds / 1000f;
+
+			if ( deltaMilliseconds < 0.25f )
+			{
+				return;
+			}
 
 			app._ffb_stopwatch.Restart();
 
-			// update clipped timer
+			// update the magnitude timer
 
-			if ( app._ffb_clippedTimer > 0 )
-			{
-				app._ffb_clippedTimer = app._ffb_clippedTimer - deltaMilliseconds;
-			}
+			app._ffb_magnitudeTimer += deltaMilliseconds;
 
 			// reset the magnitude timer when its time
 
-			if ( Interlocked.Exchange( ref app._ffb_resetMagnitudeMilliseconds, 0 ) == 1 )
+			if ( Interlocked.Exchange( ref app._ffb_resetMagnitudeTimer, 0 ) == 1 )
 			{
-				app._ffb_magnitudeMilliseconds = 0;
+				app._ffb_magnitudeTimer = 0;
 			}
 
 			// figure out where we are at in the 6 sample magnitude array
 
-			var magnitudeIndex = app._ffb_magnitudeMilliseconds * 360 / 1000;
+			var magnitudeIndex = app._ffb_magnitudeTimer * 360 / 1000;
 
 			// get the current magnitude, cubic interpolated
 
@@ -939,6 +942,13 @@ namespace MarvinsAIRA
 			var m3 = app._ffb_magnitude[ i3 ];
 
 			var magnitude = (int) InterpolateHermite( m0, m1, m2, m3, t );
+
+			// update clipped timer
+
+			if ( app._ffb_clippedTimer > 0 )
+			{
+				app._ffb_clippedTimer -= deltaMilliseconds / 1000f;
+			}
 
 			// light clip indicator if we are out of range
 
@@ -974,10 +984,6 @@ namespace MarvinsAIRA
 					app.WriteLine( exception.Message.Trim() );
 				}
 			}
-
-			// advance timer
-
-			app._ffb_magnitudeMilliseconds += deltaMilliseconds;
 
 			// test
 

@@ -24,9 +24,7 @@ namespace MarvinsAIRA
 		{
 			WriteLine( "" );
 			WriteLine( "InitializeInputs called." );
-			WriteLine( "Initializing DirectInput (all devices)" );
-
-			WriteLine( "...finding all input controller devices..." );
+			WriteLine( "...initializing DirectInput (all devices)..." );
 
 			var directInput = new DirectInput();
 
@@ -53,6 +51,8 @@ namespace MarvinsAIRA
 
 					if ( deviceType == DeviceType.Keyboard )
 					{
+						WriteLine( $"...creating keyboard type interface..." );
+
 						var keyboard = new Keyboard( directInput );
 
 						keyboard.Properties.BufferSize = 128;
@@ -70,6 +70,8 @@ namespace MarvinsAIRA
 
 						_keyboardList.Add( keyboard );
 					}
+
+					WriteLine( $"...creating joystick type interface..." );
 
 					var joystick = new Joystick( directInput, joystickDeviceInstance.InstanceGuid );
 

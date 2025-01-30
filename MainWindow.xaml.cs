@@ -280,12 +280,15 @@ namespace MarvinsAIRA
 
 		private void FrequencySlider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
-			var app = (App) Application.Current;
+			if ( _initialized )
+			{
+				var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "FrequencySlider_ValueChanged called." );
+				app.WriteLine( "" );
+				app.WriteLine( "FrequencySlider_ValueChanged called." );
 
-			app.ScheduleReinitializeForceFeedback();
+				app.ScheduleReinitializeForceFeedback();
+			}
 		}
 
 		private void LFEDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )

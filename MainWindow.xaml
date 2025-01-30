@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.17"
+        Title="Marvin's Awesome iRacing App v0.18"
         Height="Auto"
         Width="790"
         Closing="Window_Closing"
