@@ -6,17 +6,17 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
-		private readonly SpeechSynthesizer _speechSynthesizer = new();
+		private readonly SpeechSynthesizer _voice_speechSynthesizer = new();
 
 		private void InitializeVoice()
 		{
 			WriteLine( "" );
 			WriteLine( "InitializeVoice called." );
 
-			_speechSynthesizer.SetOutputToDefaultAudioDevice();
-			_speechSynthesizer.SelectVoiceByHints( VoiceGender.Female, VoiceAge.Adult );
+			_voice_speechSynthesizer.SetOutputToDefaultAudioDevice();
+			_voice_speechSynthesizer.SelectVoiceByHints( VoiceGender.Female, VoiceAge.Adult );
 
-			_speechSynthesizer.Rate = 1;
+			_voice_speechSynthesizer.Rate = 1;
 
 			UpdateVolume();
 		}
@@ -27,18 +27,18 @@ namespace MarvinsAIRA
 			{
 				if ( interrupt )
 				{
-					_speechSynthesizer.Pause();
-					_speechSynthesizer.SpeakAsyncCancelAll();
-					_speechSynthesizer.Resume();
+					_voice_speechSynthesizer.Pause();
+					_voice_speechSynthesizer.SpeakAsyncCancelAll();
+					_voice_speechSynthesizer.Resume();
 				}
 
-				_speechSynthesizer.SpeakAsync( text );
+				_voice_speechSynthesizer.SpeakAsync( text );
 			}
 		}
 
 		public void UpdateVolume()
 		{
-			_speechSynthesizer.Volume = Settings.SpeechSynthesizerVolume;
+			_voice_speechSynthesizer.Volume = Settings.SpeechSynthesizerVolume;
 		}
 	}
 }

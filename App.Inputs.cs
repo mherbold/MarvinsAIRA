@@ -6,12 +6,12 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
-		private readonly List<Joystick> _joystickList = [];
-		private readonly List<Keyboard> _keyboardList = [];
+		private readonly List<Joystick> _input_joystickList = [];
+		private readonly List<Keyboard> _input_keyboardList = [];
 
-		private bool _shiftIsDown = false;
-		private bool _ctrlIsDown = false;
-		private bool _altIsDown = false;
+		private bool _input_shiftIsDown = false;
+		private bool _input_ctrlIsDown = false;
+		private bool _input_altIsDown = false;
 
 		public class PressedButton
 		{
@@ -68,7 +68,7 @@ namespace MarvinsAIRA
 
 						WriteLine( $"...device was acquired..." );
 
-						_keyboardList.Add( keyboard );
+						_input_keyboardList.Add( keyboard );
 					}
 
 					WriteLine( $"...creating joystick type interface..." );
@@ -88,39 +88,39 @@ namespace MarvinsAIRA
 
 					WriteLine( $"...device was acquired..." );
 
-					_joystickList.Add( joystick );
+					_input_joystickList.Add( joystick );
 				}
 			}
 
 			Settings.UpdateFFBDeviceList( ffbDeviceList );
 
-			WriteLine( $"...a total of {_joystickList.Count} controller devices were found (and {_keyboardList.Count} keyboards)." );
+			WriteLine( $"...a total of {_input_joystickList.Count} controller devices were found (and {_input_keyboardList.Count} keyboards)." );
 		}
 
 		public void UpdateInputs()
 		{
-			foreach ( var joystick in _joystickList )
+			foreach ( var joystick in _input_joystickList )
 			{
 				joystick.Poll();
 			}
 
-			_shiftIsDown = false;
-			_ctrlIsDown = false;
-			_altIsDown = false;
+			_input_shiftIsDown = false;
+			_input_ctrlIsDown = false;
+			_input_altIsDown = false;
 
-			foreach ( var keyboard in _keyboardList )
+			foreach ( var keyboard in _input_keyboardList )
 			{
 				var keyboardState = keyboard.GetCurrentState();
 
-				_shiftIsDown |= keyboardState.PressedKeys.Contains( Key.LeftShift ) || keyboardState.PressedKeys.Contains( Key.RightShift );
-				_ctrlIsDown |= keyboardState.PressedKeys.Contains( Key.LeftControl ) || keyboardState.PressedKeys.Contains( Key.RightControl );
-				_altIsDown |= keyboardState.PressedKeys.Contains( Key.LeftAlt ) || keyboardState.PressedKeys.Contains( Key.RightAlt );
+				_input_shiftIsDown |= keyboardState.PressedKeys.Contains( Key.LeftShift ) || keyboardState.PressedKeys.Contains( Key.RightShift );
+				_input_ctrlIsDown |= keyboardState.PressedKeys.Contains( Key.LeftControl ) || keyboardState.PressedKeys.Contains( Key.RightControl );
+				_input_altIsDown |= keyboardState.PressedKeys.Contains( Key.LeftAlt ) || keyboardState.PressedKeys.Contains( Key.RightAlt );
 			}
 		}
 
 		public PressedButton? GetAnyPressedButton()
 		{
-			foreach ( var joystick in _joystickList )
+			foreach ( var joystick in _input_joystickList )
 			{
 				try
 				{
@@ -161,7 +161,7 @@ namespace MarvinsAIRA
 			{
 				if ( joystickUpdate.Offset == JoystickOffset.Buttons0 + mappedButton.ButtonNumber )
 				{
-					if ( ( joystickUpdate.Value != 0 ) && ( !mappedButton.UseShift || _shiftIsDown ) && ( !mappedButton.UseCtrl || _ctrlIsDown ) && ( !mappedButton.UseAlt || _altIsDown ) )
+					if ( ( joystickUpdate.Value != 0 ) && ( !mappedButton.UseShift || _input_shiftIsDown ) && ( !mappedButton.UseCtrl || _input_ctrlIsDown ) && ( !mappedButton.UseAlt || _input_altIsDown ) )
 					{
 						buttonPressCount++;
 					}

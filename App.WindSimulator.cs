@@ -76,15 +76,15 @@ namespace MarvinsAIRA
 					}
 					else if ( _irsdk.IsConnected )
 					{
-						if ( _isOnTrack )
+						if ( _irsdk_isOnTrack )
 						{
-							var velocityX = _velocityX;
-							var velocityY = _velocityY;
+							var velocityX = _irsdk_velocityX;
+							var velocityY = _irsdk_velocityY;
 
 							var leftWindForceScale = 1f - 0.85f * Math.Max( 0, Math.Min( 1, velocityY * 5f ) );
 							var rightWindForceScale = 1f - 0.85f * Math.Max( 0, Math.Min( 1, -velocityY * 5f ) );
 
-							if ( _displayUnits == 0 )
+							if ( _irsdk_displayUnits == 0 )
 							{
 								velocityX *= WIND_MPS_TO_MPH;
 							}

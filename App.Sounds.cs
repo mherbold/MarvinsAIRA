@@ -39,7 +39,7 @@ namespace MarvinsAIRA
 			}
 			catch ( Exception exception )
 			{
-				WriteLine( $"Failed to create wave out event: {exception.Message}" );
+				WriteLine( $"Failed to create wave out event: {exception.Message.Trim()}" );
 			}
 		}
 

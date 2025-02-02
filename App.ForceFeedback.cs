@@ -40,14 +40,14 @@ namespace MarvinsAIRA
 		private const int FFB_NANOSECONDS_PER_SECOND = 1000000000;
 		private const double FFB_NANOSECONDS_PER_UPDATE = (double) FFB_NANOSECONDS_PER_SECOND / FFB_UPDATE_FREQUENCY;
 
-		private const int FFB_WRITEABLE_BITMAP_WIDTH = 768;
-		private const int FFB_WRITEABLE_BITMAP_HEIGHT = 200;
-		private const int FFB_WRITEABLE_BITMAP_DPI = 96;
+		public const int FFB_WRITEABLE_BITMAP_WIDTH = 768;
+		public const int FFB_WRITEABLE_BITMAP_HEIGHT = 200;
+		public const int FFB_WRITEABLE_BITMAP_DPI = 96;
 
-		private const int FFB_PIXELS_BUFFER_WIDTH = FFB_WRITEABLE_BITMAP_WIDTH + 1;
-		private const int FFB_PIXELS_BUFFER_HEIGHT = 200;
-		private const int FFB_PIXELS_BUFFER_BYTES_PER_PIXEL = 4;
-		private const int FFB_PIXELS_BUFFER_STRIDE = FFB_PIXELS_BUFFER_WIDTH * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
+		public const int FFB_PIXELS_BUFFER_WIDTH = FFB_WRITEABLE_BITMAP_WIDTH + 1;
+		public const int FFB_PIXELS_BUFFER_HEIGHT = 200;
+		public const int FFB_PIXELS_BUFFER_BYTES_PER_PIXEL = 4;
+		public const int FFB_PIXELS_BUFFER_STRIDE = FFB_PIXELS_BUFFER_WIDTH * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
 
 		private const string ALL_WHEELS_SAVE_NAME = "All";
 
@@ -67,52 +67,49 @@ namespace MarvinsAIRA
 		private string _ffb_wheelSaveName = ALL_WHEELS_SAVE_NAME;
 
 		private float _ffb_clippedTimer = 0;
-
-		private readonly float[] _ffb_steeringWheelTorque = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 10 ];
-		private int _ffb_steeringWheelTorqueIndex = 0;
-
-		private readonly int[] _ffb_magnitude = new int[ FFB_SAMPLES_PER_FRAME ];
-		private float _ffb_magnitudeTimer = 0;
-		private int _ffb_resetMagnitudeTimer = 0;
-
-		private float _ffb_previousSteeringWheelTorque = 0;
-		private float _ffb_scaledSteeringWheelTorque = 0;
-
 		private float _ffb_announceOverallScaleTimer = 0;
 		private float _ffb_announceDetailScaleTimer = 0;
 		private float _ffb_announceLFEScaleTimer = 0;
 
-		private bool _ffb_drawPrettyGraph = false;
-		private int _ffb_prettyGraphCurrentX = 0;
-		private readonly WriteableBitmap _ffb_writeableBitmap = new( FFB_WRITEABLE_BITMAP_WIDTH, FFB_WRITEABLE_BITMAP_HEIGHT, FFB_WRITEABLE_BITMAP_DPI, FFB_WRITEABLE_BITMAP_DPI, PixelFormats.Bgra32, null );
-		private readonly byte[] _ffb_pixels = new byte[ FFB_PIXELS_BUFFER_STRIDE * FFB_PIXELS_BUFFER_HEIGHT ];
+		private readonly float[] _ffb_autoScaleSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 10 ];
+		private int _ffb_autoScaleSteeringWheelTorqueBufferIndex = 0;
 
-		private Stopwatch _ffb_stopwatch = new();
+		public readonly float[] _ffb_recordedSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 10 * 60 ];
+		public int _ffb_recordedSteeringWheelTorqueBufferIndex = 0;
+		public bool _ffb_recordNow = false;
+		public bool _ffb_playbackNow = false;
+
+		private readonly int[] _ffb_outputWheelMagnitudeBuffer = new int[ FFB_SAMPLES_PER_FRAME ];
+		private float _ffb_outputWheelMagnitudeBufferTimer = 0;
+		private int _ffb_resetOutputWheelMagnitudeBufferTimerNow = 0;
+
+		private float _ffb_previousSteeringWheelTorque = 0;
+		private float _ffb_runningSteeringWheelTorque = 0;
+		private float _ffb_steadyStateWheelTorque = 0;
+
+		public bool _ffb_drawPrettyGraph = false;
+		public int _ffb_prettyGraphCurrentX = 0;
+		public readonly WriteableBitmap _ffb_writeableBitmap = new( FFB_WRITEABLE_BITMAP_WIDTH, FFB_WRITEABLE_BITMAP_HEIGHT, FFB_WRITEABLE_BITMAP_DPI, FFB_WRITEABLE_BITMAP_DPI, PixelFormats.Bgra32, null );
+		public readonly byte[] _ffb_pixels = new byte[ FFB_PIXELS_BUFFER_STRIDE * FFB_PIXELS_BUFFER_HEIGHT ];
+
+		private readonly Stopwatch _ffb_stopwatch = new();
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
-		public int FFB_CurrentMagnitude { get => _ffb_magnitude[ 0 ]; }
+		public int FFB_CurrentMagnitude { get => _ffb_outputWheelMagnitudeBuffer[ 0 ]; }
 
-		class TestData
-		{
-			public float deltaMilliseconds;
-			public float magnitudeIndex;
-			public int m0;
-			public int m1;
-			public int m2;
-			public int m3;
-			public int magnitude;
-		}
-
-		static int testCounter = 0;
-		static TestData[] testData = new TestData[ 1000 ];
+		public float US_1;
+		public float US_2;
+		public float US_3;
+		public float US_4;
+		public float US_5;
 
 		public void InitializeForceFeedback( nint windowHandle )
 		{
 			WriteLine( "" );
 			WriteLine( "InitializeForceFeedback called." );
 
-			var mainWindow = (MainWindow) MainWindow;
+			var mainWindow = MarvinsAIRA.MainWindow.Instance;
 
 			if ( mainWindow != null )
 			{
@@ -412,22 +409,11 @@ namespace MarvinsAIRA
 
 		public void UpdateForceFeedback( float deltaTime, bool checkButtons, nint windowHandle )
 		{
-			if ( _ffb_drawPrettyGraph )
-			{
-				if ( _ffb_writeableBitmap != null )
-				{
-					Dispatcher.BeginInvoke( () =>
-					{
-						_ffb_writeableBitmap.WritePixels( new Int32Rect( 0, 0, FFB_WRITEABLE_BITMAP_WIDTH, FFB_WRITEABLE_BITMAP_HEIGHT ), _ffb_pixels, FFB_PIXELS_BUFFER_STRIDE, 0, 0 );
-					} );
-				}
-			}
-
 			if ( checkButtons )
 			{
 				var playSound = false;
 
-				foreach ( var joystick in _joystickList )
+				foreach ( var joystick in _input_joystickList )
 				{
 					if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.AutoOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid )
 					{
@@ -463,9 +449,9 @@ namespace MarvinsAIRA
 									var smoothedTorque = 0f;
 									var smoothedPeak = 0f;
 
-									for ( var i = 0; i < _ffb_steeringWheelTorque.Length; i++ )
+									for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
 									{
-										smoothedTorque = smoothedTorque * 0.9f + Math.Abs( _ffb_steeringWheelTorque[ i ] ) * 0.1f;
+										smoothedTorque = smoothedTorque * 0.9f + Math.Abs( _ffb_autoScaleSteeringWheelTorqueBuffer[ i ] ) * 0.1f;
 
 										if ( smoothedTorque > smoothedPeak )
 										{
@@ -630,26 +616,31 @@ namespace MarvinsAIRA
 				}
 			}
 
-			if ( _ffb_wheelChanged || _carChanged || _trackChanged || _trackConfigChanged )
+			if ( _ffb_wheelChanged || _car_carChanged || _track_trackChanged || _track_trackConfigChanged )
 			{
 				WriteLine( "" );
-				WriteLine( $"Loading configuration [{_ffb_wheelSaveName}, {_carSaveName}, {_trackSaveName}, {_trackConfigSaveName}]" );
+				WriteLine( $"Loading configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}]" );
 
 				_ffb_wheelChanged = false;
-				_carChanged = false;
-				_trackChanged = false;
-				_trackConfigChanged = false;
+				_car_carChanged = false;
+				_track_trackChanged = false;
+				_track_trackConfigChanged = false;
 
-				_pauseSerialization = true;
+				_settings_pauseSerialization = true;
 
 				var forceFeedbackSettingsFound = false;
 
 				foreach ( var forceFeedbackSettings in Settings.ForceFeedbackSettingsList )
 				{
-					if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _carSaveName ) && ( forceFeedbackSettings.TrackName == _trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _trackConfigSaveName ) )
+					if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _car_carSaveName ) && ( forceFeedbackSettings.TrackName == _track_trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _track_trackConfigSaveName ) )
 					{
 						Settings.OverallScale = forceFeedbackSettings.OverallScale;
 						Settings.DetailScale = forceFeedbackSettings.DetailScale;
+
+						Settings.USEffectStrength = forceFeedbackSettings.USEffectStrength;
+						Settings.USYawRateFactor = forceFeedbackSettings.USYawRateFactor;
+						Settings.USLateralForceFactor = forceFeedbackSettings.USLateralForceFactor;
+						Settings.USSteeringWheelOffset = forceFeedbackSettings.USSteeringWheelOffset;
 
 						forceFeedbackSettingsFound = true;
 
@@ -671,10 +662,15 @@ namespace MarvinsAIRA
 					Settings.OverallScale = 10;
 					Settings.DetailScale = 100;
 
+					Settings.USEffectStrength = 0;
+					Settings.USYawRateFactor = 0;
+					Settings.USLateralForceFactor = 0;
+					Settings.USSteeringWheelOffset = 0;
+
 					Say( "This is the first time you have driven this combination, so we have reset the overall and detail scale." );
 				}
 
-				_pauseSerialization = false;
+				_settings_pauseSerialization = false;
 			}
 		}
 
@@ -709,129 +705,220 @@ namespace MarvinsAIRA
 		{
 			for ( var i = 0; i < forceMagnitudeList.Length; i++ )
 			{
-				_ffb_magnitude[ i ] = forceMagnitudeList[ i ];
+				_ffb_outputWheelMagnitudeBuffer[ i ] = forceMagnitudeList[ i ];
 			}
 
 			_ffb_updatesToSkip = 6;
-			_ffb_resetMagnitudeTimer = 1;
+			_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
 			_ffb_previousSteeringWheelTorque = 0;
-			_ffb_scaledSteeringWheelTorque = 0;
+			_ffb_runningSteeringWheelTorque = 0;
+			_ffb_steadyStateWheelTorque = 0;
 		}
 
 		private void ProcessSteeringWheelTorque()
 		{
-			if ( _isOnTrack )
+			float[] steeringWheelTorque_ST = [
+				_irsdk_steeringWheelTorque_ST[ 0 ],
+				_irsdk_steeringWheelTorque_ST[ 1 ],
+				_irsdk_steeringWheelTorque_ST[ 2 ],
+				_irsdk_steeringWheelTorque_ST[ 3 ],
+				_irsdk_steeringWheelTorque_ST[ 4 ],
+				_irsdk_steeringWheelTorque_ST[ 5 ]
+			];
+
+			if ( _ffb_playbackNow )
 			{
-				// we want to reduce forces while the car is moving very slow or parked
-
-				var speedScale = 1f;
-
-				if ( _speed < 5 )
+				for ( var x = 0; x < steeringWheelTorque_ST.Length; x++ )
 				{
-					var t = _speed / 5;
+					steeringWheelTorque_ST[ x ] = _ffb_recordedSteeringWheelTorqueBuffer[ _ffb_recordedSteeringWheelTorqueBufferIndex ];
 
-					speedScale = ( Settings.ParkedScale / 100f ) * ( 1 - t ) + t;
+					_ffb_recordedSteeringWheelTorqueBufferIndex = ( _ffb_recordedSteeringWheelTorqueBufferIndex + 1 ) % _ffb_recordedSteeringWheelTorqueBuffer.Length;
+				}
+			}
+			else if ( !_irsdk_isOnTrack )
+			{
+				steeringWheelTorque_ST[ 0 ] = 0;
+				steeringWheelTorque_ST[ 1 ] = 0;
+				steeringWheelTorque_ST[ 2 ] = 0;
+				steeringWheelTorque_ST[ 3 ] = 0;
+				steeringWheelTorque_ST[ 4 ] = 0;
+				steeringWheelTorque_ST[ 5 ] = 0;
+
+				_ffb_previousSteeringWheelTorque = 0;
+				_ffb_runningSteeringWheelTorque = 0;
+				_ffb_steadyStateWheelTorque = 0;
+			}
+
+			// calculate understeer effect
+
+			float understeerAmount = 0;
+
+			if ( _irsdk_speed > 1 )
+			{
+				US_1 = _irsdk_yawRate * Settings.USYawRateFactor / 10;
+				US_2 = _irsdk_latAccel * Settings.USLateralForceFactor / 100;
+
+				var maxSteeringWheelAngle = Math.Abs( US_1 + US_2 );
+
+				US_3 = Math.Abs( _irsdk_steeringWheelAngle ) - maxSteeringWheelAngle;
+				US_4 = _irsdk_steeringWheelAngle;
+
+				understeerAmount = US_3 - Settings.USSteeringWheelOffset;
+			}
+
+			var understeerEffectMagnitude = Math.Max( 0, understeerAmount * Settings.USEffectStrength * 10 );
+
+			US_5 = understeerEffectMagnitude;
+
+			// we want to reduce forces while the car is moving very slow or parked
+
+			var speedScale = 1f;
+
+			if ( !_ffb_playbackNow && ( _irsdk_speed < 5 ) )
+			{
+				var t = _irsdk_speed / 5;
+
+				speedScale = ( Settings.ParkedScale / 100f ) * ( 1 - t ) + t;
+			}
+
+			// calculate the conversion scale from Newton-meters to (-DI_FFNOMINALMAX, DI_FFNOMINALMAX)
+
+			var newtonMetersToDirectInputUnits = DI_FFNOMINALMAX / Settings.WheelMaxForce;
+
+			// normalize the scale settings ("100" slider value = 1.0)
+
+			var normalizedOverallScaleSetting = Settings.OverallScale / 100f;
+			var normalizedDetailScaleSetting = Settings.DetailScale / 100f;
+			var normalizedLFEScaleSetting = Settings.LFEScale / 100f;
+
+			// map scales into DI units (detail scale will be the same as the overall scale if detail scale slider is set to 100%)
+
+			var overallScaleToDirectInputUnits = normalizedOverallScaleSetting * newtonMetersToDirectInputUnits;
+			var detailScaleToDirectInputUnits = overallScaleToDirectInputUnits + overallScaleToDirectInputUnits * ( normalizedDetailScaleSetting - 1 );
+			var lfeScale = normalizedLFEScaleSetting * DI_FFNOMINALMAX;
+
+			// make a copy of the lfe read index so it doesn't change in the middle of this update (its updated in another thread)
+
+			var lfeMagnitudeIndex = _lfe_magnitudeIndex;
+
+			// go through each sample
+
+			for ( var x = 0; x < steeringWheelTorque_ST.Length; x++ )
+			{
+				// get the next steering wheel torque sample (it is in Newton-meters)
+
+				var currentSteeringWheelTorque = steeringWheelTorque_ST[ x ];
+
+				// save the original steering wheel torque (for auto-overall-scale feature)
+
+				_ffb_autoScaleSteeringWheelTorqueBuffer[ _ffb_autoScaleSteeringWheelTorqueBufferIndex ] = currentSteeringWheelTorque;
+
+				_ffb_autoScaleSteeringWheelTorqueBufferIndex = ( _ffb_autoScaleSteeringWheelTorqueBufferIndex + 1 ) % _ffb_autoScaleSteeringWheelTorqueBuffer.Length;
+
+				// save the original steering wheel torque (for playback feature)
+
+				if ( _ffb_recordNow )
+				{
+					_ffb_recordedSteeringWheelTorqueBuffer[ _ffb_recordedSteeringWheelTorqueBufferIndex ] = currentSteeringWheelTorque;
+
+					_ffb_recordedSteeringWheelTorqueBufferIndex = ( _ffb_recordedSteeringWheelTorqueBufferIndex + 1 ) % _ffb_recordedSteeringWheelTorqueBuffer.Length;
 				}
 
-				// calculate the conversion scale from Newton-meters to DI_FFNOMINALMAX
+				// calculate the impulse (change in steering wheel torque compared to the last sample)
 
-				var ffbConversionScale = DI_FFNOMINALMAX / Settings.WheelMaxForce;
+				var deltaSteeringWheelTorque = currentSteeringWheelTorque - _ffb_previousSteeringWheelTorque;
 
-				// apply conversion scale to the overall scale
+				_ffb_previousSteeringWheelTorque = currentSteeringWheelTorque;
 
-				var overallScale = ffbConversionScale * Settings.OverallScale / 100f;
+				// delta limiter
 
-				// calculate the detail scale
+				var limitedDeltaSteeringWheelTorque = Math.Max( -0.09f, Math.Min( 0.09f, deltaSteeringWheelTorque ) );
 
-				var detailScale = overallScale + overallScale * ( ( Settings.DetailScale - 100f ) / 100f );
+				_ffb_steadyStateWheelTorque += limitedDeltaSteeringWheelTorque * overallScaleToDirectInputUnits;
 
-				// calculate the lfe scale
+				_ffb_steadyStateWheelTorque = ( _ffb_steadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * 0.1f );
 
-				var lfeScale = Settings.LFEScale / 100f * DI_FFNOMINALMAX;
+				// algorithm is different for detail scale >= 100 and < 100
 
-				// grab the lfe read index
-
-				var lfeMagnitudeIndex = _lfe_magnitudeIndex;
-
-				// go through each sample
-
-				for ( var x = 0; x < _steeringWheelTorque_ST.Length; x++ )
+				if ( normalizedDetailScaleSetting >= 1 )
 				{
-					// get the next steering wheel torque sample (it is in Newton-meters)
+					// scale the impulse by our detail scale and add it to our running steering wheel torque
 
-					var currentSteeringWheelTorque = _steeringWheelTorque_ST[ x ];
-
-					// save the original steering wheel torque (for auto-overall-scale feature)
-
-					_ffb_steeringWheelTorque[ _ffb_steeringWheelTorqueIndex ] = currentSteeringWheelTorque;
-
-					_ffb_steeringWheelTorqueIndex = ( _ffb_steeringWheelTorqueIndex + 1 ) % _ffb_steeringWheelTorque.Length;
-
-					// calculate the impulse (change in steering wheel torque compared to the last sample)
-
-					var deltaSteeringWheelTorque = currentSteeringWheelTorque - _ffb_previousSteeringWheelTorque;
-
-					_ffb_previousSteeringWheelTorque = currentSteeringWheelTorque;
-
-					// scale the impulse by our detail scale and add it to our running scaled steering wheel torque
-
-					_ffb_scaledSteeringWheelTorque += deltaSteeringWheelTorque * detailScale;
+					_ffb_runningSteeringWheelTorque += deltaSteeringWheelTorque * detailScaleToDirectInputUnits;
 
 					// ramp our running scaled magnitude towards the original signal (feed in steady state signal)
 
-					_ffb_scaledSteeringWheelTorque = ( _ffb_scaledSteeringWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScale * 0.1f );
+					_ffb_runningSteeringWheelTorque = ( _ffb_runningSteeringWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * 0.1f );
+				}
+				else
+				{
+					_ffb_runningSteeringWheelTorque = ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * normalizedDetailScaleSetting ) + ( _ffb_steadyStateWheelTorque * ( 1 - normalizedDetailScaleSetting ) );
+				}
 
-					// apply the speed scale and update the array that the force feedback thread uses
+				// apply the speed scale and update the array that the force feedback thread uses
 
-					_ffb_magnitude[ x ] = (int) ( _ffb_scaledSteeringWheelTorque * speedScale );
+				_ffb_outputWheelMagnitudeBuffer[ x ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale );
 
-					// add in the low frequency effects
+				// mix in the low frequency effects
 
-					_ffb_magnitude[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
+				_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
 
-					// reset the magnitude timer
+				// mix in the understeer effects
 
-					_ffb_resetMagnitudeTimer = 1;
+				_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( understeerEffectMagnitude * ( ( ( x & 1 ) == 0 ) ? 1 : -1 ) );
 
-					// update the pretty graph
+				// reset the magnitude index now
 
-					if ( _ffb_drawPrettyGraph )
+				_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
+
+				// update the pretty graph
+
+				if ( _ffb_drawPrettyGraph )
+				{
+					var forceFeedbackMaxToPixelBufferHeightScale = DI_FFNOMINALMAX * 2 / FFB_PIXELS_BUFFER_HEIGHT;
+					var halfPixelBufferHeight = FFB_PIXELS_BUFFER_HEIGHT / 2;
+
+					var iY2 = (int) ( currentSteeringWheelTorque * overallScaleToDirectInputUnits / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferHeight ) + 1;
+					var iY1 = iY2 - 2;
+
+					var oY2 = (int) ( (float) _ffb_outputWheelMagnitudeBuffer[ x ] / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferHeight ) + 1;
+					var oY1 = oY2 - 2;
+
+					var sY2 = (int) ( _ffb_steadyStateWheelTorque / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferHeight ) + 1;
+					var sY1 = sY2 - 2;
+
+					for ( var y = 0; y < FFB_PIXELS_BUFFER_HEIGHT; y++ )
 					{
-						var forceFeedbackMaxToPixelBufferHeightScale = DI_FFNOMINALMAX * 2 / FFB_PIXELS_BUFFER_HEIGHT;
-						var halfPixelBufferOffset = FFB_PIXELS_BUFFER_HEIGHT / 2;
+						var offset = y * FFB_PIXELS_BUFFER_STRIDE + _ffb_prettyGraphCurrentX * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
 
-						var oY2 = (int) ( currentSteeringWheelTorque * overallScale / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
-						var oY1 = oY2 - 2;
+						_ffb_pixels[ offset + 0 ] = 0;
+						_ffb_pixels[ offset + 1 ] = 0;
+						_ffb_pixels[ offset + 2 ] = 0;
+						_ffb_pixels[ offset + 3 ] = 255;
 
-						var sY2 = (int) ( _ffb_magnitude[ x ] / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferOffset ) + 1;
-						var sY1 = sY2 - 2;
+						var onInput = ( y >= iY1 ) && ( y <= iY2 );
+						var onOutput = ( y >= oY1 ) && ( y <= oY2 );
+						var onSteady = ( y >= sY1 ) && ( y <= sY2 );
 
-						for ( var y = 0; y < 200; y++ )
+						if ( onInput )
 						{
-							var offset = y * FFB_PIXELS_BUFFER_STRIDE + _ffb_prettyGraphCurrentX * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
+							_ffb_pixels[ offset + 2 ] = 255;
+						}
 
-							var onOriginal = ( y >= oY1 ) && ( y <= oY2 );
-							var onScaled = ( y >= sY1 ) && ( y <= sY2 );
+						if ( onSteady )
+						{
+							_ffb_pixels[ offset + 1 ] = 255;
+						}
 
-							if ( onOriginal && onScaled )
-							{
-								_ffb_pixels[ offset + 0 ] = 255;
-								_ffb_pixels[ offset + 1 ] = 128;
-								_ffb_pixels[ offset + 2 ] = 255;
-							}
-							else if ( onOriginal )
-							{
-								_ffb_pixels[ offset + 0 ] = 0;
-								_ffb_pixels[ offset + 1 ] = 0;
-								_ffb_pixels[ offset + 2 ] = 255;
-							}
-							else if ( onScaled )
-							{
-								_ffb_pixels[ offset + 0 ] = 255;
-								_ffb_pixels[ offset + 1 ] = 128;
-								_ffb_pixels[ offset + 2 ] = 0;
-							}
-							else if ( y == 25 || y == 50 || y == 75 || y == 125 || y == 150 || y == 175 )
+						if ( onOutput )
+						{
+							_ffb_pixels[ offset + 1 ] = Math.Max( _ffb_pixels[ offset + 1 ], (byte) 128 );
+							_ffb_pixels[ offset + 0 ] = 255;
+						}
+
+						if ( !onInput && !onOutput && !onSteady )
+						{
+							if ( y == 25 || y == 50 || y == 75 || y == 125 || y == 150 || y == 175 )
 							{
 								_ffb_pixels[ offset + 0 ] = 64;
 								_ffb_pixels[ offset + 1 ] = 64;
@@ -849,38 +936,33 @@ namespace MarvinsAIRA
 								_ffb_pixels[ offset + 1 ] = 32;
 								_ffb_pixels[ offset + 2 ] = 32;
 							}
-
-							_ffb_pixels[ offset + 3 ] = 255;
 						}
-
-						_ffb_prettyGraphCurrentX = ( _ffb_prettyGraphCurrentX + 1 ) % FFB_PIXELS_BUFFER_WIDTH;
 					}
+
+					_ffb_prettyGraphCurrentX = ( _ffb_prettyGraphCurrentX + 1 ) % FFB_PIXELS_BUFFER_WIDTH;
 				}
 
-				// update the pretty graph
+				// disable wheel output if we are playing back a recording
 
-				if ( _ffb_drawPrettyGraph )
+				if ( _ffb_playbackNow )
 				{
-					for ( var y = 0; y < 200; y++ )
-					{
-						var offset = y * FFB_PIXELS_BUFFER_STRIDE + _ffb_prettyGraphCurrentX * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
-
-						_ffb_pixels[ offset + 0 ] = 0;
-						_ffb_pixels[ offset + 1 ] = 128;
-						_ffb_pixels[ offset + 2 ] = 0;
-						_ffb_pixels[ offset + 3 ] = 255;
-					}
+					// _ffb_outputWheelMagnitudeBuffer[ x ] = 0;
 				}
 			}
-			else
-			{
-				for ( var i = 0; i < _ffb_magnitude.Length; i++ )
-				{
-					_ffb_magnitude[ i ] = 0;
-				}
 
-				_ffb_previousSteeringWheelTorque = 0;
-				_ffb_scaledSteeringWheelTorque = 0;
+			// update the pretty graph
+
+			if ( _ffb_drawPrettyGraph )
+			{
+				for ( var y = 0; y < 200; y++ )
+				{
+					var offset = y * FFB_PIXELS_BUFFER_STRIDE + _ffb_prettyGraphCurrentX * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
+
+					_ffb_pixels[ offset + 0 ] = 0;
+					_ffb_pixels[ offset + 1 ] = 128;
+					_ffb_pixels[ offset + 2 ] = 0;
+					_ffb_pixels[ offset + 3 ] = 255;
+				}
 			}
 		}
 
@@ -912,34 +994,34 @@ namespace MarvinsAIRA
 
 			// update the magnitude timer
 
-			app._ffb_magnitudeTimer += deltaMilliseconds;
+			app._ffb_outputWheelMagnitudeBufferTimer += deltaMilliseconds;
 
 			// reset the magnitude timer when its time
 
-			if ( Interlocked.Exchange( ref app._ffb_resetMagnitudeTimer, 0 ) == 1 )
+			if ( Interlocked.Exchange( ref app._ffb_resetOutputWheelMagnitudeBufferTimerNow, 0 ) == 1 )
 			{
-				app._ffb_magnitudeTimer = 0;
+				app._ffb_outputWheelMagnitudeBufferTimer = 0;
 			}
 
-			// figure out where we are at in the 6 sample magnitude array
+			// figure out where we are at in the magnitude buffer
 
-			var magnitudeIndex = app._ffb_magnitudeTimer * 360 / 1000;
+			var outputWheelMagnitudeBufferIndex = app._ffb_outputWheelMagnitudeBufferTimer * 360 / 1000;
 
 			// get the current magnitude, cubic interpolated
 
-			var maxOffset = app._ffb_magnitude.Length - 1;
+			var maxOffset = app._ffb_outputWheelMagnitudeBuffer.Length - 1;
 
-			var i1 = Math.Min( maxOffset, (int) Math.Truncate( magnitudeIndex ) );
+			var i1 = Math.Min( maxOffset, (int) Math.Truncate( outputWheelMagnitudeBufferIndex ) );
 			var i2 = Math.Min( maxOffset, i1 + 1 );
 			var i3 = Math.Min( maxOffset, i2 + 1 );
 			var i0 = Math.Max( 0, i1 - 1 );
 
-			var t = Math.Min( 1, magnitudeIndex - i1 );
+			var t = Math.Min( 1, outputWheelMagnitudeBufferIndex - i1 );
 
-			var m0 = app._ffb_magnitude[ i0 ];
-			var m1 = app._ffb_magnitude[ i1 ];
-			var m2 = app._ffb_magnitude[ i2 ];
-			var m3 = app._ffb_magnitude[ i3 ];
+			var m0 = app._ffb_outputWheelMagnitudeBuffer[ i0 ];
+			var m1 = app._ffb_outputWheelMagnitudeBuffer[ i1 ];
+			var m2 = app._ffb_outputWheelMagnitudeBuffer[ i2 ];
+			var m3 = app._ffb_outputWheelMagnitudeBuffer[ i3 ];
 
 			var magnitude = (int) InterpolateHermite( m0, m1, m2, m3, t );
 
@@ -982,37 +1064,6 @@ namespace MarvinsAIRA
 					app.WriteLine( "" );
 					app.WriteLine( "An exception was thrown while trying to update the constant force effect parameters!" );
 					app.WriteLine( exception.Message.Trim() );
-				}
-			}
-
-			// test
-
-			if ( false )
-			{
-				if ( testCounter < testData.Length )
-				{
-					testData[ testCounter++ ] = new TestData
-					{
-						deltaMilliseconds = deltaMilliseconds,
-						magnitudeIndex = magnitudeIndex,
-						m0 = m0,
-						m1 = m1,
-						m2 = m2,
-						m3 = m3,
-						magnitude = magnitude
-					};
-
-					if ( testCounter == testData.Length )
-					{
-						var targetMilliseconds = 18 - app.Settings.Frequency;
-
-						foreach ( var data in testData )
-						{
-							var skew = data.deltaMilliseconds - targetMilliseconds;
-
-							app.WriteLine( $"d={data.deltaMilliseconds:F3} ({skew:F3}); i={data.magnitudeIndex}; m0={data.m0:F0}; m1={data.m1:F0}; m2={data.m2:F0}; m3={data.m3:F0}; m={data.magnitude:F0}" );
-						}
-					}
 				}
 			}
 		}

@@ -8,8 +8,8 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
-		private ReaderWriterLock _readerWriterLock = new();
-		private FileStream? _fileStream = null;
+		private ReaderWriterLock _console_readerWriterLock = new();
+		private FileStream? _console_fileStream = null;
 
 		public void InitializeConsole()
 		{
@@ -28,7 +28,7 @@ namespace MarvinsAIRA
 				}
 			}
 
-			_fileStream = new FileStream( filePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite );
+			_console_fileStream = new FileStream( filePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite );
 		}
 
 		public void StopConsole()
@@ -36,10 +36,10 @@ namespace MarvinsAIRA
 			WriteLine( "" );
 			WriteLine( "StopConsole called." );
 
-			_fileStream?.Close();
-			_fileStream?.Dispose();
+			_console_fileStream?.Close();
+			_console_fileStream?.Dispose();
 
-			_fileStream = null;
+			_console_fileStream = null;
 		}
 
 		public void WriteLine( string message )
@@ -48,22 +48,22 @@ namespace MarvinsAIRA
 
 			Debug.WriteLine( message );
 
-			if ( _fileStream != null )
+			if ( _console_fileStream != null )
 			{
 				try
 				{
-					_readerWriterLock.AcquireWriterLock( 250 );
+					_console_readerWriterLock.AcquireWriterLock( 250 );
 
 					try
 					{
 						var bytes = new UTF8Encoding( true ).GetBytes( $"{messageWithTime}\r\n" );
 
-						_fileStream.Write( bytes, 0, bytes.Length );
-						_fileStream.Flush();
+						_console_fileStream.Write( bytes, 0, bytes.Length );
+						_console_fileStream.Flush();
 					}
 					finally
 					{
-						_readerWriterLock.ReleaseWriterLock();
+						_console_readerWriterLock.ReleaseWriterLock();
 					}
 				}
 				catch ( ApplicationException )
@@ -74,7 +74,7 @@ namespace MarvinsAIRA
 
 			Dispatcher.BeginInvoke( () =>
 			{
-				var mainWindow = (MainWindow) MainWindow;
+				var mainWindow = MarvinsAIRA.MainWindow.Instance;
 
 				if ( mainWindow != null )
 				{

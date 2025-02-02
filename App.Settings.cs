@@ -10,8 +10,8 @@ namespace MarvinsAIRA
 	{
 		private Settings _settings = new();
 
-		private bool _pauseSerialization = false;
-		private float _serializationTimer = 0;
+		private bool _settings_pauseSerialization = false;
+		private float _settings_serializationTimer = 0;
 
 		public Settings Settings
 		{
@@ -27,7 +27,7 @@ namespace MarvinsAIRA
 
 			if ( File.Exists( filePath ) )
 			{
-				_pauseSerialization = true;
+				_settings_pauseSerialization = true;
 
 				var settings = (Settings?) Serializer.Load( filePath, typeof( Settings ) );
 
@@ -36,10 +36,10 @@ namespace MarvinsAIRA
 					_settings = settings;
 				}
 
-				_pauseSerialization = false;
+				_settings_pauseSerialization = false;
 			}
 
-			var mainWindow = (MainWindow) MainWindow;
+			var mainWindow = MarvinsAIRA.MainWindow.Instance;
 
 			if ( mainWindow != null )
 			{
@@ -49,25 +49,30 @@ namespace MarvinsAIRA
 
 		public void UpdateSettings( float deltaTime )
 		{
-			if ( _serializationTimer > 0 )
+			if ( _settings_serializationTimer > 0 )
 			{
-				_serializationTimer -= deltaTime;
+				_settings_serializationTimer -= deltaTime;
 
-				if ( _serializationTimer <= 0 )
+				if ( _settings_serializationTimer <= 0 )
 				{
-					_serializationTimer = 0;
+					_settings_serializationTimer = 0;
 
 					WriteLine( "" );
-					WriteLine( $"Saving configuration [{_ffb_wheelSaveName}, {_carSaveName}, {_trackSaveName}, {_trackConfigSaveName}]" );
+					WriteLine( $"Saving configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}]" );
 
 					var forceFeedbackSettingsFound = false;
 
 					foreach ( var forceFeedbackSettings in Settings.ForceFeedbackSettingsList )
 					{
-						if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _carSaveName ) && ( forceFeedbackSettings.TrackName == _trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _trackConfigSaveName ) )
+						if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _car_carSaveName ) && ( forceFeedbackSettings.TrackName == _track_trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _track_trackConfigSaveName ) )
 						{
 							forceFeedbackSettings.OverallScale = Settings.OverallScale;
 							forceFeedbackSettings.DetailScale = Settings.DetailScale;
+
+							forceFeedbackSettings.USEffectStrength = Settings.USEffectStrength;
+							forceFeedbackSettings.USYawRateFactor = Settings.USYawRateFactor;
+							forceFeedbackSettings.USLateralForceFactor = Settings.USLateralForceFactor;
+							forceFeedbackSettings.USSteeringWheelOffset = Settings.USSteeringWheelOffset;
 
 							forceFeedbackSettingsFound = true;
 
@@ -80,11 +85,17 @@ namespace MarvinsAIRA
 						var forceFeedbackSettings = new ForceFeedbackSettings
 						{
 							WheelName = _ffb_wheelSaveName,
-							CarName = _carSaveName,
-							TrackName = _trackSaveName,
-							TrackConfigName = _trackConfigSaveName,
+							CarName = _car_carSaveName,
+							TrackName = _track_trackSaveName,
+							TrackConfigName = _track_trackConfigSaveName,
+
 							OverallScale = Settings.OverallScale,
 							DetailScale = Settings.DetailScale,
+
+							USEffectStrength = Settings.USEffectStrength,
+							USYawRateFactor = Settings.USYawRateFactor,
+							USLateralForceFactor = Settings.USLateralForceFactor,
+							USSteeringWheelOffset= Settings.USSteeringWheelOffset
 						};
 
 						Settings.ForceFeedbackSettingsList.Add( forceFeedbackSettings );
@@ -99,9 +110,9 @@ namespace MarvinsAIRA
 
 		public void QueueForSerialization()
 		{
-			if ( !_pauseSerialization )
+			if ( !_settings_pauseSerialization )
 			{
-				_serializationTimer = 1;
+				_settings_serializationTimer = 1;
 			}
 		}
 	}

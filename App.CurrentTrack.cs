@@ -12,14 +12,14 @@ namespace MarvinsAIRA
 		private const string NO_TRACK_CONFIG_NAME = "No Track Configuration";
 		private const string ALL_TRACK_CONFIGS_SAVE_NAME = "All";
 
-		private string _currentTrackDisplayName = NO_TRACK_DISPLAY_NAME;
-		private string _trackSaveName = ALL_TRACKS_SAVE_NAME;
+		private string _track_currentTrackDisplayName = NO_TRACK_DISPLAY_NAME;
+		private string _track_trackSaveName = ALL_TRACKS_SAVE_NAME;
 
-		private string _currentTrackConfigName = NO_TRACK_CONFIG_NAME;
-		private string _trackConfigSaveName = ALL_TRACK_CONFIGS_SAVE_NAME;
+		private string _track_currentTrackConfigName = NO_TRACK_CONFIG_NAME;
+		private string _track_trackConfigSaveName = ALL_TRACK_CONFIGS_SAVE_NAME;
 
-		private bool _trackChanged = false;
-		private bool _trackConfigChanged = false;
+		private bool _track_trackChanged = false;
+		private bool _track_trackConfigChanged = false;
 
 		private void InitializeCurrentTrack()
 		{
@@ -40,7 +40,7 @@ namespace MarvinsAIRA
 				trackConfigName = _irsdk.Data.SessionInfo.WeekendInfo.TrackConfigName;
 			}
 
-			if ( ( _currentTrackDisplayName != trackDisplayName ) || ( _currentTrackConfigName != trackConfigName ) )
+			if ( ( _track_currentTrackDisplayName != trackDisplayName ) || ( _track_currentTrackConfigName != trackConfigName ) )
 			{
 				if ( trackDisplayName == NO_TRACK_DISPLAY_NAME )
 				{
@@ -54,38 +54,38 @@ namespace MarvinsAIRA
 
 					Say( $"You are racing at {trackDisplayName} ({trackConfigName})." );
 
-					_trackChanged = ( _currentTrackDisplayName != trackDisplayName );
-					_trackConfigChanged = ( _currentTrackConfigName != trackConfigName );
+					_track_trackChanged = ( _track_currentTrackDisplayName != trackDisplayName );
+					_track_trackConfigChanged = ( _track_currentTrackConfigName != trackConfigName );
 				}
 
-				_currentTrackDisplayName = trackDisplayName;
+				_track_currentTrackDisplayName = trackDisplayName;
 
 				UpdateTrackSaveName();
 
-				_currentTrackConfigName = trackConfigName;
+				_track_currentTrackConfigName = trackConfigName;
 
 				UpdateTrackConfigSaveName();
 
 				Dispatcher.BeginInvoke( () =>
 				{
-					var mainWindow = (MainWindow) MainWindow;
+					var mainWindow = MarvinsAIRA.MainWindow.Instance;
 
 					if ( mainWindow != null )
 					{
-						mainWindow.CurrentTrackStatusBarItem.Content = $"{_currentTrackDisplayName} ({_currentTrackConfigName})";
-						mainWindow.CurrentTrackStatusBarItem.Foreground = ( _currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;					}
+						mainWindow.CurrentTrackStatusBarItem.Content = $"{_track_currentTrackDisplayName} ({_track_currentTrackConfigName})";
+						mainWindow.CurrentTrackStatusBarItem.Foreground = ( _track_currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;					}
 				} );
 			}
 		}
 
 		public void UpdateTrackSaveName()
 		{
-			_trackSaveName = Settings.SaveSettingsPerTrack ? _currentTrackDisplayName : ALL_TRACKS_SAVE_NAME;
+			_track_trackSaveName = Settings.SaveSettingsPerTrack ? _track_currentTrackDisplayName : ALL_TRACKS_SAVE_NAME;
 		}
 
 		public void UpdateTrackConfigSaveName()
 		{
-			_trackConfigSaveName = Settings.SaveSettingsPerTrackConfig ? _currentTrackConfigName : ALL_TRACK_CONFIGS_SAVE_NAME;
+			_track_trackConfigSaveName = Settings.SaveSettingsPerTrackConfig ? _track_currentTrackConfigName : ALL_TRACK_CONFIGS_SAVE_NAME;
 		}
 	}
 }

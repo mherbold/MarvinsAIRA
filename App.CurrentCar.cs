@@ -9,10 +9,10 @@ namespace MarvinsAIRA
 		private const string NO_CAR_SCREEN_NAME = "No Car";
 		private const string ALL_CARS_SAVE_NAME = "All";
 
-		private string _currentCarScreenName = NO_CAR_SCREEN_NAME;
-		private string _carSaveName = ALL_CARS_SAVE_NAME;
+		private string _car_currentCarScreenName = NO_CAR_SCREEN_NAME;
+		private string _car_carSaveName = ALL_CARS_SAVE_NAME;
 
-		private bool _carChanged = false;
+		private bool _car_carChanged = false;
 
 		private void InitializeCurrentCar()
 		{
@@ -38,7 +38,7 @@ namespace MarvinsAIRA
 				}
 			}
 
-			if ( _currentCarScreenName != carScreenName )
+			if ( _car_currentCarScreenName != carScreenName )
 			{
 				if ( carScreenName == NO_CAR_SCREEN_NAME )
 				{
@@ -52,21 +52,21 @@ namespace MarvinsAIRA
 
 					Say( $"You are now driving a {carScreenName}." );
 
-					_carChanged = true;
+					_car_carChanged = true;
 				}
 
-				_currentCarScreenName = carScreenName;
+				_car_currentCarScreenName = carScreenName;
 
 				UpdateCarSaveName();
 
 				Dispatcher.BeginInvoke( () =>
 				{
-					var mainWindow = (MainWindow) MainWindow;
+					var mainWindow = MarvinsAIRA.MainWindow.Instance;
 
 					if ( mainWindow != null )
 					{
-						mainWindow.CurrentCarStatusBarItem.Content = _currentCarScreenName;
-						mainWindow.CurrentCarStatusBarItem.Foreground = ( _currentCarScreenName == NO_CAR_SCREEN_NAME ) ? Brushes.Gray : Brushes.ForestGreen;
+						mainWindow.CurrentCarStatusBarItem.Content = _car_currentCarScreenName;
+						mainWindow.CurrentCarStatusBarItem.Foreground = ( _car_currentCarScreenName == NO_CAR_SCREEN_NAME ) ? Brushes.Gray : Brushes.ForestGreen;
 					}
 				} );
 			}
@@ -75,7 +75,7 @@ namespace MarvinsAIRA
 
 		public void UpdateCarSaveName()
 		{
-			_carSaveName = Settings.SaveSettingsPerCar ? _currentCarScreenName : ALL_CARS_SAVE_NAME;
+			_car_carSaveName = Settings.SaveSettingsPerCar ? _car_currentCarScreenName : ALL_CARS_SAVE_NAME;
 		}
 	}
 }

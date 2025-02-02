@@ -422,6 +422,173 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Understeer effect strength */
+
+		private int _usEffectStrength = 0;
+
+		public int USEffectStrength
+		{
+			get => _usEffectStrength;
+
+			set
+			{
+				value = Math.Max( 0, Math.Min( 100, value ) );
+
+				if ( _usEffectStrength != value )
+				{
+					_usEffectStrength = value;
+
+					if ( _usEffectStrength == 0 )
+					{
+						USEffectStrengthString = "OFF";
+					}
+					else
+					{
+						USEffectStrengthString = $"{_usEffectStrength}%";
+					}
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _usEffectStrengthString = "OFF";
+
+		public string USEffectStrengthString
+		{
+			get => _usEffectStrengthString;
+
+			set
+			{
+				if ( _usEffectStrengthString != value )
+				{
+					_usEffectStrengthString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Understeer effect yaw rate factor */
+
+		private int _usYawRateFactor = 50;
+
+		public int USYawRateFactor
+		{
+			get => _usYawRateFactor;
+
+			set
+			{
+				value = Math.Max( 0, Math.Min( 100, value ) );
+
+				if ( _usYawRateFactor != value )
+				{
+					_usYawRateFactor = value;
+
+					USYawRateFactorString = $"{_usYawRateFactor}";
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _usYawRateFactorString = "50";
+
+		public string USYawRateFactorString
+		{
+			get => _usYawRateFactorString;
+
+			set
+			{
+				if ( _usYawRateFactorString != value )
+				{
+					_usYawRateFactorString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Understeer effect lateral force factor */
+
+		private int _usLateralForceFactor = 50;
+
+		public int USLateralForceFactor
+		{
+			get => _usLateralForceFactor;
+
+			set
+			{
+				value = Math.Max( 0, Math.Min( 100, value ) );
+
+				if ( _usLateralForceFactor != value )
+				{
+					_usLateralForceFactor = value;
+
+					USLateralForceFactorString = $"{_usLateralForceFactor}";
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _usLateralForceFactorString = "50";
+
+		public string USLateralForceFactorString
+		{
+			get => _usLateralForceFactorString;
+
+			set
+			{
+				if ( _usLateralForceFactorString != value )
+				{
+					_usLateralForceFactorString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Understeer effect steering wheel offset */
+
+		private int _usSteeringWheelOffset = 0;
+
+		public int USSteeringWheelOffset
+		{
+			get => _usSteeringWheelOffset;
+
+			set
+			{
+				value = Math.Max( -100, Math.Min( 100, value ) );
+
+				if ( _usSteeringWheelOffset != value )
+				{
+					_usSteeringWheelOffset = value;
+
+					USSteeringWheelOffsetString = $"{_usSteeringWheelOffset}%";
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _usSteeringWheelOffsetString = "50%";
+
+		public string USSteeringWheelOffsetString
+		{
+			get => _usSteeringWheelOffsetString;
+
+			set
+			{
+				if ( _usSteeringWheelOffsetString != value )
+				{
+					_usSteeringWheelOffsetString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Selected LFE device */
 
 		private Guid _selectedLFEDeviceGuid = Guid.Empty;
@@ -500,7 +667,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Increase LEF scale */
+		/* Increase LFE scale */
 
 		private MappedButton _increaseLFEScale = new();
 
@@ -530,6 +697,11 @@ namespace MarvinsAIRA
 
 			public int OverallScale = 10;
 			public int DetailScale = 100;
+
+			public int USEffectStrength = 0;
+			public int USYawRateFactor = 0;
+			public int USLateralForceFactor = 0;
+			public int USSteeringWheelOffset = 0;
 		}
 
 		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
