@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.22"
+        Title="Marvin's Awesome iRacing App v0.23"
         Height="Auto"
         Width="790"
         Closing="Window_Closing"
@@ -136,42 +136,55 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car understeers." />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <RadioButton x:Name="SineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="FxStyle" Click="SineWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSineWaveBuzz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <RadioButton x:Name="TriangleWaveBuzz_RadioButton" Content="Triangle Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="FxStyle" Click="TriangleWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleTriangleWaveBuzz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <RadioButton x:Name="ReduceSteadyStateForce_RadioButton" Content="Reduce Steady State Force" Margin="10,0,0,0" MinWidth="0" GroupName="FxStyle" Click="ReduceSteadyStateForce_RadioButton_Click" IsChecked="{Binding USEffectStyleReduceSteadyStateForce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is the understeer effect steering wheel offset." />
+                                <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the understeer effect will feel." />
                                 <TextBox Grid.Column="1" Text="{Binding USEffectStrengthString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USEffectStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USEffectStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="10" />
                             </Grid>
-                            <Grid Margin="0,5,0,0">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Yaw Rate ×" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor." />
-                                <TextBox Grid.Column="1" Text="{Binding USYawRateFactorString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" />
-                            </Grid>
-                            <Grid Margin="0,5,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Lat. Force ×" VerticalAlignment="Center" ToolTip="This is the understeer effect lateral force factor." />
-                                <TextBox Grid.Column="1" Text="{Binding USLateralForceFactorString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USLateralForceFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" />
-                            </Grid>
-                            <Grid Margin="0,5,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Steer Offset" VerticalAlignment="Center" ToolTip="This is the understeer effect steering wheel offset." />
-                                <TextBox Grid.Column="1" Text="{Binding USSteeringWheelOffsetString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="-100" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USSteeringWheelOffset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="2" />
+                                <StackPanel Grid.Column="0">
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning left." />
+                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorLeftString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
+                                    </Grid>
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning right." />
+                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorRightString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorRight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="5" />
+                                    </Grid>
+                                </StackPanel>
+                                <Button Grid.Column="1" x:Name="UndersteerEffectButton" Margin="10,0,0,0" Click="UndersteerEffectButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/u-button.png"/>
+                                </Button>
                             </Grid>
                         </StackPanel>
                     </GroupBox>
@@ -215,11 +228,6 @@
                                     <Image Grid.Row="0" x:Name="WheelForceFeedbackImage" Height="200" Width="768"/>
                                     <Label Grid.Row="0" x:Name="RecordingLabel" Content="RECORDING" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FFF32828" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
                                     <Label Grid.Row="0" x:Name="PlaybackLabel" Content="PLAYBACK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FF67C50D" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
-                                    <Label Grid.Row="0" x:Name="US_1" Content="US_1" VerticalAlignment="Top" Margin="10,10,0,0" FontSize="24" Foreground="White"/>
-                                    <Label Grid.Row="0" x:Name="US_2" Content="US_2" VerticalAlignment="Top" Margin="10,50,0,0" FontSize="24" Foreground="White"/>
-                                    <Label Grid.Row="0" x:Name="US_3" Content="US_3" VerticalAlignment="Top" Margin="10,90,0,0" FontSize="24" Foreground="White"/>
-                                    <Label Grid.Row="0" x:Name="US_4" Content="US_4" VerticalAlignment="Top" Margin="10,130,0,0" FontSize="24" Foreground="White"/>
-                                    <Label Grid.Row="0" x:Name="US_5" Content="US_5" VerticalAlignment="Top" Margin="10,170,0,0" FontSize="24" Foreground="White"/>
                                 </Grid>
                             </Border>
                             <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
@@ -361,6 +369,54 @@
             </TabItem>
             <TabItem>
                 <TabItem.Header>
+                    <Label Content="Skid Pad" VerticalAlignment="Center" />
+                </TabItem.Header>
+                <StackPanel Margin="10,10,10,10">
+                    <GroupBox Header="Live Data">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="128"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <Label Content="Steering Angle" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <Image x:Name="SteeringWheel_Image" Source="/steering-wheel.png" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" >
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform Angle="0"/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                                <Label x:Name="SteeringWheel_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <Label Content="Speed" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="Speed_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Yaw Rate" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="YawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Lateral Force" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="LateralForce_Label" Content="0 m⋅s²" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <Label Content="Instant" HorizontalAlignment="Center" Margin="0,17,0,0"/>
+                                <Label Content="YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="YawRateFactorInstant_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Average" HorizontalAlignment="Center"/>
+                                <Label Content="YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="YawRateFactorAverage_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
                     <Label Content="General Settings" VerticalAlignment="Center" />
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
@@ -399,6 +455,7 @@
                     <GroupBox Header="Application Control" Padding="10,0,10,15">
                         <StackPanel>
                             <CheckBox Content="Start Minimized" IsChecked="{Binding StartMinimized, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="TopmostWindow_CheckBox_Click"/>
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>

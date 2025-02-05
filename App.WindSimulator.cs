@@ -5,9 +5,6 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
-		private const float WIND_MPS_TO_MPH = 2.23694f;
-		private const float WIND_MPS_TO_KPH = 3.6f;
-
 		static readonly byte[] WIND_HANDSHAKE = { (byte) 'w', (byte) 'i', (byte) 'n', (byte) 'd' };
 
 		private bool _wind_initialized = false;
@@ -86,11 +83,11 @@ namespace MarvinsAIRA
 
 							if ( _irsdk_displayUnits == 0 )
 							{
-								velocityX *= WIND_MPS_TO_MPH;
+								velocityX *= MPS_TO_MPH;
 							}
 							else
 							{
-								velocityX *= WIND_MPS_TO_KPH;
+								velocityX *= MPS_TO_KPH;
 							}
 
 							_wind_currentMagnitude = GetWindForce( velocityX, carSpeedArray, windForceArray );

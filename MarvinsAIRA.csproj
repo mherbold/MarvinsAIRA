@@ -25,6 +25,8 @@
     <None Remove="plus-button.png" />
     <None Remove="r-button.png" />
     <None Remove="record-button.png" />
+    <None Remove="steering-wheel.png" />
+    <None Remove="u-button.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,6 +56,8 @@
     <Resource Include="plus-button.png" />
     <Resource Include="r-button.png" />
     <Resource Include="record-button.png" />
+    <Resource Include="steering-wheel.png" />
+    <Resource Include="u-button.png" />
   </ItemGroup>
 
   <ItemGroup>

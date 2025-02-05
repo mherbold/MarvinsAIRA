@@ -10,6 +10,9 @@ namespace MarvinsAIRA
 
 		public static string DocumentsFolder { get; private set; } = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments ), APP_FOLDER_NAME );
 
+		public const float MPS_TO_MPH = 2.23694f;
+		public const float MPS_TO_KPH = 3.6f;
+
 		public void Initialize( nint windowHandle )
 		{
 			WriteLine( "" );

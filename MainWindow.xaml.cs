@@ -116,6 +116,14 @@ namespace MarvinsAIRA
 				app.WriteLine( "" );
 				app.WriteLine( $"{Title} has been initialized!" );
 
+				if ( app.Settings.TopmostWindow )
+				{
+					app.WriteLine( "" );
+					app.WriteLine( "Setting window to be topmost." );
+
+					Topmost = true;
+				}
+
 				if ( app.Settings.StartMinimized )
 				{
 					app.WriteLine( "" );
@@ -193,6 +201,8 @@ namespace MarvinsAIRA
 
 							Dispatcher.BeginInvoke( () =>
 							{
+								// Force feedback status
+
 								if ( !app.FFB_Initialized )
 								{
 									ForceFeedbackStatusBarItem.Content = "FFB: Fault";
@@ -214,10 +224,14 @@ namespace MarvinsAIRA
 									ForceFeedbackStatusBarItem.Foreground = Brushes.Gray;
 								}
 
+								// Pretty graph
+
 								if ( app._ffb_drawPrettyGraph )
 								{
 									app._ffb_writeableBitmap?.WritePixels( new Int32Rect( 0, 0, App.FFB_WRITEABLE_BITMAP_WIDTH, App.FFB_WRITEABLE_BITMAP_HEIGHT ), app._ffb_pixels, App.FFB_PIXELS_BUFFER_STRIDE, 0, 0 );
 								}
+
+								// Recording status
 
 								if ( app._ffb_recordNow )
 								{
@@ -228,6 +242,8 @@ namespace MarvinsAIRA
 									RecordingLabel.Visibility = Visibility.Hidden;
 								}
 
+								// Playback status
+
 								if ( app._ffb_playbackNow )
 								{
 									PlaybackLabel.Visibility = Visibility.Visible;
@@ -237,11 +253,59 @@ namespace MarvinsAIRA
 									PlaybackLabel.Visibility = Visibility.Hidden;
 								}
 
-								US_1.Content = $"{app.US_1:F3}";
-								US_2.Content = $"{app.US_2:F3}";
-								US_3.Content = $"{app.US_3:F3}";
-								US_4.Content = $"{app.US_4:F3}";
-								US_5.Content = $"{app.US_5:F3}";
+								// Steering wheel angle
+
+								var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / Math.PI;
+
+								SteeringWheel_Image.RenderTransform = new RotateTransform( -steeringWheelAngleInDegrees );
+
+								SteeringWheel_Label.Content = $"{steeringWheelAngleInDegrees:F0}°";
+
+								if ( (string) SteeringWheel_Label.Content == "-0°" )
+								{
+									SteeringWheel_Label.Content = "0°";
+								}
+
+								// Speed
+
+								if ( app._irsdk_displayUnits == 0 )
+								{
+									Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_MPH:F0} MPH";
+								}
+								else
+								{
+									Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_KPH:F0} KPH";
+								}
+
+								// Yaw rate
+
+								var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / Math.PI;
+
+								YawRate_Label.Content = $"{yawRateInDegreesPerSecond:F0}°/sec";
+
+								if ( (string) YawRate_Label.Content == "-0°/sec" )
+								{
+									YawRate_Label.Content = $"0°/sec";
+								}
+
+								// Lateral force
+
+								LateralForce_Label.Content = $"{app._irsdk_latAccel:F0} m⋅s²";
+
+								if ( (string) LateralForce_Label.Content == "-0 m⋅s²" )
+								{
+									LateralForce_Label.Content = $"0 m⋅s²";
+								}
+
+								// Yaw rate factor (instant)
+
+								YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F2}";
+
+								// Yaw rate factor (average)
+
+								YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F2}";
+
+								// Wind status
 
 								if ( !app.Wind_Initialized )
 								{
@@ -474,6 +538,55 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private void SineWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "SineWaveBuzz_RadioButton_Click called." );
+
+				app.Settings.USEffectStyle = 0;
+			}
+		}
+
+		private void TriangleWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "TriangleWaveBuzz_RadioButton_Click called." );
+
+				app.Settings.USEffectStyle = 1;
+			}
+		}
+
+		private void ReduceSteadyStateForce_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "ReduceSteadyStateForce_RadioButton_Click called." );
+
+				app.Settings.USEffectStyle = 2;
+			}
+		}
+
+		private void UndersteerEffectButton_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "UndersteerEffectButton_Click called." );
+
+			ShowMapButtonWindow( app.Settings.UndersteerEffectButton );
+		}
+
 		private void LFEDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
 		{
 			if ( _win_initialized )
@@ -614,6 +727,9 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
+			app.WriteLine( "" );
+			app.WriteLine( "SaveForEachWheel_CheckBox_Click called." );
+
 			app.UpdateWheelSaveName();
 			app.QueueForSerialization();
 		}
@@ -621,6 +737,9 @@ namespace MarvinsAIRA
 		private void SaveForEachCar_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "SaveForEachCar_CheckBox_Click called." );
 
 			app.UpdateCarSaveName();
 			app.QueueForSerialization();
@@ -630,6 +749,9 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
+			app.WriteLine( "" );
+			app.WriteLine( "SaveForEachTrack_CheckBox_Click called." );
+
 			app.UpdateTrackSaveName();
 			app.QueueForSerialization();
 		}
@@ -638,8 +760,23 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
+			app.WriteLine( "" );
+			app.WriteLine( "SaveForEachTrackConfig_CheckBox_Click called." );
+
 			app.UpdateTrackConfigSaveName();
 			app.QueueForSerialization();
+		}
+
+		private void TopmostWindow_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "TopmostWindow_CheckBox_Click called." );
+
+			var checkBox = (CheckBox) sender;
+
+			Topmost = checkBox.IsChecked == true;
 		}
 
 		#endregion

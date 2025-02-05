@@ -94,15 +94,23 @@ namespace MarvinsAIRA
 
 		private readonly Stopwatch _ffb_stopwatch = new();
 
+		private float _ffb_yawRateFactorInstant = 0;
+		private float _ffb_yawRateFactorAverage = 0;
+		private readonly float[] _ffb_yawRateFactorBuffer = new float[ 30 ];
+		private int _ffb_yawRateFactorBufferIndex = 0;
+
+		private float _ffb_lateralForceFactorAverage = 0;
+		private readonly float[] _ffb_lateralForceFactorBuffer = new float[ 30 ];
+		private int _ffb_lateralForceFactorBufferIndex = 0;
+
+		private float _ffb_understeerEffectAngle = 0;
+
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
 		public int FFB_CurrentMagnitude { get => _ffb_outputWheelMagnitudeBuffer[ 0 ]; }
-
-		public float US_1;
-		public float US_2;
-		public float US_3;
-		public float US_4;
-		public float US_5;
+		public float FFB_YawRateFactorInstant { get => _ffb_yawRateFactorInstant; }
+		public float FFB_YawRateFactorAverage { get => _ffb_yawRateFactorAverage; }
+		public float FFB_LateralForceFactorAverage { get => _ffb_lateralForceFactorAverage; }
 
 		public void InitializeForceFeedback( nint windowHandle )
 		{
@@ -415,146 +423,165 @@ namespace MarvinsAIRA
 
 				foreach ( var joystick in _input_joystickList )
 				{
-					if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.AutoOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid || joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid )
+					try
 					{
-						try
+						var joystickUpdateArray = joystick.GetBufferedData();
+
+						if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
 						{
-							var joystickUpdateArray = joystick.GetBufferedData();
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.SetForegroundWindow );
 
-							if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
+							if ( buttonPresses > 0 )
 							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.SetForegroundWindow );
+								IntPtr foregroundWindowHandle = GetForegroundWindow();
 
-								if ( buttonPresses > 0 )
+								if ( foregroundWindowHandle != windowHandle )
 								{
-									IntPtr foregroundWindowHandle = GetForegroundWindow();
-
-									if ( foregroundWindowHandle != windowHandle )
-									{
-										SetForegroundWindow( windowHandle );
-									}
-									else
-									{
-										ReinitializeForceFeedbackDevice( windowHandle );
-									}
+									SetForegroundWindow( windowHandle );
 								}
-							}
-
-							if ( joystick.Information.InstanceGuid == Settings.AutoOverallScale.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.AutoOverallScale );
-
-								if ( buttonPresses > 0 )
+								else
 								{
-									var smoothedTorque = 0f;
-									var smoothedPeak = 0f;
-
-									for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
-									{
-										smoothedTorque = smoothedTorque * 0.9f + Math.Abs( _ffb_autoScaleSteeringWheelTorqueBuffer[ i ] ) * 0.1f;
-
-										if ( smoothedTorque > smoothedPeak )
-										{
-											smoothedPeak = smoothedTorque;
-										}
-									}
-
-									if ( smoothedPeak > 0 )
-									{
-										var ratio = Math.Min( 1, Settings.TargetForce / smoothedPeak );
-
-										Settings.OverallScale = (int) ( ratio * 100 );
-									}
-								}
-							}
-
-							if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseOverallScale );
-
-								if ( buttonPresses > 0 )
-								{
-									Settings.OverallScale -= buttonPresses;
-
-									_ffb_announceOverallScaleTimer = 1;
-
-									playSound = true;
-								}
-							}
-
-							if ( joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseOverallScale );
-
-								if ( buttonPresses > 0 )
-								{
-									Settings.OverallScale += buttonPresses;
-
-									_ffb_announceOverallScaleTimer = 1;
-
-									playSound = true;
-								}
-							}
-
-							if ( joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseDetailScale );
-
-								if ( buttonPresses > 0 )
-								{
-									Settings.DetailScale -= buttonPresses;
-
-									_ffb_announceDetailScaleTimer = 1;
-
-									playSound = true;
-								}
-							}
-
-							if ( joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseDetailScale );
-
-								if ( buttonPresses > 0 )
-								{
-									Settings.DetailScale += buttonPresses;
-
-									_ffb_announceDetailScaleTimer = 1;
-
-									playSound = true;
-								}
-							}
-							if ( joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseLFEScale );
-
-								if ( buttonPresses > 0 )
-								{
-									Settings.LFEScale -= buttonPresses;
-
-									_ffb_announceLFEScaleTimer = 1;
-
-									playSound = true;
-								}
-							}
-
-							if ( joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid )
-							{
-								var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseLFEScale );
-
-								if ( buttonPresses > 0 )
-								{
-									Settings.LFEScale += buttonPresses;
-
-									_ffb_announceLFEScaleTimer = 1;
-
-									playSound = true;
+									ReinitializeForceFeedbackDevice( windowHandle );
 								}
 							}
 						}
-						catch ( Exception )
+
+						if ( joystick.Information.InstanceGuid == Settings.AutoOverallScale.DeviceInstanceGuid )
 						{
-							joystick.Acquire();
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.AutoOverallScale );
+
+							if ( buttonPresses > 0 )
+							{
+								var smoothedTorque = 0f;
+								var smoothedPeak = 0f;
+
+								for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
+								{
+									smoothedTorque = smoothedTorque * 0.9f + Math.Abs( _ffb_autoScaleSteeringWheelTorqueBuffer[ i ] ) * 0.1f;
+
+									if ( smoothedTorque > smoothedPeak )
+									{
+										smoothedPeak = smoothedTorque;
+									}
+								}
+
+								if ( smoothedPeak > 0 )
+								{
+									var ratio = Math.Min( 1, Settings.TargetForce / smoothedPeak );
+
+									Settings.OverallScale = (int) ( ratio * 100 );
+								}
+							}
 						}
+
+						if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid )
+						{
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseOverallScale );
+
+							if ( buttonPresses > 0 )
+							{
+								Settings.OverallScale -= buttonPresses;
+
+								_ffb_announceOverallScaleTimer = 1;
+
+								playSound = true;
+							}
+						}
+
+						if ( joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid )
+						{
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseOverallScale );
+
+							if ( buttonPresses > 0 )
+							{
+								Settings.OverallScale += buttonPresses;
+
+								_ffb_announceOverallScaleTimer = 1;
+
+								playSound = true;
+							}
+						}
+
+						if ( joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid )
+						{
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseDetailScale );
+
+							if ( buttonPresses > 0 )
+							{
+								Settings.DetailScale -= buttonPresses;
+
+								_ffb_announceDetailScaleTimer = 1;
+
+								playSound = true;
+							}
+						}
+
+						if ( joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid )
+						{
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseDetailScale );
+
+							if ( buttonPresses > 0 )
+							{
+								Settings.DetailScale += buttonPresses;
+
+								_ffb_announceDetailScaleTimer = 1;
+
+								playSound = true;
+							}
+						}
+
+						if ( joystick.Information.InstanceGuid == Settings.UndersteerEffectButton.DeviceInstanceGuid )
+						{
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.UndersteerEffectButton );
+
+							if ( buttonPresses > 0 )
+							{
+								if ( _irsdk_steeringWheelAngle >= 0 )
+								{
+									Settings.USYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
+
+									Say( $"The understeer effect left yaw rate factor has been set to {Settings.USYawRateFactorLeft}." );
+								}
+								else
+								{
+									Settings.USYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
+
+									Say( $"The understeer effect right yaw rate factor has been set to {Settings.USYawRateFactorRight}." );
+								}
+							}
+						}
+
+						if ( joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid )
+						{
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseLFEScale );
+
+							if ( buttonPresses > 0 )
+							{
+								Settings.LFEScale -= buttonPresses;
+
+								_ffb_announceLFEScaleTimer = 1;
+
+								playSound = true;
+							}
+						}
+
+						if ( joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid )
+						{
+							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseLFEScale );
+
+							if ( buttonPresses > 0 )
+							{
+								Settings.LFEScale += buttonPresses;
+
+								_ffb_announceLFEScaleTimer = 1;
+
+								playSound = true;
+							}
+						}
+					}
+					catch ( Exception )
+					{
+						joystick.Acquire();
 					}
 				}
 
@@ -638,9 +665,8 @@ namespace MarvinsAIRA
 						Settings.DetailScale = forceFeedbackSettings.DetailScale;
 
 						Settings.USEffectStrength = forceFeedbackSettings.USEffectStrength;
-						Settings.USYawRateFactor = forceFeedbackSettings.USYawRateFactor;
-						Settings.USLateralForceFactor = forceFeedbackSettings.USLateralForceFactor;
-						Settings.USSteeringWheelOffset = forceFeedbackSettings.USSteeringWheelOffset;
+						Settings.USYawRateFactorLeft = forceFeedbackSettings.USYawRateFactorLeft;
+						Settings.USYawRateFactorRight = forceFeedbackSettings.USYawRateFactorRight;
 
 						forceFeedbackSettingsFound = true;
 
@@ -663,9 +689,8 @@ namespace MarvinsAIRA
 					Settings.DetailScale = 100;
 
 					Settings.USEffectStrength = 0;
-					Settings.USYawRateFactor = 0;
-					Settings.USLateralForceFactor = 0;
-					Settings.USSteeringWheelOffset = 0;
+					Settings.USYawRateFactorLeft = 0;
+					Settings.USYawRateFactorRight = 0;
 
 					Say( "This is the first time you have driven this combination, so we have reset the overall and detail scale." );
 				}
@@ -749,26 +774,71 @@ namespace MarvinsAIRA
 				_ffb_steadyStateWheelTorque = 0;
 			}
 
-			// calculate understeer effect
+			// calculate current instant yaw rate factor
+
+			if ( Math.Abs( _irsdk_yawRate ) > 0.1f )
+			{
+				_ffb_yawRateFactorInstant = _irsdk_steeringWheelAngle * _irsdk_speed / _irsdk_yawRate;
+			}
+			else
+			{
+				_ffb_yawRateFactorInstant = 0;
+			}
+
+			// keep track of average yaw rate factor over the last half second
+
+			_ffb_yawRateFactorBuffer[ _ffb_yawRateFactorBufferIndex ] = _ffb_yawRateFactorInstant;
+
+			_ffb_yawRateFactorBufferIndex = ( _ffb_yawRateFactorBufferIndex + 1 ) % _ffb_yawRateFactorBuffer.Length;
+
+			var totalYawRateFactor = 0f;
+
+			for ( var i = 0; i < _ffb_yawRateFactorBuffer.Length; i++ )
+			{
+				totalYawRateFactor += _ffb_yawRateFactorBuffer[ i ];
+			}
+
+			_ffb_yawRateFactorAverage = totalYawRateFactor / _ffb_yawRateFactorBuffer.Length;
+
+			// keep track of average lateral force factor over the last half second
+
+			if ( _irsdk_steeringWheelAngle < -0.1f || _irsdk_steeringWheelAngle > 0.1f )
+			{
+				var latForceFactor = _irsdk_latAccel / _irsdk_steeringWheelAngle;
+
+				_ffb_lateralForceFactorBuffer[ _ffb_lateralForceFactorBufferIndex ] = latForceFactor;
+			}
+			else
+			{
+				_ffb_lateralForceFactorBuffer[ _ffb_lateralForceFactorBufferIndex ] = 0;
+			}
+
+			_ffb_lateralForceFactorBufferIndex = ( _ffb_lateralForceFactorBufferIndex + 1 ) % _ffb_lateralForceFactorBuffer.Length;
+
+			var totalLatForceFactor = 0f;
+
+			for ( var i = 0; i < _ffb_lateralForceFactorBuffer.Length; i++ )
+			{
+				totalLatForceFactor += _ffb_lateralForceFactorBuffer[ i ];
+			}
+
+			_ffb_lateralForceFactorAverage = totalLatForceFactor / _ffb_lateralForceFactorBuffer.Length;
+
+			// update the understeer effect
 
 			float understeerAmount = 0;
 
-			if ( _irsdk_speed > 1 )
+			var settingYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.USYawRateFactorLeft : Settings.USYawRateFactorRight;
+
+			if ( ( Math.Abs( _irsdk_yawRate ) > 0.1f ) && ( settingYawRateFactor > 0 ) )
 			{
-				US_1 = _irsdk_yawRate * Settings.USYawRateFactor / 10;
-				US_2 = _irsdk_latAccel * Settings.USLateralForceFactor / 100;
+				var deltaYawRateFactor = settingYawRateFactor - _ffb_yawRateFactorInstant;
+				var margin = settingYawRateFactor * 0.25f;
 
-				var maxSteeringWheelAngle = Math.Abs( US_1 + US_2 );
-
-				US_3 = Math.Abs( _irsdk_steeringWheelAngle ) - maxSteeringWheelAngle;
-				US_4 = _irsdk_steeringWheelAngle;
-
-				understeerAmount = US_3 - Settings.USSteeringWheelOffset;
+				understeerAmount = Math.Max( 0f, Math.Min( 2f, ( margin - deltaYawRateFactor ) / margin ) );
 			}
 
-			var understeerEffectMagnitude = Math.Max( 0, understeerAmount * Settings.USEffectStrength * 10 );
-
-			US_5 = understeerEffectMagnitude;
+			var understeerEffectMagnitude = (int) ( ( Settings.USEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4 ) );
 
 			// we want to reduce forces while the car is moving very slow or parked
 
@@ -842,17 +912,37 @@ namespace MarvinsAIRA
 
 				if ( normalizedDetailScaleSetting >= 1 )
 				{
+					// apply understeer effect to steady state wheel torque
+
+					var steadyStateWheelTorque = currentSteeringWheelTorque * overallScaleToDirectInputUnits;
+
+					if ( Settings.USEffectStyle == 2 )
+					{
+						steadyStateWheelTorque *= 1.0f - understeerAmount;
+					}
+
 					// scale the impulse by our detail scale and add it to our running steering wheel torque
 
 					_ffb_runningSteeringWheelTorque += deltaSteeringWheelTorque * detailScaleToDirectInputUnits;
 
 					// ramp our running scaled magnitude towards the original signal (feed in steady state signal)
 
-					_ffb_runningSteeringWheelTorque = ( _ffb_runningSteeringWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * 0.1f );
+					_ffb_runningSteeringWheelTorque = ( _ffb_runningSteeringWheelTorque * 0.9f ) + ( steadyStateWheelTorque * 0.1f );
 				}
 				else
 				{
-					_ffb_runningSteeringWheelTorque = ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * normalizedDetailScaleSetting ) + ( _ffb_steadyStateWheelTorque * ( 1 - normalizedDetailScaleSetting ) );
+					// apply understeer effect to steady state wheel torque
+
+					var steadyStateWheelTorque = _ffb_steadyStateWheelTorque;
+
+					if ( Settings.USEffectStyle == 2 )
+					{
+						steadyStateWheelTorque *= 1.0f - understeerAmount;
+					}
+
+					// blend between steady state force and original force using detail scale amount
+
+					_ffb_runningSteeringWheelTorque = ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * normalizedDetailScaleSetting ) + ( steadyStateWheelTorque * ( 1 - normalizedDetailScaleSetting ) );
 				}
 
 				// apply the speed scale and update the array that the force feedback thread uses
@@ -865,7 +955,21 @@ namespace MarvinsAIRA
 
 				// mix in the understeer effects
 
-				_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( understeerEffectMagnitude * ( ( ( x & 1 ) == 0 ) ? 1 : -1 ) );
+				if ( Settings.USEffectStyle == 0 )
+				{
+					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( Math.Sin( _ffb_understeerEffectAngle ) * understeerEffectMagnitude * understeerAmount );
+				}
+				else if ( Settings.USEffectStyle == 1 )
+				{
+					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( ( 2 * Math.Abs( Math.PI - _ffb_understeerEffectAngle ) - 1 ) * understeerEffectMagnitude * understeerAmount );
+				}
+
+				_ffb_understeerEffectAngle += understeerAmount * 0.5f;
+
+				if ( _ffb_understeerEffectAngle > (float) Math.PI * 2f )
+				{
+					_ffb_understeerEffectAngle -= (float) Math.PI * 2f;
+				}
 
 				// reset the magnitude index now
 

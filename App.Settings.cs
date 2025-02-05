@@ -70,9 +70,8 @@ namespace MarvinsAIRA
 							forceFeedbackSettings.DetailScale = Settings.DetailScale;
 
 							forceFeedbackSettings.USEffectStrength = Settings.USEffectStrength;
-							forceFeedbackSettings.USYawRateFactor = Settings.USYawRateFactor;
-							forceFeedbackSettings.USLateralForceFactor = Settings.USLateralForceFactor;
-							forceFeedbackSettings.USSteeringWheelOffset = Settings.USSteeringWheelOffset;
+							forceFeedbackSettings.USYawRateFactorLeft = Settings.USYawRateFactorLeft;
+							forceFeedbackSettings.USYawRateFactorRight = Settings.USYawRateFactorRight;
 
 							forceFeedbackSettingsFound = true;
 
@@ -93,9 +92,8 @@ namespace MarvinsAIRA
 							DetailScale = Settings.DetailScale,
 
 							USEffectStrength = Settings.USEffectStrength,
-							USYawRateFactor = Settings.USYawRateFactor,
-							USLateralForceFactor = Settings.USLateralForceFactor,
-							USSteeringWheelOffset= Settings.USSteeringWheelOffset
+							USYawRateFactorLeft = Settings.USYawRateFactorLeft,
+							USYawRateFactorRight = Settings.USYawRateFactorRight
 						};
 
 						Settings.ForceFeedbackSettingsList.Add( forceFeedbackSettings );

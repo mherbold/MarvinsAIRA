@@ -422,6 +422,29 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Understeer effect style */
+
+		public bool USEffectStyleSineWaveBuzz { get; set; } = true;
+		public bool USEffectStyleTriangleWaveBuzz { get; set; } = false;
+		public bool USEffectStyleReduceSteadyStateForce { get; set; } = false;
+
+		private int _usEffectStyle = 0;
+
+		public int USEffectStyle
+		{
+			get => _usEffectStyle;
+
+			set
+			{
+				if ( _usEffectStyle != value )
+				{
+					_usEffectStyle = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Understeer effect strength */
 
 		private int _usEffectStrength = 0;
@@ -469,120 +492,98 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Understeer effect yaw rate factor */
+		/* Understeer effect yaw rate factor (left) */
 
-		private int _usYawRateFactor = 50;
+		private int _usYawRateFactorLeft = 80;
 
-		public int USYawRateFactor
+		public int USYawRateFactorLeft
 		{
-			get => _usYawRateFactor;
+			get => _usYawRateFactorLeft;
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 100, value ) );
+				value = Math.Max( 0, Math.Min( 200, value ) );
 
-				if ( _usYawRateFactor != value )
+				if ( _usYawRateFactorLeft != value )
 				{
-					_usYawRateFactor = value;
+					_usYawRateFactorLeft = value;
 
-					USYawRateFactorString = $"{_usYawRateFactor}";
+					USYawRateFactorLeftString = $"{_usYawRateFactorLeft}";
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _usYawRateFactorString = "50";
+		private string _usYawRateFactorLeftString = "80";
 
-		public string USYawRateFactorString
+		public string USYawRateFactorLeftString
 		{
-			get => _usYawRateFactorString;
+			get => _usYawRateFactorLeftString;
 
 			set
 			{
-				if ( _usYawRateFactorString != value )
+				if ( _usYawRateFactorLeftString != value )
 				{
-					_usYawRateFactorString = value;
+					_usYawRateFactorLeftString = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		/* Understeer effect lateral force factor */
+		/* Understeer effect yaw rate factor (right) */
 
-		private int _usLateralForceFactor = 50;
+		private int _usYawRateFactorRight = 80;
 
-		public int USLateralForceFactor
+		public int USYawRateFactorRight
 		{
-			get => _usLateralForceFactor;
+			get => _usYawRateFactorRight;
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 100, value ) );
+				value = Math.Max( 0, Math.Min( 200, value ) );
 
-				if ( _usLateralForceFactor != value )
+				if ( _usYawRateFactorRight != value )
 				{
-					_usLateralForceFactor = value;
+					_usYawRateFactorRight = value;
 
-					USLateralForceFactorString = $"{_usLateralForceFactor}";
+					USYawRateFactorRightString = $"{_usYawRateFactorRight}";
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _usLateralForceFactorString = "50";
+		private string _usYawRateFactorRightString = "80";
 
-		public string USLateralForceFactorString
+		public string USYawRateFactorRightString
 		{
-			get => _usLateralForceFactorString;
+			get => _usYawRateFactorRightString;
 
 			set
 			{
-				if ( _usLateralForceFactorString != value )
+				if ( _usYawRateFactorRightString != value )
 				{
-					_usLateralForceFactorString = value;
+					_usYawRateFactorRightString = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
+		/* Understeer effect button */
 
-		/* Understeer effect steering wheel offset */
+		private MappedButton _understeerEffectButton = new();
 
-		private int _usSteeringWheelOffset = 0;
-
-		public int USSteeringWheelOffset
+		public MappedButton UndersteerEffectButton
 		{
-			get => _usSteeringWheelOffset;
+			get => _understeerEffectButton;
 
 			set
 			{
-				value = Math.Max( -100, Math.Min( 100, value ) );
-
-				if ( _usSteeringWheelOffset != value )
+				if ( _understeerEffectButton != value )
 				{
-					_usSteeringWheelOffset = value;
-
-					USSteeringWheelOffsetString = $"{_usSteeringWheelOffset}%";
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		private string _usSteeringWheelOffsetString = "50%";
-
-		public string USSteeringWheelOffsetString
-		{
-			get => _usSteeringWheelOffsetString;
-
-			set
-			{
-				if ( _usSteeringWheelOffsetString != value )
-				{
-					_usSteeringWheelOffsetString = value;
+					_understeerEffectButton = value;
 
 					OnPropertyChanged();
 				}
@@ -699,9 +700,8 @@ namespace MarvinsAIRA
 			public int DetailScale = 100;
 
 			public int USEffectStrength = 0;
-			public int USYawRateFactor = 0;
-			public int USLateralForceFactor = 0;
-			public int USSteeringWheelOffset = 0;
+			public int USYawRateFactorLeft = 0;
+			public int USYawRateFactorRight = 0;
 		}
 
 		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
@@ -1301,6 +1301,25 @@ namespace MarvinsAIRA
 				if ( _startMinimized != value )
 				{
 					_startMinimized = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Topmost window */
+
+		private bool _topmostWindow = false;
+
+		public bool TopmostWindow
+		{
+			get => _topmostWindow;
+
+			set
+			{
+				if ( _topmostWindow != value )
+				{
+					_topmostWindow = value;
 
 					OnPropertyChanged();
 				}
