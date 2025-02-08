@@ -12,13 +12,6 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
-		[DllImport( "user32.dll" )]
-		private static extern IntPtr GetForegroundWindow();
-
-		[DllImport( "user32.dll" )]
-		[return: MarshalAs( UnmanagedType.Bool )]
-		private static extern bool SetForegroundWindow( IntPtr hWnd );
-
 		private delegate void MultimediaTimerCallback( UInt32 id, UInt32 msg, ref UInt32 userCtx, UInt32 rsv1, UInt32 rsv2 );
 
 		[DllImport( "winmm.dll", SetLastError = true, EntryPoint = "timeSetEvent" )]
@@ -40,7 +33,7 @@ namespace MarvinsAIRA
 		private const int FFB_NANOSECONDS_PER_SECOND = 1000000000;
 		private const double FFB_NANOSECONDS_PER_UPDATE = (double) FFB_NANOSECONDS_PER_SECOND / FFB_UPDATE_FREQUENCY;
 
-		public const int FFB_WRITEABLE_BITMAP_WIDTH = 768;
+		public const int FFB_WRITEABLE_BITMAP_WIDTH = 978;
 		public const int FFB_WRITEABLE_BITMAP_HEIGHT = 200;
 		public const int FFB_WRITEABLE_BITMAP_DPI = 96;
 
@@ -74,7 +67,7 @@ namespace MarvinsAIRA
 		private readonly float[] _ffb_autoScaleSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 10 ];
 		private int _ffb_autoScaleSteeringWheelTorqueBufferIndex = 0;
 
-		public readonly float[] _ffb_recordedSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 10 * 60 ];
+		public readonly float[] _ffb_recordedSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 60 * 10 ];
 		public int _ffb_recordedSteeringWheelTorqueBufferIndex = 0;
 		public bool _ffb_recordNow = false;
 		public bool _ffb_playbackNow = false;
@@ -400,6 +393,7 @@ namespace MarvinsAIRA
 				WriteLine( exception.Message.Trim() );
 
 				_ffb_forceFeedbackExceptionThrown = true;
+				_ffb_reinitializeNeeded = true;
 			}
 		}
 
@@ -419,173 +413,153 @@ namespace MarvinsAIRA
 		{
 			if ( checkButtons )
 			{
-				var playSound = false;
+				var playClickSound = false;
 
-				foreach ( var joystick in _input_joystickList )
+				var buttonPresses = Settings.ReinitForceFeedbackButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
 				{
-					try
+					WriteLine( "" );
+					WriteLine( "RESET button pressed!" );
+
+					ReinitializeForceFeedbackDevice( windowHandle );
+				}
+
+
+				buttonPresses = Settings.AutoOverallScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( "AUTO-OVERALL-SCALE button pressed!" );
+
+					var smoothedTorque = 0f;
+					var smoothedPeak = 0f;
+
+					for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
 					{
-						var joystickUpdateArray = joystick.GetBufferedData();
+						smoothedTorque = smoothedTorque * 0.9f + Math.Abs( _ffb_autoScaleSteeringWheelTorqueBuffer[ i ] ) * 0.1f;
 
-						if ( joystick.Information.InstanceGuid == Settings.SetForegroundWindow.DeviceInstanceGuid )
+						if ( smoothedTorque > smoothedPeak )
 						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.SetForegroundWindow );
-
-							if ( buttonPresses > 0 )
-							{
-								IntPtr foregroundWindowHandle = GetForegroundWindow();
-
-								if ( foregroundWindowHandle != windowHandle )
-								{
-									SetForegroundWindow( windowHandle );
-								}
-								else
-								{
-									ReinitializeForceFeedbackDevice( windowHandle );
-								}
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.AutoOverallScale.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.AutoOverallScale );
-
-							if ( buttonPresses > 0 )
-							{
-								var smoothedTorque = 0f;
-								var smoothedPeak = 0f;
-
-								for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
-								{
-									smoothedTorque = smoothedTorque * 0.9f + Math.Abs( _ffb_autoScaleSteeringWheelTorqueBuffer[ i ] ) * 0.1f;
-
-									if ( smoothedTorque > smoothedPeak )
-									{
-										smoothedPeak = smoothedTorque;
-									}
-								}
-
-								if ( smoothedPeak > 0 )
-								{
-									var ratio = Math.Min( 1, Settings.TargetForce / smoothedPeak );
-
-									Settings.OverallScale = (int) ( ratio * 100 );
-								}
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.DecreaseOverallScale.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseOverallScale );
-
-							if ( buttonPresses > 0 )
-							{
-								Settings.OverallScale -= buttonPresses;
-
-								_ffb_announceOverallScaleTimer = 1;
-
-								playSound = true;
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.IncreaseOverallScale.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseOverallScale );
-
-							if ( buttonPresses > 0 )
-							{
-								Settings.OverallScale += buttonPresses;
-
-								_ffb_announceOverallScaleTimer = 1;
-
-								playSound = true;
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.DecreaseDetailScale.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseDetailScale );
-
-							if ( buttonPresses > 0 )
-							{
-								Settings.DetailScale -= buttonPresses;
-
-								_ffb_announceDetailScaleTimer = 1;
-
-								playSound = true;
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.IncreaseDetailScale.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseDetailScale );
-
-							if ( buttonPresses > 0 )
-							{
-								Settings.DetailScale += buttonPresses;
-
-								_ffb_announceDetailScaleTimer = 1;
-
-								playSound = true;
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.UndersteerEffectButton.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.UndersteerEffectButton );
-
-							if ( buttonPresses > 0 )
-							{
-								if ( _irsdk_steeringWheelAngle >= 0 )
-								{
-									Settings.USYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
-
-									Say( $"The understeer effect left yaw rate factor has been set to {Settings.USYawRateFactorLeft}." );
-								}
-								else
-								{
-									Settings.USYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
-
-									Say( $"The understeer effect right yaw rate factor has been set to {Settings.USYawRateFactorRight}." );
-								}
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.DecreaseLFEScale.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.DecreaseLFEScale );
-
-							if ( buttonPresses > 0 )
-							{
-								Settings.LFEScale -= buttonPresses;
-
-								_ffb_announceLFEScaleTimer = 1;
-
-								playSound = true;
-							}
-						}
-
-						if ( joystick.Information.InstanceGuid == Settings.IncreaseLFEScale.DeviceInstanceGuid )
-						{
-							var buttonPresses = GetButtonPressCount( joystickUpdateArray, Settings.IncreaseLFEScale );
-
-							if ( buttonPresses > 0 )
-							{
-								Settings.LFEScale += buttonPresses;
-
-								_ffb_announceLFEScaleTimer = 1;
-
-								playSound = true;
-							}
+							smoothedPeak = smoothedTorque;
 						}
 					}
-					catch ( Exception )
+
+					if ( smoothedPeak > 0 )
 					{
-						joystick.Acquire();
+						var ratio = Math.Min( 1, Settings.TargetForce / smoothedPeak );
+
+						Settings.OverallScale = (int) ( ratio * 100 );
 					}
 				}
 
-				if ( playSound )
+				buttonPresses = Settings.DecreaseOverallScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"DECREASE-OVERALL-SCALE button pressed! (x{buttonPresses})" );
+
+					Settings.OverallScale -= buttonPresses;
+
+					_ffb_announceOverallScaleTimer = 1;
+
+					playClickSound = true;
+				}
+
+				buttonPresses = Settings.IncreaseOverallScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"INCREASE-OVERALL-SCALE button pressed! (x{buttonPresses})" );
+
+					Settings.OverallScale += buttonPresses;
+
+					_ffb_announceOverallScaleTimer = 1;
+
+					playClickSound = true;
+				}
+
+				buttonPresses = Settings.DecreaseDetailScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"DECREASE-DETAIL-SCALE button pressed! (x{buttonPresses})" );
+
+					Settings.DetailScale -= buttonPresses;
+
+					_ffb_announceDetailScaleTimer = 1;
+
+					playClickSound = true;
+				}
+
+				buttonPresses = Settings.IncreaseDetailScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"INCREASE-DETAIL-SCALE button pressed! (x{buttonPresses})" );
+
+					Settings.DetailScale += buttonPresses;
+
+					_ffb_announceDetailScaleTimer = 1;
+
+					playClickSound = true;
+				}
+
+				buttonPresses = Settings.UndersteerEffectButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"UNDERSTEER-EFFECT button pressed!" );
+
+					if ( _irsdk_steeringWheelAngle >= 0 )
+					{
+						Settings.USYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
+
+						Say( Settings.SayLeftYawRateFactor, Settings.USYawRateFactorLeft.ToString() );
+					}
+					else
+					{
+						Settings.USYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
+
+						Say( Settings.SayRightYawRateFactor, Settings.USYawRateFactorRight.ToString() );
+					}
+				}
+
+				buttonPresses = Settings.DecreaseLFEScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"DECREASE-LFE-SCALE button pressed! (x{buttonPresses})" );
+
+					Settings.LFEScale -= buttonPresses;
+
+					_ffb_announceLFEScaleTimer = 1;
+
+					playClickSound = true;
+				}
+
+				buttonPresses = Settings.IncreaseLFEScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"INCREASE-LFE-SCALE button pressed! (x{buttonPresses})" );
+
+					Settings.LFEScale += buttonPresses;
+
+					_ffb_announceLFEScaleTimer = 1;
+
+					playClickSound = true;
+				}
+
+				if ( playClickSound )
 				{
 					PlayClick();
 				}
@@ -597,7 +571,7 @@ namespace MarvinsAIRA
 
 				if ( _ffb_announceOverallScaleTimer <= 0 )
 				{
-					Say( $"The overall scale is now {Settings.OverallScale} percent." );
+					Say( Settings.SayOverallScale, Settings.OverallScale.ToString() );
 				}
 			}
 
@@ -607,7 +581,7 @@ namespace MarvinsAIRA
 
 				if ( _ffb_announceDetailScaleTimer <= 0 )
 				{
-					Say( $"The detail scale is now {Settings.DetailScale} percent." );
+					Say( Settings.SayDetailScale, Settings.DetailScale.ToString() );
 				}
 			}
 
@@ -617,7 +591,7 @@ namespace MarvinsAIRA
 
 				if ( _ffb_announceLFEScaleTimer <= 0 )
 				{
-					Say( $"The LFE scale is now {Settings.LFEScale} percent." );
+					Say( Settings.SayLFEScale, Settings.LFEScale.ToString() );
 				}
 			}
 
@@ -625,12 +599,7 @@ namespace MarvinsAIRA
 			{
 				_ffb_reinitializeNeeded = false;
 
-				_ffb_reinitializeTimer = Math.Max( 0.25f, _ffb_reinitializeTimer );
-			}
-
-			if ( _ffb_forceFeedbackExceptionThrown )
-			{
-				_ffb_reinitializeTimer = Math.Max( 1.0f, _ffb_reinitializeTimer );
+				_ffb_reinitializeTimer = Math.Max( 1f, _ffb_reinitializeTimer );
 			}
 
 			if ( _ffb_reinitializeTimer > 0 )
@@ -670,14 +639,8 @@ namespace MarvinsAIRA
 
 						forceFeedbackSettingsFound = true;
 
-						if ( Settings.OverallScale == Settings.DetailScale )
-						{
-							Say( $"The overall and detail scale have been restored to {Settings.OverallScale} percent." );
-						}
-						else
-						{
-							Say( $"The overall scale has been restored to {Settings.OverallScale} percent, and the detail scale to {Settings.DetailScale} percent." );
-						}
+						Say( Settings.SayLoadOverallScale, Settings.OverallScale.ToString() );
+						Say( Settings.SayLoadDetailScale, Settings.DetailScale.ToString() );
 
 						break;
 					}
@@ -692,7 +655,7 @@ namespace MarvinsAIRA
 					Settings.USYawRateFactorLeft = 0;
 					Settings.USYawRateFactorRight = 0;
 
-					Say( "This is the first time you have driven this combination, so we have reset the overall and detail scale." );
+					Say( Settings.SayScalesReset );
 				}
 
 				_settings_pauseSerialization = false;
@@ -802,7 +765,7 @@ namespace MarvinsAIRA
 
 			// keep track of average lateral force factor over the last half second
 
-			if ( _irsdk_steeringWheelAngle < -0.1f || _irsdk_steeringWheelAngle > 0.1f )
+			if ( Math.Abs( _irsdk_steeringWheelAngle ) > 0.1f )
 			{
 				var latForceFactor = _irsdk_latAccel / _irsdk_steeringWheelAngle;
 
@@ -826,19 +789,24 @@ namespace MarvinsAIRA
 
 			// update the understeer effect
 
-			float understeerAmount = 0;
+			float understeerAmount = 0; // 0 = 15% below understeer edge, 0.5 = right on understeer edge, 1 = 15% above understeer edge
+			float understeerFrequency = 0.25f; // 0.25 to 1.0
 
 			var settingYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.USYawRateFactorLeft : Settings.USYawRateFactorRight;
 
 			if ( ( Math.Abs( _irsdk_yawRate ) > 0.1f ) && ( settingYawRateFactor > 0 ) )
 			{
 				var deltaYawRateFactor = settingYawRateFactor - _ffb_yawRateFactorInstant;
-				var margin = settingYawRateFactor * 0.25f;
+				var margin = settingYawRateFactor * 0.15f;
 
-				understeerAmount = Math.Max( 0f, Math.Min( 2f, ( margin - deltaYawRateFactor ) / margin ) );
+				understeerAmount = Math.Max( 0f, Math.Min( 1f, ( margin - deltaYawRateFactor ) / margin * 0.5f ) );
+				understeerFrequency += understeerAmount * 0.375f;
+
+				if ( Settings.USEffectStyleInvert )
+				{
+					understeerAmount = -understeerAmount;
+				}
 			}
-
-			var understeerEffectMagnitude = (int) ( ( Settings.USEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4 ) );
 
 			// we want to reduce forces while the car is moving very slow or parked
 
@@ -865,6 +833,7 @@ namespace MarvinsAIRA
 
 			var overallScaleToDirectInputUnits = normalizedOverallScaleSetting * newtonMetersToDirectInputUnits;
 			var detailScaleToDirectInputUnits = overallScaleToDirectInputUnits + overallScaleToDirectInputUnits * ( normalizedDetailScaleSetting - 1 );
+			var understeerEffectScaleToDirectInputUnits = (int) ( ( Settings.USEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4 ) );
 			var lfeScale = normalizedLFEScaleSetting * DI_FFNOMINALMAX;
 
 			// make a copy of the lfe read index so it doesn't change in the middle of this update (its updated in another thread)
@@ -918,7 +887,9 @@ namespace MarvinsAIRA
 
 					if ( Settings.USEffectStyle == 2 )
 					{
-						steadyStateWheelTorque *= 1.0f - understeerAmount;
+						var wave = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+						steadyStateWheelTorque += wave * understeerAmount * understeerEffectScaleToDirectInputUnits;
 					}
 
 					// scale the impulse by our detail scale and add it to our running steering wheel torque
@@ -937,7 +908,9 @@ namespace MarvinsAIRA
 
 					if ( Settings.USEffectStyle == 2 )
 					{
-						steadyStateWheelTorque *= 1.0f - understeerAmount;
+						var wave = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+						steadyStateWheelTorque += wave * understeerAmount * understeerEffectScaleToDirectInputUnits;
 					}
 
 					// blend between steady state force and original force using detail scale amount
@@ -953,22 +926,26 @@ namespace MarvinsAIRA
 
 				_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
 
-				// mix in the understeer effects
+				// mix in the sine and sawtooth wave understeer effects
 
-				if ( Settings.USEffectStyle == 0 )
-				{
-					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( Math.Sin( _ffb_understeerEffectAngle ) * understeerEffectMagnitude * understeerAmount );
-				}
-				else if ( Settings.USEffectStyle == 1 )
-				{
-					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( ( 2 * Math.Abs( Math.PI - _ffb_understeerEffectAngle ) - 1 ) * understeerEffectMagnitude * understeerAmount );
-				}
-
-				_ffb_understeerEffectAngle += understeerAmount * 0.5f;
+				_ffb_understeerEffectAngle += understeerFrequency;
 
 				if ( _ffb_understeerEffectAngle > (float) Math.PI * 2f )
 				{
 					_ffb_understeerEffectAngle -= (float) Math.PI * 2f;
+				}
+
+				if ( Settings.USEffectStyle == 0 )
+				{
+					var wave = Math.Sin( _ffb_understeerEffectAngle );
+
+					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+				}
+				else if ( Settings.USEffectStyle == 1 )
+				{
+					var wave = _ffb_understeerEffectAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
 				}
 
 				// reset the magnitude index now
@@ -1164,6 +1141,7 @@ namespace MarvinsAIRA
 				catch ( Exception exception )
 				{
 					app._ffb_forceFeedbackExceptionThrown = true;
+					app._ffb_reinitializeNeeded = true;
 
 					app.WriteLine( "" );
 					app.WriteLine( "An exception was thrown while trying to update the constant force effect parameters!" );

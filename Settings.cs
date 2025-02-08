@@ -9,13 +9,17 @@ namespace MarvinsAIRA
 	{
 		public class MappedButton
 		{
-			public bool IsKeyboard = false;
-			public bool UseShift = false;
-			public bool UseCtrl = false;
-			public bool UseAlt = false;
-			public Guid DeviceInstanceGuid = Guid.Empty;
-			public string DeviceProductName = string.Empty;
-			public int ButtonNumber = 0;
+			public Guid DeviceInstanceGuid { get; set; } = Guid.Empty;
+			public string DeviceProductName { get; set; } = string.Empty;
+			public int ButtonNumber { get; set; } = 0;
+		}
+
+		public class MappedButtons
+		{
+			public MappedButton Button1 { get; set; } = new();
+			public MappedButton Button2 { get; set; } = new();
+			public bool Button1Held { get; set; } = false;
+			public int ClickCount { get; set; } = 0;
 		}
 
 		#region Force feedback tab
@@ -39,7 +43,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Device lists */
+		/* Lists */
 
 		private SerializableDictionary<Guid, string> _ffbDeviceList = [];
 
@@ -48,6 +52,10 @@ namespace MarvinsAIRA
 		private SerializableDictionary<Guid, string> _lfeDeviceList = [];
 
 		public SerializableDictionary<Guid, string> LFEDeviceList { get => _lfeDeviceList; }
+
+		private SerializableDictionary<string, string> _voiceList = [];
+
+		public SerializableDictionary<string, string> VoiceList { get => _voiceList; }
 
 		/* Selected FFB device */
 
@@ -70,17 +78,17 @@ namespace MarvinsAIRA
 
 		/* Reset force feedback */
 
-		public MappedButton _setForegroundWindow = new();
+		public MappedButtons _reinitForceFeedbackButtons = new();
 
-		public MappedButton SetForegroundWindow
+		public MappedButtons ReinitForceFeedbackButtons
 		{
-			get => _setForegroundWindow;
+			get => _reinitForceFeedbackButtons;
 
 			set
 			{
-				if ( _setForegroundWindow != value )
+				if ( _reinitForceFeedbackButtons != value )
 				{
-					_setForegroundWindow = value;
+					_reinitForceFeedbackButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -169,17 +177,17 @@ namespace MarvinsAIRA
 
 		/* Auto overall scale */
 
-		public MappedButton _autoOverallScale = new();
+		public MappedButtons _autoOverallScaleButtons = new();
 
-		public MappedButton AutoOverallScale
+		public MappedButtons AutoOverallScaleButtons
 		{
-			get => _autoOverallScale;
+			get => _autoOverallScaleButtons;
 
 			set
 			{
-				if ( _autoOverallScale != value )
+				if ( _autoOverallScaleButtons != value )
 				{
-					_autoOverallScale = value;
+					_autoOverallScaleButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -268,17 +276,17 @@ namespace MarvinsAIRA
 
 		/* Decrease overall scale */
 
-		private MappedButton _decreaseOverallScale = new();
+		private MappedButtons _decreaseOverallScaleButtons = new();
 
-		public MappedButton DecreaseOverallScale
+		public MappedButtons DecreaseOverallScaleButtons
 		{
-			get => _decreaseOverallScale;
+			get => _decreaseOverallScaleButtons;
 
 			set
 			{
-				if ( _decreaseOverallScale != value )
+				if ( _decreaseOverallScaleButtons != value )
 				{
-					_decreaseOverallScale = value;
+					_decreaseOverallScaleButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -287,17 +295,17 @@ namespace MarvinsAIRA
 
 		/* Increase overall scale */
 
-		private MappedButton _increaseOverallScale = new();
+		private MappedButtons _increaseOverallScaleButtons = new();
 
-		public MappedButton IncreaseOverallScale
+		public MappedButtons IncreaseOverallScaleButtons
 		{
-			get => _increaseOverallScale;
+			get => _increaseOverallScaleButtons;
 
 			set
 			{
-				if ( _increaseOverallScale != value )
+				if ( _increaseOverallScaleButtons != value )
 				{
-					_increaseOverallScale = value;
+					_increaseOverallScaleButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -306,17 +314,17 @@ namespace MarvinsAIRA
 
 		/* Decrease detail scale */
 
-		private MappedButton _decreaseDetailScale = new();
+		private MappedButtons _decreaseDetailScaleButtons = new();
 
-		public MappedButton DecreaseDetailScale
+		public MappedButtons DecreaseDetailScaleButtons
 		{
-			get => _decreaseDetailScale;
+			get => _decreaseDetailScaleButtons;
 
 			set
 			{
-				if ( _decreaseDetailScale != value )
+				if ( _decreaseDetailScaleButtons != value )
 				{
-					_decreaseDetailScale = value;
+					_decreaseDetailScaleButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -325,17 +333,17 @@ namespace MarvinsAIRA
 
 		/* Increase detail scale */
 
-		private MappedButton _increaseDetailScale = new();
+		private MappedButtons _increaseDetailScaleButtons = new();
 
-		public MappedButton IncreaseDetailScale
+		public MappedButtons IncreaseDetailScaleButtons
 		{
-			get => _increaseDetailScale;
+			get => _increaseDetailScaleButtons;
 
 			set
 			{
-				if ( _increaseDetailScale != value )
+				if ( _increaseDetailScaleButtons != value )
 				{
-					_increaseDetailScale = value;
+					_increaseDetailScaleButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -422,11 +430,34 @@ namespace MarvinsAIRA
 			}
 		}
 
+		#endregion
+
+		#region Understeer effect tab
+
+		/* Understeer effect enabled */
+
+		private bool _understeerEffectEnabled = false;
+
+		public bool UndersteerEffectEnabled
+		{
+			get => _understeerEffectEnabled;
+
+			set
+			{
+				if ( _understeerEffectEnabled != value )
+				{
+					_understeerEffectEnabled = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Understeer effect style */
 
 		public bool USEffectStyleSineWaveBuzz { get; set; } = true;
-		public bool USEffectStyleTriangleWaveBuzz { get; set; } = false;
-		public bool USEffectStyleReduceSteadyStateForce { get; set; } = false;
+		public bool USEffectStyleSawtoothWaveBuzz { get; set; } = false;
+		public bool USEffectStyleConstantForce { get; set; } = false;
 
 		private int _usEffectStyle = 0;
 
@@ -445,9 +476,26 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private bool _usEffectStyleInvert = false;
+
+		public bool USEffectStyleInvert
+		{
+			get => _usEffectStyleInvert;
+
+			set
+			{
+				if ( _usEffectStyleInvert != value )
+				{
+					_usEffectStyleInvert = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Understeer effect strength */
 
-		private int _usEffectStrength = 0;
+		private int _usEffectStrength = 10;
 
 		public int USEffectStrength
 		{
@@ -461,21 +509,14 @@ namespace MarvinsAIRA
 				{
 					_usEffectStrength = value;
 
-					if ( _usEffectStrength == 0 )
-					{
-						USEffectStrengthString = "OFF";
-					}
-					else
-					{
-						USEffectStrengthString = $"{_usEffectStrength}%";
-					}
+					USEffectStrengthString = $"{_usEffectStrength}%";
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _usEffectStrengthString = "OFF";
+		private string _usEffectStrengthString = "10%";
 
 		public string USEffectStrengthString
 		{
@@ -571,19 +612,43 @@ namespace MarvinsAIRA
 				}
 			}
 		}
+
 		/* Understeer effect button */
 
-		private MappedButton _understeerEffectButton = new();
+		private MappedButtons _understeerEffectButtons = new();
 
-		public MappedButton UndersteerEffectButton
+		public MappedButtons UndersteerEffectButtons
 		{
-			get => _understeerEffectButton;
+			get => _understeerEffectButtons;
 
 			set
 			{
-				if ( _understeerEffectButton != value )
+				if ( _understeerEffectButtons != value )
 				{
-					_understeerEffectButton = value;
+					_understeerEffectButtons = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region LFE to FFB tab
+
+		/* LFE to FFB enabled */
+
+		private bool _lfeToFFBEnabled = false;
+
+		public bool LFEToFFBEnabled
+		{
+			get => _lfeToFFBEnabled;
+
+			set
+			{
+				if ( _lfeToFFBEnabled != value )
+				{
+					_lfeToFFBEnabled = value;
 
 					OnPropertyChanged();
 				}
@@ -651,17 +716,17 @@ namespace MarvinsAIRA
 
 		/* Decrease LFE scale */
 
-		private MappedButton _decreaseLFEScale = new();
+		private MappedButtons _decreaseLFEScaleButtons = new();
 
-		public MappedButton DecreaseLFEScale
+		public MappedButtons DecreaseLFEScaleButtons
 		{
-			get => _decreaseLFEScale;
+			get => _decreaseLFEScaleButtons;
 
 			set
 			{
-				if ( _decreaseLFEScale != value )
+				if ( _decreaseLFEScaleButtons != value )
 				{
-					_decreaseLFEScale = value;
+					_decreaseLFEScaleButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -670,17 +735,17 @@ namespace MarvinsAIRA
 
 		/* Increase LFE scale */
 
-		private MappedButton _increaseLFEScale = new();
+		private MappedButtons _increaseLFEScaleButtons = new();
 
-		public MappedButton IncreaseLFEScale
+		public MappedButtons IncreaseLFEScaleButtons
 		{
-			get => _increaseLFEScale;
+			get => _increaseLFEScaleButtons;
 
 			set
 			{
-				if ( _increaseLFEScale != value )
+				if ( _increaseLFEScaleButtons != value )
 				{
-					_increaseLFEScale = value;
+					_increaseLFEScaleButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -712,7 +777,7 @@ namespace MarvinsAIRA
 
 		/* Wind simulator enabled */
 
-		private bool _windSimulatorEnabled = true;
+		private bool _windSimulatorEnabled = false;
 
 		public bool WindSimulatorEnabled
 		{
@@ -1140,85 +1205,50 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region General settings tab
+		#region Settings tab - Window tab
 
-		/* Enable speech synthesizer */
+		/* Start minimized */
 
-		private bool _enableSpeechSynthesizer = true;
+		private bool _startMinimized = false;
 
-		public bool EnableSpeechSynthesizer
+		public bool StartMinimized
 		{
-			get => _enableSpeechSynthesizer;
+			get => _startMinimized;
 
 			set
 			{
-				if ( _enableSpeechSynthesizer != value )
+				if ( _startMinimized != value )
 				{
-					_enableSpeechSynthesizer = value;
+					_startMinimized = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		/* Speech synthesizer volume */
+		/* Topmost window */
 
-		private int _speechSynthesizerVolume = 100;
+		private bool _topmostWindow = false;
 
-		public int SpeechSynthesizerVolume
+		public bool TopmostWindow
 		{
-			get => _speechSynthesizerVolume;
+			get => _topmostWindow;
 
 			set
 			{
-				if ( _speechSynthesizerVolume != value )
+				if ( _topmostWindow != value )
 				{
-					_speechSynthesizerVolume = value;
+					_topmostWindow = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		/* Enable click sound */
 
-		private bool _enableClickSound = true;
+		#endregion
 
-		public bool EnableClickSound
-		{
-			get => _enableClickSound;
-
-			set
-			{
-				if ( _enableClickSound != value )
-				{
-					_enableClickSound = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Click sound volume */
-
-		private int _clickSoundVolume = 75;
-
-		public int ClickSoundVolume
-		{
-			get => _clickSoundVolume;
-
-			set
-			{
-				if ( _clickSoundVolume != value )
-				{
-					_clickSoundVolume = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Force feedback settings save options*/
+		#region Settings tab - Save file tab
 
 		private bool _saveSettingsPerWheel = true;
 
@@ -1288,38 +1318,43 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Start minimized */
 
-		private bool _startMinimized = false;
+		#endregion
 
-		public bool StartMinimized
+		#region Settings tab - Audio tab
+
+		/* Enable click sound */
+
+		private bool _enableClickSound = true;
+
+		public bool EnableClickSound
 		{
-			get => _startMinimized;
+			get => _enableClickSound;
 
 			set
 			{
-				if ( _startMinimized != value )
+				if ( _enableClickSound != value )
 				{
-					_startMinimized = value;
+					_enableClickSound = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		/* Topmost window */
+		/* Click sound volume */
 
-		private bool _topmostWindow = false;
+		private int _clickSoundVolume = 75;
 
-		public bool TopmostWindow
+		public int ClickSoundVolume
 		{
-			get => _topmostWindow;
+			get => _clickSoundVolume;
 
 			set
 			{
-				if ( _topmostWindow != value )
+				if ( _clickSoundVolume != value )
 				{
-					_topmostWindow = value;
+					_clickSoundVolume = value;
 
 					OnPropertyChanged();
 				}
@@ -1328,7 +1363,102 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Device lists
+		#region Settings tab - Voice tab
+
+		/* Enable speech synthesizer */
+
+		private bool _enableSpeechSynthesizer = true;
+
+		public bool EnableSpeechSynthesizer
+		{
+			get => _enableSpeechSynthesizer;
+
+			set
+			{
+				if ( _enableSpeechSynthesizer != value )
+				{
+					_enableSpeechSynthesizer = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Speech synthesizer volume */
+
+		private int _speechSynthesizerVolume = 100;
+
+		public int SpeechSynthesizerVolume
+		{
+			get => _speechSynthesizerVolume;
+
+			set
+			{
+				if ( _speechSynthesizerVolume != value )
+				{
+					_speechSynthesizerVolume = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Speech synthesizer gender */
+
+		private string _selectedVoice = string.Empty;
+
+		public string SelectedVoice
+		{
+			get => _selectedVoice;
+
+			set
+			{
+				if ( _selectedVoice != value )
+				{
+					_selectedVoice = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Various translations */
+
+		public string _sayHello = "Hello!";
+		public string _sayConnected = "We are connected to the iRacing simulator.";
+		public string _sayDisconnected = "We have been disconnected from the iRacing simulator.";
+		public string _sayVoiceVolume = "My voice is now at :value: percent.";
+		public string _sayCarName = "You are driving a :value:.";
+		public string _sayTrackName = "You are racing at :value:.";
+		public string _sayTrackConfigName = ":value:.";
+		public string _sayOverallScale = "The overall scale is now :value: percent.";
+		public string _sayDetailScale = "The detail scale is now :value: percent.";
+		public string _sayLFEScale = "The LFE scale is now :value: percent.";
+		public string _sayScalesReset = "This is the first time you have driven this combination, so we have reset the overall and detail scale.";
+		public string _sayLoadOverallScale = "The overall scale has been restored to :value: percent";
+		public string _sayLoadDetailScale = "The detail scale has been restored to :value: percent.";
+		public string _sayLeftYawRateFactor = "The understeer effect left yaw rate factor has been set to :value:.";
+		public string _sayRightYawRateFactor = "The understeer effect right yaw rate factor has been set to :value:.";
+
+		public string SayHello { get => _sayHello; set { if ( _sayHello != value ) { _sayHello = value; OnPropertyChanged(); } } }
+		public string SayConnected { get => _sayConnected; set { if ( _sayConnected != value ) { _sayConnected = value; OnPropertyChanged(); } } }
+		public string SayDisconnected { get => _sayDisconnected; set { if ( _sayDisconnected != value ) { _sayDisconnected = value; OnPropertyChanged(); } } }
+		public string SayVoiceVolume { get => _sayVoiceVolume; set { if ( _sayVoiceVolume != value ) { _sayVoiceVolume = value; OnPropertyChanged(); } } }
+		public string SayCarName { get => _sayCarName; set { if ( _sayCarName != value ) { _sayCarName = value; OnPropertyChanged(); } } }
+		public string SayTrackName { get => _sayTrackName; set { if ( _sayTrackName != value ) { _sayTrackName = value; OnPropertyChanged(); } } }
+		public string SayTrackConfigName { get => _sayTrackConfigName; set { if ( _sayTrackConfigName != value ) { _sayTrackConfigName = value; OnPropertyChanged(); } } }
+		public string SayOverallScale { get => _sayOverallScale; set { if ( _sayOverallScale != value ) { _sayOverallScale = value; OnPropertyChanged(); } } }
+		public string SayDetailScale { get => _sayDetailScale; set { if ( _sayDetailScale != value ) { _sayDetailScale = value; OnPropertyChanged(); } } }
+		public string SayLFEScale { get => _sayLFEScale; set { if ( _sayLFEScale != value ) { _sayLFEScale = value; OnPropertyChanged(); } } }
+		public string SayScalesReset { get => _sayScalesReset; set { if ( _sayScalesReset != value ) { _sayScalesReset = value; OnPropertyChanged(); } } }
+		public string SayLoadOverallScale { get => _sayLoadOverallScale; set { if ( _sayLoadOverallScale != value ) { _sayLoadOverallScale = value; OnPropertyChanged(); } } }
+		public string SayLoadDetailScale { get => _sayLoadDetailScale; set { if ( _sayLoadDetailScale != value ) { _sayLoadDetailScale = value; OnPropertyChanged(); } } }
+		public string SayLeftYawRateFactor { get => _sayLeftYawRateFactor; set { if ( _sayLeftYawRateFactor != value ) { _sayLeftYawRateFactor = value; OnPropertyChanged(); } } }
+		public string SayRightYawRateFactor { get => _sayRightYawRateFactor; set { if ( _sayRightYawRateFactor != value ) { _sayRightYawRateFactor = value; OnPropertyChanged(); } } }
+
+		#endregion
+
+		#region Lists
 
 		public void UpdateFFBDeviceList( SerializableDictionary<Guid, string> ffbDeviceList )
 		{
@@ -1342,6 +1472,13 @@ namespace MarvinsAIRA
 			_lfeDeviceList = lfeDeviceList;
 
 			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( LFEDeviceList ) ) );
+		}
+
+		public void UpdateVoiceList( SerializableDictionary<string, string> voiceList )
+		{
+			_voiceList = voiceList;
+
+			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( VoiceList ) ) );
 		}
 
 		#endregion

@@ -34,8 +34,6 @@ namespace MarvinsAIRA
 
 			SerializableDictionary<Guid, string> lfeDeviceList = [];
 
-			lfeDeviceList.Add( Guid.Empty, "Disable LFE to FFB" );
-
 			foreach ( var deviceInformation in deviceInformationList )
 			{
 				if ( deviceInformation.DriverGuid != Guid.Empty )

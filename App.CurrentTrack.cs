@@ -52,7 +52,8 @@ namespace MarvinsAIRA
 					WriteLine( "" );
 					WriteLine( $"You are racing at {trackDisplayName} ({trackConfigName})." );
 
-					Say( $"You are racing at {trackDisplayName} ({trackConfigName})." );
+					Say( Settings.SayTrackName, trackDisplayName );
+					Say( Settings.SayTrackConfigName, trackConfigName );
 
 					_track_trackChanged = ( _track_currentTrackDisplayName != trackDisplayName );
 					_track_trackConfigChanged = ( _track_currentTrackConfigName != trackConfigName );

@@ -14,8 +14,7 @@ namespace MarvinsAIRA
 
 		private bool _win_initialized = false;
 		private bool _win_updateLoopRunning = false;
-		private bool _win_pauseScaleButtons = false;
-		private bool _win_restartForceFeedback = false;
+		private bool _win_pauseButtons = false;
 
 		private nint _win_windowHandle = 0;
 
@@ -92,6 +91,8 @@ namespace MarvinsAIRA
 				app.WriteLine( "" );
 				app.WriteLine( "Starting the update loop..." );
 
+				_win_stopwatch.Restart();
+
 				var thread = new Thread( UpdateLoop );
 
 				thread.Start();
@@ -134,16 +135,6 @@ namespace MarvinsAIRA
 
 				_win_initialized = true;
 			}
-
-			if ( _win_restartForceFeedback )
-			{
-				app.ReinitializeForceFeedbackDevice( _win_windowHandle );
-			}
-		}
-
-		private void Window_Deactivated( object sender, EventArgs e )
-		{
-			_win_restartForceFeedback = true;
 		}
 
 		#endregion
@@ -176,13 +167,18 @@ namespace MarvinsAIRA
 					{
 						var deltaTime = Math.Min( 0.5f, (float) _win_stopwatch.Elapsed.TotalSeconds );
 
-						_win_stopwatch.Restart();
-
 						if ( deltaTime > 0.002f )
 						{
+							_win_stopwatch.Restart();
+
 							app.UpdateSettings( deltaTime );
-							app.UpdateInputs();
-							app.UpdateForceFeedback( deltaTime, !_win_pauseScaleButtons, _win_windowHandle );
+
+							if ( !_win_pauseButtons )
+							{
+								app.UpdateInputs();
+							}
+
+							app.UpdateForceFeedback( deltaTime, !_win_pauseButtons, _win_windowHandle );
 							app.UpdateWindSimulator();
 
 							if ( _win_sendForceFeedbackTestSignalCounter > 0 )
@@ -437,6 +433,10 @@ namespace MarvinsAIRA
 			{
 				SaveRecording();
 			}
+			else
+			{
+				Array.Clear( app._ffb_recordedSteeringWheelTorqueBuffer );
+			}
 
 			app.WriteLine( $"...recording is now {app._ffb_recordNow}" );
 			app.WriteLine( $"...playback is now {app._ffb_playbackNow}" );
@@ -472,7 +472,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "ResetForceFeedbackButton_Click called." );
 
-			app.Settings.SetForegroundWindow = ShowMapButtonWindow( app.Settings.SetForegroundWindow );
+			app.Settings.ReinitForceFeedbackButtons = ShowMapButtonsWindow( app.Settings.ReinitForceFeedbackButtons );
 		}
 
 		private void AutoOverallScaleButton_Click( object sender, RoutedEventArgs e )
@@ -482,7 +482,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "AutoOverallScaleButton_Click called." );
 
-			app.Settings.AutoOverallScale = ShowMapButtonWindow( app.Settings.AutoOverallScale );
+			app.Settings.AutoOverallScaleButtons = ShowMapButtonsWindow( app.Settings.AutoOverallScaleButtons );
 		}
 
 		private void DecreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
@@ -492,7 +492,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "DecreaseOverallScaleButton_Click called." );
 
-			app.Settings.DecreaseOverallScale = ShowMapButtonWindow( app.Settings.DecreaseOverallScale );
+			app.Settings.DecreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseOverallScaleButtons );
 		}
 
 		private void IncreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
@@ -502,7 +502,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "IncreaseOverallScaleButton_Click called." );
 
-			app.Settings.IncreaseOverallScale = ShowMapButtonWindow( app.Settings.IncreaseOverallScale );
+			app.Settings.IncreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseOverallScaleButtons );
 		}
 
 		private void DecreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
@@ -512,7 +512,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "DecreaseDetailScaleButton_Click called." );
 
-			app.Settings.DecreaseDetailScale = ShowMapButtonWindow( app.Settings.DecreaseDetailScale );
+			app.Settings.DecreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseDetailScaleButtons );
 		}
 
 		private void IncreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
@@ -522,7 +522,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "IncreaseDetailScaleButton_Click called." );
 
-			app.Settings.IncreaseDetailScale = ShowMapButtonWindow( app.Settings.IncreaseDetailScale );
+			app.Settings.IncreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseDetailScaleButtons );
 		}
 
 		private void FrequencySlider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
@@ -538,6 +538,45 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private void TogglePrettyGraph_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "EnablePrettyGraph_Button_Click called." );
+
+			if ( app.TogglePrettyGraph() )
+			{
+				Dispatcher.BeginInvoke( () =>
+				{
+					PrettyGraph_Border.Visibility = Visibility.Visible;
+
+					TogglePrettyGraph_Button.Content = "Disable Pretty Graph";
+				} );
+			}
+			else
+			{
+				Dispatcher.BeginInvoke( () =>
+				{
+					PrettyGraph_Border.Visibility = Visibility.Collapsed;
+
+					TogglePrettyGraph_Button.Content = "Enable Pretty Graph";
+				} );
+			}
+		}
+
+		#endregion
+
+		#region Understeer effect tab
+
+		private void UndersteerEffect_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "UndersteerEffect_CheckBox_Click called." );
+		}
+
 		private void SineWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
@@ -551,27 +590,27 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void TriangleWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
+		private void SawtoothWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "TriangleWaveBuzz_RadioButton_Click called." );
+				app.WriteLine( "SawtoothWaveBuzz_RadioButton_Click called." );
 
 				app.Settings.USEffectStyle = 1;
 			}
 		}
 
-		private void ReduceSteadyStateForce_RadioButton_Click( object sender, RoutedEventArgs e )
+		private void ConstantForce_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "ReduceSteadyStateForce_RadioButton_Click called." );
+				app.WriteLine( "ConstantForce_RadioButton_Click called." );
 
 				app.Settings.USEffectStyle = 2;
 			}
@@ -584,7 +623,19 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "UndersteerEffectButton_Click called." );
 
-			ShowMapButtonWindow( app.Settings.UndersteerEffectButton );
+			ShowMapButtonsWindow( app.Settings.UndersteerEffectButtons );
+		}
+
+		#endregion
+
+		#region LFE to FFB tab
+
+		private void LFEToFFB_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "LFEToFFB_CheckBox_Click called." );
 		}
 
 		private void LFEDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
@@ -607,7 +658,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "DecreaseLFEScaleButton_Click called." );
 
-			app.Settings.DecreaseLFEScale = ShowMapButtonWindow( app.Settings.DecreaseLFEScale );
+			app.Settings.DecreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseLFEScaleButtons );
 		}
 
 		private void IncreaseLFEScaleButton_Click( object sender, RoutedEventArgs e )
@@ -617,30 +668,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "IncreaseLFEScaleButton_Click called." );
 
-			app.Settings.IncreaseLFEScale = ShowMapButtonWindow( app.Settings.IncreaseLFEScale );
-		}
-
-		private void TogglePrettyGraph_Button_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "EnablePrettyGraph_Button_Click called." );
-
-			if ( app.TogglePrettyGraph() )
-			{
-				Dispatcher.BeginInvoke( () =>
-				{
-					TogglePrettyGraph_Button.Content = "Disable Pretty Graph";
-				} );
-			}
-			else
-			{
-				Dispatcher.BeginInvoke( () =>
-				{
-					TogglePrettyGraph_Button.Content = "Enable Pretty Graph";
-				} );
-			}
+			app.Settings.IncreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseLFEScaleButtons );
 		}
 
 		#endregion
@@ -693,35 +721,23 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region General settings tab
+		#region Settings tab - Window tab
 
-		private void SpeechSynthesizerVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		private void TopmostWindow_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
-			if ( _win_initialized )
-			{
-				var app = (App) Application.Current;
+			var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "SpeechSynthesizerVolume_ValueChanged called." );
+			app.WriteLine( "" );
+			app.WriteLine( "TopmostWindow_CheckBox_Click called." );
 
-				app.UpdateVolume();
+			var checkBox = (CheckBox) sender;
 
-				app.Say( $"My voice is now at {app.Settings.SpeechSynthesizerVolume} percent.", true );
-			}
+			Topmost = checkBox.IsChecked == true;
 		}
 
-		private void ClickSoundVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
-		{
-			if ( _win_initialized )
-			{
-				var app = (App) Application.Current;
+		#endregion
 
-				app.WriteLine( "" );
-				app.WriteLine( "ClickSoundVolume_ValueChanged called." );
-
-				app.PlayClick();
-			}
-		}
+		#region Settings tab - Save file tab
 
 		private void SaveForEachWheel_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
@@ -767,16 +783,55 @@ namespace MarvinsAIRA
 			app.QueueForSerialization();
 		}
 
-		private void TopmostWindow_CheckBox_Click( object sender, RoutedEventArgs e )
+		#endregion
+
+		#region Settings tab - Audio tab
+
+		private void ClickSoundVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
-			var app = (App) Application.Current;
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "TopmostWindow_CheckBox_Click called." );
+				app.WriteLine( "" );
+				app.WriteLine( "ClickSoundVolume_ValueChanged called." );
 
-			var checkBox = (CheckBox) sender;
+				app.PlayClick();
+			}
+		}
 
-			Topmost = checkBox.IsChecked == true;
+		#endregion
+
+		#region Settings tab - Voice tab
+
+		private void SpeechSynthesizerVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "SpeechSynthesizerVolume_ValueChanged called." );
+
+				app.UpdateVolume();
+
+				app.Say( app.Settings.SayVoiceVolume, app.Settings.SpeechSynthesizerVolume.ToString(), true );
+			}
+		}
+
+		private void SelectedVoice_SelectionChanged( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "SelectedVoice_SelectionChanged called." );
+
+				app.InitializeVoice();
+
+				app.Say( app.Settings.SayHello, null, true );
+			}
 		}
 
 		#endregion
@@ -790,7 +845,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "SeeHelpDocumentation_Click called." );
 
-			string url = "https://herboldracing.com";
+			string url = "https://herboldracing.com/marvins-awesome-iracing-app-maira/";
 
 			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
 			{
@@ -842,24 +897,19 @@ namespace MarvinsAIRA
 
 		#region Map button window
 
-		private Settings.MappedButton ShowMapButtonWindow( Settings.MappedButton mappedButton )
+		private Settings.MappedButtons ShowMapButtonsWindow( Settings.MappedButtons mappedButtons )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "Showing the map button dialog window..." );
+			app.WriteLine( "Showing the map buttons dialog window..." );
 
-			_win_pauseScaleButtons = true;
+			_win_pauseButtons = true;
 
 			var window = new MapButtonWindow
 			{
 				Owner = this,
-				useShift = mappedButton.UseShift,
-				useCtrl = mappedButton.UseCtrl,
-				useAlt = mappedButton.UseAlt,
-				deviceInstanceGuid = mappedButton.DeviceInstanceGuid,
-				deviceProductName = mappedButton.DeviceProductName,
-				buttonNumber = mappedButton.ButtonNumber
+				MappedButtons = mappedButtons,
 			};
 
 			window.ShowDialog();
@@ -868,25 +918,21 @@ namespace MarvinsAIRA
 			{
 				app.WriteLine( "...dialog window was closed..." );
 
-				mappedButton.UseShift = window.useShift;
-				mappedButton.UseCtrl = window.useCtrl;
-				mappedButton.UseAlt = window.useAlt;
-				mappedButton.DeviceInstanceGuid = window.deviceInstanceGuid;
-				mappedButton.DeviceProductName = window.deviceProductName;
-				mappedButton.ButtonNumber = window.buttonNumber;
+				mappedButtons.Button1 = window.MappedButtons.Button1;
+				mappedButtons.Button2 = window.MappedButtons.Button2;
 
 				app.QueueForSerialization();
 
-				app.WriteLine( $"...control mapping was changed to {mappedButton.DeviceProductName} button {mappedButton.ButtonNumber + 1}." );
+				app.WriteLine( $"...button mapping was changed." );
 			}
 			else
 			{
 				app.WriteLine( "...dialog window was closed (canceled)." );
 			}
 
-			_win_pauseScaleButtons = false;
+			_win_pauseButtons = false;
 
-			return mappedButton;
+			return mappedButtons;
 		}
 
 		#endregion

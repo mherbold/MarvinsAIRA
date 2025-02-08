@@ -48,9 +48,9 @@ namespace MarvinsAIRA
 				else
 				{
 					WriteLine( "" );
-					WriteLine( $"You are now driving a {carScreenName}." );
+					WriteLine( $"You are driving a {carScreenName}." );
 
-					Say( $"You are now driving a {carScreenName}." );
+					Say( Settings.SayCarName, carScreenName );
 
 					_car_carChanged = true;
 				}

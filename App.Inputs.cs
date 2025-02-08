@@ -1,24 +1,24 @@
 ﻿
-using SharpDX.DirectInput;
 using System.Windows;
+
+using SharpDX.DirectInput;
+
+using static MarvinsAIRA.Settings;
 
 namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
-		private readonly List<Joystick> _input_joystickList = [];
-		private readonly List<Keyboard> _input_keyboardList = [];
-
-		private bool _input_shiftIsDown = false;
-		private bool _input_ctrlIsDown = false;
-		private bool _input_altIsDown = false;
-
 		public class PressedButton
 		{
-			public required string deviceProductName;
-			public Guid deviceInstanceGuid;
-			public int buttonNumber;
+			public Guid DeviceInstanceGuid { get; set; } = Guid.Empty;
+			public string DeviceProductName { get; set; } = string.Empty;
+			public int ButtonNumber { get; set; } = 0;
 		}
+
+		public PressedButton AnyPressedButton { get; private set; } = new();
+
+		private readonly List<Joystick> _input_joystickList = [];
 
 		private void InitializeInputs( nint windowHandle )
 		{
@@ -49,28 +49,6 @@ namespace MarvinsAIRA
 
 					WriteLine( $"...this devices identifies as Type: {joystickDeviceInstance.Type}, Subtype: {joystickDeviceInstance.Subtype}, Has FF: {hasForceFeedback}..." );
 
-					if ( deviceType == DeviceType.Keyboard )
-					{
-						WriteLine( $"...creating keyboard type interface..." );
-
-						var keyboard = new Keyboard( directInput );
-
-						keyboard.Properties.BufferSize = 128;
-
-						WriteLine( $"...setting the cooperative level (non-exclusive background) on this device..." );
-
-						keyboard.SetCooperativeLevel( windowHandle, CooperativeLevel.NonExclusive | CooperativeLevel.Background );
-
-						WriteLine( $"...cooperative level was set..." );
-						WriteLine( $"...acquiring this device..." );
-
-						keyboard.Acquire();
-
-						WriteLine( $"...device was acquired..." );
-
-						_input_keyboardList.Add( keyboard );
-					}
-
 					WriteLine( $"...creating joystick type interface..." );
 
 					var joystick = new Joystick( directInput, joystickDeviceInstance.InstanceGuid );
@@ -94,52 +72,98 @@ namespace MarvinsAIRA
 
 			Settings.UpdateFFBDeviceList( ffbDeviceList );
 
-			WriteLine( $"...a total of {_input_joystickList.Count} controller devices were found (and {_input_keyboardList.Count} keyboards)." );
+			WriteLine( $"...a total of {_input_joystickList.Count} controller devices were found." );
 		}
 
 		public void UpdateInputs()
 		{
+			MappedButtons[] mappedButtonsList = [
+				Settings.ReinitForceFeedbackButtons,
+				Settings.AutoOverallScaleButtons,
+				Settings.IncreaseOverallScaleButtons,
+				Settings.DecreaseOverallScaleButtons,
+				Settings.IncreaseDetailScaleButtons,
+				Settings.DecreaseDetailScaleButtons,
+				Settings.IncreaseLFEScaleButtons,
+				Settings.DecreaseLFEScaleButtons,
+				Settings.UndersteerEffectButtons
+			];
+
+			foreach ( var mappedButton in mappedButtonsList )
+			{
+				mappedButton.Button1Held = false;
+				mappedButton.ClickCount = 0;
+			}
+
+			AnyPressedButton.DeviceInstanceGuid = Guid.Empty;
+			AnyPressedButton.DeviceProductName = string.Empty;
+			AnyPressedButton.ButtonNumber = 0;
+
+			JoystickState joystickState = new();
+
 			foreach ( var joystick in _input_joystickList )
 			{
-				joystick.Poll();
+				joystick.GetCurrentState( ref joystickState );
+
+				foreach ( var mappedButtons in mappedButtonsList )
+				{
+					if ( mappedButtons.Button2.DeviceInstanceGuid != Guid.Empty )
+					{
+						if ( mappedButtons.Button1.DeviceInstanceGuid == joystick.Information.InstanceGuid )
+						{
+							if ( joystickState.Buttons[ mappedButtons.Button1.ButtonNumber ] )
+							{
+								mappedButtons.Button1Held = true;
+							}
+						}
+					}
+				}
 			}
 
-			_input_shiftIsDown = false;
-			_input_ctrlIsDown = false;
-			_input_altIsDown = false;
-
-			foreach ( var keyboard in _input_keyboardList )
-			{
-				var keyboardState = keyboard.GetCurrentState();
-
-				_input_shiftIsDown |= keyboardState.PressedKeys.Contains( Key.LeftShift ) || keyboardState.PressedKeys.Contains( Key.RightShift );
-				_input_ctrlIsDown |= keyboardState.PressedKeys.Contains( Key.LeftControl ) || keyboardState.PressedKeys.Contains( Key.RightControl );
-				_input_altIsDown |= keyboardState.PressedKeys.Contains( Key.LeftAlt ) || keyboardState.PressedKeys.Contains( Key.RightAlt );
-			}
-		}
-
-		public PressedButton? GetAnyPressedButton()
-		{
 			foreach ( var joystick in _input_joystickList )
 			{
 				try
 				{
+					joystick.Poll();
+
 					var joystickUpdateArray = joystick.GetBufferedData();
 
-					foreach ( var joystickUpdate in joystickUpdateArray )
+					if ( ( joystickUpdateArray.Length > 0 ) && ( AnyPressedButton.DeviceInstanceGuid == Guid.Empty ) )
 					{
-						if ( ( joystickUpdate.Offset >= JoystickOffset.Buttons0 ) && ( joystickUpdate.Offset <= JoystickOffset.Buttons127 ) )
-						{
-							if ( joystickUpdate.Value != 0 )
-							{
-								var pressedButton = new PressedButton
-								{
-									deviceProductName = joystick.Information.ProductName,
-									deviceInstanceGuid = joystick.Information.InstanceGuid,
-									buttonNumber = joystickUpdate.Offset - JoystickOffset.Buttons0
-								};
+						AnyPressedButton.DeviceInstanceGuid = joystick.Information.InstanceGuid;
+						AnyPressedButton.DeviceProductName = joystick.Information.ProductName;
+						AnyPressedButton.ButtonNumber = joystickUpdateArray[ 0 ].Offset - JoystickOffset.Buttons0;
+					}
 
-								return pressedButton;
+					foreach ( var mappedButtons in mappedButtonsList )
+					{
+						if ( ( mappedButtons.Button1.DeviceInstanceGuid == joystick.Information.InstanceGuid ) && ( mappedButtons.Button2.DeviceInstanceGuid == Guid.Empty ) )
+						{
+							foreach ( var joystickUpdate in joystickUpdateArray )
+							{
+								if ( joystickUpdate.Offset == JoystickOffset.Buttons0 + mappedButtons.Button1.ButtonNumber )
+								{
+									if ( joystickUpdate.Value != 0 )
+									{
+										mappedButtons.ClickCount++;
+									}
+								}
+							}
+						}
+						else if ( mappedButtons.Button2.DeviceInstanceGuid == joystick.Information.InstanceGuid )
+						{
+							if ( mappedButtons.Button1Held )
+							{
+								foreach ( var joystickUpdate in joystickUpdateArray )
+								{
+									if ( joystickUpdate.Offset == JoystickOffset.Buttons0 + mappedButtons.Button2.ButtonNumber )
+									{
+										if ( joystickUpdate.Value != 0 )
+										{
+											mappedButtons.ClickCount++;
+										}
+									}
+								}
 							}
 						}
 					}
@@ -149,26 +173,6 @@ namespace MarvinsAIRA
 					joystick.Acquire();
 				}
 			}
-
-			return null;
-		}
-
-		private int GetButtonPressCount( JoystickUpdate[] joystickUpdateArray, Settings.MappedButton mappedButton )
-		{
-			var buttonPressCount = 0;
-
-			foreach ( var joystickUpdate in joystickUpdateArray )
-			{
-				if ( joystickUpdate.Offset == JoystickOffset.Buttons0 + mappedButton.ButtonNumber )
-				{
-					if ( ( joystickUpdate.Value != 0 ) && ( !mappedButton.UseShift || _input_shiftIsDown ) && ( !mappedButton.UseCtrl || _input_ctrlIsDown ) && ( !mappedButton.UseAlt || _input_altIsDown ) )
-					{
-						buttonPressCount++;
-					}
-				}
-			}
-
-			return buttonPressCount;
 		}
 	}
 }

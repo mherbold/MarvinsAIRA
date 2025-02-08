@@ -93,7 +93,7 @@ namespace MarvinsAIRA
 			WriteLine( "" );
 			WriteLine( "OnConnected called." );
 
-			Say( "We are now connected to the iRacing simulator." );
+			Say( Settings.SayConnected );
 
 			_irsdk_connected = true;
 
@@ -137,7 +137,9 @@ namespace MarvinsAIRA
 
 			_irsdk.PauseSessionInfoUpdates = false;
 
-			Say( "We have been disconnected from the iRacing simulator." );
+			UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
+
+			Say( Settings.SayDisconnected );
 
 			Dispatcher.BeginInvoke( () =>
 			{
