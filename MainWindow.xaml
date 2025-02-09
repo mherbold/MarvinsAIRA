@@ -608,7 +608,16 @@
                     </TabItem>
                     <TabItem Header="Wheel">
                         <StackPanel Margin="10,10,10,10">
-                            <CheckBox x:Name="AutoCenterWheel_CheckBox" Content="Gently center the wheel when out of the car or the iRacing simulator disconnects." IsChecked="{Binding AutoCenterWheel}" Click="AutoCenterWheel_CheckBox_Click"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Center the wheel when out of the car or when the iRacing simulator disconnects" IsChecked="{Binding AutoCenterWheel}" Click="AutoCenterWheel_CheckBox_Click"/>
+                                <Label Grid.Column="1" Content="Strength" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
+                                <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="10" Maximum="10000" SmallChange="1" LargeChange="100" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="1000" ValueChanged="AutoCenterWheelStrength_Slider_ValueChanged" />
+                            </Grid>
                         </StackPanel>
                     </TabItem>
                 </TabControl>

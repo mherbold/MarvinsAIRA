@@ -904,6 +904,19 @@ namespace MarvinsAIRA
 			app.WriteLine( "AutoCenterWheel_CheckBox_Click called." );
 		}
 
+		private void AutoCenterWheelStrength_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "AutoCenterWheelStrength_Slider_ValueChanged called." );
+
+				app.ScheduleReinitializeForceFeedback();
+			}
+		}
+
 		#endregion
 
 		#region Help tab

@@ -1498,6 +1498,22 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private int _autoCenterWheelStrength = 1000;
+
+		public int AutoCenterWheelStrength
+		{
+			get => _autoCenterWheelStrength;
+
+			set
+			{
+				if ( _autoCenterWheelStrength != value )
+				{
+					_autoCenterWheelStrength = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		#endregion
 

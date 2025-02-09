@@ -429,10 +429,10 @@ namespace MarvinsAIRA
 							Conditions = [ new SharpDX.DirectInput.Condition
 							{
 								Offset = 0,
-								PositiveCoefficient = DI_FFNOMINALMAX,
-								NegativeCoefficient = DI_FFNOMINALMAX,
-								PositiveSaturation = 500,
-								NegativeSaturation = 500,
+								PositiveCoefficient = Settings.AutoCenterWheelStrength,
+								NegativeCoefficient = Settings.AutoCenterWheelStrength,
+								PositiveSaturation = Settings.AutoCenterWheelStrength,
+								NegativeSaturation = Settings.AutoCenterWheelStrength,
 								DeadBand = 10
 							} ]
 						}
