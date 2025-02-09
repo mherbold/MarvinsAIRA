@@ -608,7 +608,7 @@
                     </TabItem>
                     <TabItem Header="Wheel">
                         <StackPanel Margin="10,10,10,10">
-                            <CheckBox x:Name="AutoCenterWheel_CheckBox" Content="Gently center the wheel when out of the car or the iRacing simulator disconnects." IsChecked="{Binding AutoCenterWheel}"/>
+                            <CheckBox x:Name="AutoCenterWheel_CheckBox" Content="Gently center the wheel when out of the car or the iRacing simulator disconnects." IsChecked="{Binding AutoCenterWheel}" Click="AutoCenterWheel_CheckBox_Click"/>
                         </StackPanel>
                     </TabItem>
                 </TabControl>

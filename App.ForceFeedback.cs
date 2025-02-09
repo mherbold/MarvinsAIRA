@@ -670,28 +670,36 @@ namespace MarvinsAIRA
 				_ffb_reinitializeTimer = Math.Max( 1f, _ffb_reinitializeTimer );
 			}
 
-			if ( _ffb_springEffect != null )
+			try
 			{
-				if ( _irsdk_isOnTrack )
+				if ( _ffb_springEffect != null )
 				{
-					if ( _ffb_springEffect.Status == EffectStatus.Playing )
+					if ( _irsdk_isOnTrack || !Settings.AutoCenterWheel )
 					{
-						WriteLine( "" );
-						WriteLine( "Stopping the spring effect." );
+						if ( _ffb_springEffect.Status == EffectStatus.Playing )
+						{
+							WriteLine( "" );
+							WriteLine( "Stopping the spring effect." );
 
-						_ffb_springEffect?.Stop();
+							_ffb_springEffect?.Stop();
+						}
+					}
+					else
+					{
+						if ( _ffb_springEffect.Status != EffectStatus.Playing )
+						{
+							WriteLine( "" );
+							WriteLine( "Starting the spring effect." );
+
+							_ffb_springEffect?.Start();
+						}
 					}
 				}
-				else
-				{
-					if ( _ffb_springEffect.Status != EffectStatus.Playing )
-					{
-						WriteLine( "" );
-						WriteLine( "Starting the spring effect." );
-
-						_ffb_springEffect?.Start();
-					}
-				}
+			}
+			catch ( Exception exception )
+			{
+				WriteLine( "" );
+				WriteLine( $"Exception thrown when trying to read status of, or starting, or stopping the spring effect: {exception.Message.Trim()}" );
 			}
 
 			if ( _ffb_reinitializeTimer > 0 )

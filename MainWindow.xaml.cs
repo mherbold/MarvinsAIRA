@@ -894,6 +894,18 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Settings tab - Wheel tab
+
+		private void AutoCenterWheel_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "AutoCenterWheel_CheckBox_Click called." );
+		}
+
+		#endregion
+
 		#region Help tab
 
 		private void SeeHelpDocumentation_Click( object sender, RoutedEventArgs e )
