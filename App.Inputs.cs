@@ -18,8 +18,6 @@ namespace MarvinsAIRA
 
 		public PressedButton AnyPressedButton { get; private set; } = new();
 
-		public int _input_steeringWheelAngle = 0;
-
 		private readonly List<Joystick> _input_joystickList = [];
 
 		private void InitializeInputs( nint windowHandle )
@@ -120,14 +118,6 @@ namespace MarvinsAIRA
 						}
 					}
 				}
-
-				if ( _ffb_drivingJoystick != null )
-				{
-					if ( joystick.Information.InstanceGuid == _ffb_drivingJoystick.Information.InstanceGuid )
-					{
-						_input_steeringWheelAngle = joystickState.X;
-					}
-				}
 			}
 
 			foreach ( var joystick in _input_joystickList )
@@ -140,9 +130,17 @@ namespace MarvinsAIRA
 
 					if ( ( joystickUpdateArray.Length > 0 ) && ( AnyPressedButton.DeviceInstanceGuid == Guid.Empty ) )
 					{
-						AnyPressedButton.DeviceInstanceGuid = joystick.Information.InstanceGuid;
-						AnyPressedButton.DeviceProductName = joystick.Information.ProductName;
-						AnyPressedButton.ButtonNumber = joystickUpdateArray[ 0 ].Offset - JoystickOffset.Buttons0;
+						foreach ( var joystickUpdate in joystickUpdateArray )
+						{
+							if ( joystickUpdate.Value != 0 )
+							{
+								AnyPressedButton.DeviceInstanceGuid = joystick.Information.InstanceGuid;
+								AnyPressedButton.DeviceProductName = joystick.Information.ProductName;
+								AnyPressedButton.ButtonNumber = joystickUpdateArray[ 0 ].Offset - JoystickOffset.Buttons0;
+
+								break;
+							}
+						}
 					}
 
 					foreach ( var mappedButtons in mappedButtonsList )
