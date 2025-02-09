@@ -79,13 +79,10 @@ namespace MarvinsAIRA
 
 		private void Window_Activated( object sender, EventArgs e )
 		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( $"MainWindow.Window_Activated called." );
-
 			if ( !_win_initialized )
 			{
+				var app = (App) Application.Current;
+
 				_win_windowHandle = new WindowInteropHelper( this ).Handle;
 
 				app.Initialize( _win_windowHandle );
@@ -195,22 +192,6 @@ namespace MarvinsAIRA
 								}
 
 								_win_sendForceFeedbackTestSignalCounter--;
-							}
-							else if ( !app._irsdk_isOnTrack )
-							{
-								var lastMagnitudeSendToWheel = app.FFB_LastMagnitudeSentToWheel;
-								var rampSpeed = (int) ( deltaTime * 1000 );
-
-								if ( lastMagnitudeSendToWheel > 0 )
-								{
-									lastMagnitudeSendToWheel = Math.Max( 0, lastMagnitudeSendToWheel - rampSpeed );
-								}
-								else
-								{
-									lastMagnitudeSendToWheel = Math.Min( 0, lastMagnitudeSendToWheel + rampSpeed );
-								}
-
-								app.UpdateConstantForce( [ lastMagnitudeSendToWheel ] );
 							}
 
 							_win_guiUpdateTimer -= deltaTime;

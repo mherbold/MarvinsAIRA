@@ -45,9 +45,14 @@ namespace MarvinsAIRA
 		private const string ALL_WHEELS_SAVE_NAME = "All";
 
 		private Joystick? _ffb_drivingJoystick = null;
+
 		private EffectInfo? _ffb_constantForceEffectInfo = null;
-		private EffectParameters? _ffb_effectParameters = null;
+		private EffectParameters? _ffb_constantForceEffectParameters = null;
 		private Effect? _ffb_constantForceEffect = null;
+
+		private EffectInfo? _ffb_springEffectInfo = null;
+		private EffectParameters? _ffb_springEffectParameters = null;
+		private Effect? _ffb_springEffect = null;
 
 		private bool _ffb_initialized = false;
 		private int _ffb_updatesToSkip = 0;
@@ -97,7 +102,7 @@ namespace MarvinsAIRA
 		private readonly float[] _ffb_lateralForceFactorBuffer = new float[ 30 ];
 		private int _ffb_lateralForceFactorBufferIndex = 0;
 
-		private float _ffb_understeerEffectAngle = 0;
+		private float _ffb_understeerEffectWaveAngle = 0;
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
@@ -199,7 +204,10 @@ namespace MarvinsAIRA
 					if ( effectInfo.Guid == EffectGuid.ConstantForce )
 					{
 						_ffb_constantForceEffectInfo = effectInfo;
-						break;
+					}
+					else if ( effectInfo.Guid == EffectGuid.Spring )
+					{
+						_ffb_springEffectInfo = effectInfo;
 					}
 				}
 
@@ -210,6 +218,12 @@ namespace MarvinsAIRA
 				else
 				{
 					WriteLine( "...the device does support constant force effects..." );
+
+					if ( _ffb_springEffectInfo != null )
+					{
+						WriteLine( "...the device also supports spring effects..." );
+					}
+
 					WriteLine( "...we are good to go with this force feedback driving device." );
 
 					_ffb_initialized = true;
@@ -332,6 +346,17 @@ namespace MarvinsAIRA
 					WriteLine( "...the old constant force effect has been disposed of..." );
 				}
 
+				if ( _ffb_springEffect != null )
+				{
+					WriteLine( "...disposing of the old spring effect..." );
+
+					_ffb_springEffect.Dispose();
+
+					_ffb_springEffect = null;
+
+					WriteLine( "...the old spring effect has been disposed of..." );
+				}
+
 				WriteLine( "...unacquiring the force feedback device..." );
 
 				_ffb_drivingJoystick.Unacquire();
@@ -349,7 +374,7 @@ namespace MarvinsAIRA
 				WriteLine( "...the force feedback device has been acquired..." );
 				WriteLine( "...creating the constant force effect..." );
 
-				_ffb_effectParameters = new EffectParameters
+				_ffb_constantForceEffectParameters = new EffectParameters
 				{
 					Flags = EffectFlags.Cartesian | EffectFlags.ObjectOffsets,
 					Duration = int.MaxValue,
@@ -373,14 +398,51 @@ namespace MarvinsAIRA
 					}
 				};
 
-				_ffb_constantForceEffect = new Effect( _ffb_drivingJoystick, _ffb_constantForceEffectInfo.Guid, _ffb_effectParameters );
+				_ffb_constantForceEffect = new Effect( _ffb_drivingJoystick, _ffb_constantForceEffectInfo.Guid, _ffb_constantForceEffectParameters );
 
 				WriteLine( "...the constant force effect has been created..." );
-				WriteLine( "...starting the constant force effect..." );
 
-				_ffb_constantForceEffect.Start();
+				if ( _ffb_springEffectInfo != null )
+				{
+					WriteLine( "...creating the spring effect..." );
 
-				WriteLine( "...the constant force effect has been started..." );
+					_ffb_springEffectParameters = new EffectParameters
+					{
+						Flags = EffectFlags.Cartesian | EffectFlags.ObjectOffsets,
+						Duration = int.MaxValue,
+						Gain = DI_FFNOMINALMAX,
+						Axes = [ 0 ],
+						Directions = [ 0 ],
+						SamplePeriod = 0,
+						StartDelay = 0,
+						TriggerButton = DIEB_NOTRIGGER,
+						TriggerRepeatInterval = 0,
+						Envelope = new Envelope
+						{
+							AttackLevel = 0,
+							FadeLevel = 0,
+							AttackTime = 0,
+							FadeTime = 0,
+						},
+						Parameters = new ConditionSet
+						{
+							Conditions = [ new SharpDX.DirectInput.Condition
+							{
+								Offset = 0,
+								PositiveCoefficient = DI_FFNOMINALMAX,
+								NegativeCoefficient = DI_FFNOMINALMAX,
+								PositiveSaturation = 500,
+								NegativeSaturation = 500,
+								DeadBand = 10
+							} ]
+						}
+					};
+
+					_ffb_springEffect = new Effect( _ffb_drivingJoystick, _ffb_springEffectInfo.Guid, _ffb_springEffectParameters );
+
+					WriteLine( "...the spring effect has been created..." );
+				}
+
 				WriteLine( "...starting the multimedia timer event..." );
 
 				UInt32 userCtx = 0;
@@ -606,6 +668,30 @@ namespace MarvinsAIRA
 				_ffb_reinitializeNeeded = false;
 
 				_ffb_reinitializeTimer = Math.Max( 1f, _ffb_reinitializeTimer );
+			}
+
+			if ( _ffb_springEffect != null )
+			{
+				if ( _irsdk_isOnTrack )
+				{
+					if ( _ffb_springEffect.Status == EffectStatus.Playing )
+					{
+						WriteLine( "" );
+						WriteLine( "Stopping the spring effect." );
+
+						_ffb_springEffect?.Stop();
+					}
+				}
+				else
+				{
+					if ( _ffb_springEffect.Status != EffectStatus.Playing )
+					{
+						WriteLine( "" );
+						WriteLine( "Starting the spring effect." );
+
+						_ffb_springEffect?.Start();
+					}
+				}
 			}
 
 			if ( _ffb_reinitializeTimer > 0 )
@@ -939,24 +1025,24 @@ namespace MarvinsAIRA
 
 				// mix in the sine and sawtooth wave understeer effects
 
-				_ffb_understeerEffectAngle += understeerFrequency;
+				_ffb_understeerEffectWaveAngle += understeerFrequency;
 
 				if ( Settings.UndersteerEffectEnabled )
 				{
-					if ( _ffb_understeerEffectAngle > (float) Math.PI * 2f )
+					if ( _ffb_understeerEffectWaveAngle > (float) Math.PI * 2f )
 					{
-						_ffb_understeerEffectAngle -= (float) Math.PI * 2f;
+						_ffb_understeerEffectWaveAngle -= (float) Math.PI * 2f;
 					}
 
 					if ( Settings.USEffectStyle == 0 )
 					{
-						var wave = Math.Sin( _ffb_understeerEffectAngle );
+						var wave = Math.Sin( _ffb_understeerEffectWaveAngle );
 
 						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
 					}
 					else if ( Settings.USEffectStyle == 1 )
 					{
-						var wave = _ffb_understeerEffectAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+						var wave = _ffb_understeerEffectWaveAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
 
 						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
 					}
@@ -1144,13 +1230,18 @@ namespace MarvinsAIRA
 
 			// send the magnitude to the wheel
 
-			if ( !app._ffb_forceFeedbackExceptionThrown && ( app._ffb_effectParameters != null ) && ( app._ffb_constantForceEffect != null ) )
+			if ( !app._ffb_forceFeedbackExceptionThrown && ( app._ffb_constantForceEffectParameters != null ) && ( app._ffb_constantForceEffect != null ) )
 			{
-				( (ConstantForce) app._ffb_effectParameters.Parameters ).Magnitude = magnitude;
+				( (ConstantForce) app._ffb_constantForceEffectParameters.Parameters ).Magnitude = magnitude;
 
 				try
 				{
-					app._ffb_constantForceEffect.SetParameters( app._ffb_effectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
+					if ( app._ffb_constantForceEffect.Status != EffectStatus.Playing )
+					{
+						app._ffb_constantForceEffect.Start();
+					}
+
+					app._ffb_constantForceEffect.SetParameters( app._ffb_constantForceEffectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
 
 					app._ffb_lastMagnitudeSentToWheel = magnitude;
 				}

@@ -132,13 +132,16 @@ namespace MarvinsAIRA
 					{
 						foreach ( var joystickUpdate in joystickUpdateArray )
 						{
-							if ( joystickUpdate.Value != 0 )
+							if ( ( joystickUpdateArray[ 0 ].Offset >= JoystickOffset.Buttons0 ) && ( joystickUpdateArray[ 0 ].Offset >= JoystickOffset.Buttons127 ) )
 							{
-								AnyPressedButton.DeviceInstanceGuid = joystick.Information.InstanceGuid;
-								AnyPressedButton.DeviceProductName = joystick.Information.ProductName;
-								AnyPressedButton.ButtonNumber = joystickUpdateArray[ 0 ].Offset - JoystickOffset.Buttons0;
+								if ( joystickUpdate.Value != 0 )
+								{
+									AnyPressedButton.DeviceInstanceGuid = joystick.Information.InstanceGuid;
+									AnyPressedButton.DeviceProductName = joystick.Information.ProductName;
+									AnyPressedButton.ButtonNumber = joystickUpdateArray[ 0 ].Offset - JoystickOffset.Buttons0;
 
-								break;
+									break;
+								}
 							}
 						}
 					}
