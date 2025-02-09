@@ -69,12 +69,13 @@ namespace MarvinsAIRA
 
 		public readonly float[] _ffb_recordedSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 60 * 10 ];
 		public int _ffb_recordedSteeringWheelTorqueBufferIndex = 0;
-		public bool _ffb_recordNow = false;
-		public bool _ffb_playbackNow = false;
+		public bool _ffb_recordingNow = false;
+		public bool _ffb_playingBackNow = false;
 
 		private readonly int[] _ffb_outputWheelMagnitudeBuffer = new int[ FFB_SAMPLES_PER_FRAME ];
 		private float _ffb_outputWheelMagnitudeBufferTimer = 0;
 		private int _ffb_resetOutputWheelMagnitudeBufferTimerNow = 0;
+		private int _ffb_lastMagnitudeSentToWheel = 0;
 
 		private float _ffb_previousSteeringWheelTorque = 0;
 		private float _ffb_runningSteeringWheelTorque = 0;
@@ -100,7 +101,7 @@ namespace MarvinsAIRA
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
-		public int FFB_CurrentMagnitude { get => _ffb_outputWheelMagnitudeBuffer[ 0 ]; }
+		public int FFB_LastMagnitudeSentToWheel { get => _ffb_lastMagnitudeSentToWheel; }
 		public float FFB_YawRateFactorInstant { get => _ffb_yawRateFactorInstant; }
 		public float FFB_YawRateFactorAverage { get => _ffb_yawRateFactorAverage; }
 		public float FFB_LateralForceFactorAverage { get => _ffb_lateralForceFactorAverage; }
@@ -116,6 +117,8 @@ namespace MarvinsAIRA
 			{
 				mainWindow.WheelForceFeedbackImage.Source = _ffb_writeableBitmap;
 			}
+
+			var isFirstInitialization = !_ffb_initialized;
 
 			if ( _ffb_initialized )
 			{
@@ -210,7 +213,11 @@ namespace MarvinsAIRA
 					WriteLine( "...we are good to go with this force feedback driving device." );
 
 					_ffb_initialized = true;
-					_ffb_wheelChanged = true;
+
+					if ( !isFirstInitialization )
+					{
+						_ffb_wheelChanged = true;
+					}
 
 					UpdateWheelSaveName();
 
@@ -399,7 +406,7 @@ namespace MarvinsAIRA
 
 		public void StopForceFeedback()
 		{
-			UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
+			UpdateConstantForce( [ 0 ] );
 
 			UninitializeForceFeedback();
 		}
@@ -424,7 +431,6 @@ namespace MarvinsAIRA
 
 					ReinitializeForceFeedbackDevice( windowHandle );
 				}
-
 
 				buttonPresses = Settings.AutoOverallScaleButtons.ClickCount;
 
@@ -691,9 +697,11 @@ namespace MarvinsAIRA
 
 		public void UpdateConstantForce( int[] forceMagnitudeList )
 		{
-			for ( var i = 0; i < forceMagnitudeList.Length; i++ )
+			for ( var i = 0; i < _ffb_outputWheelMagnitudeBuffer.Length; i++ )
 			{
-				_ffb_outputWheelMagnitudeBuffer[ i ] = forceMagnitudeList[ i ];
+				var value = forceMagnitudeList[ i % forceMagnitudeList.Length ];
+
+				_ffb_outputWheelMagnitudeBuffer[ i ] = value;
 			}
 
 			_ffb_updatesToSkip = 6;
@@ -714,7 +722,7 @@ namespace MarvinsAIRA
 				_irsdk_steeringWheelTorque_ST[ 5 ]
 			];
 
-			if ( _ffb_playbackNow )
+			if ( _ffb_playingBackNow )
 			{
 				for ( var x = 0; x < steeringWheelTorque_ST.Length; x++ )
 				{
@@ -812,7 +820,7 @@ namespace MarvinsAIRA
 
 			var speedScale = 1f;
 
-			if ( !_ffb_playbackNow && ( _irsdk_speed < 5 ) )
+			if ( !_ffb_playingBackNow && ( _irsdk_speed < 5 ) )
 			{
 				var t = _irsdk_speed / 5;
 
@@ -856,7 +864,7 @@ namespace MarvinsAIRA
 
 				// save the original steering wheel torque (for playback feature)
 
-				if ( _ffb_recordNow )
+				if ( _ffb_recordingNow )
 				{
 					_ffb_recordedSteeringWheelTorqueBuffer[ _ffb_recordedSteeringWheelTorqueBufferIndex ] = currentSteeringWheelTorque;
 
@@ -885,7 +893,7 @@ namespace MarvinsAIRA
 
 					var steadyStateWheelTorque = currentSteeringWheelTorque * overallScaleToDirectInputUnits;
 
-					if ( Settings.USEffectStyle == 2 )
+					if ( Settings.UndersteerEffectEnabled && ( Settings.USEffectStyle == 2 ) )
 					{
 						var wave = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
 
@@ -906,7 +914,7 @@ namespace MarvinsAIRA
 
 					var steadyStateWheelTorque = _ffb_steadyStateWheelTorque;
 
-					if ( Settings.USEffectStyle == 2 )
+					if ( Settings.UndersteerEffectEnabled && ( Settings.USEffectStyle == 2 ) )
 					{
 						var wave = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
 
@@ -924,28 +932,34 @@ namespace MarvinsAIRA
 
 				// mix in the low frequency effects
 
-				_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
+				if ( Settings.LFEToFFBEnabled )
+				{
+					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
+				}
 
 				// mix in the sine and sawtooth wave understeer effects
 
 				_ffb_understeerEffectAngle += understeerFrequency;
 
-				if ( _ffb_understeerEffectAngle > (float) Math.PI * 2f )
+				if ( Settings.UndersteerEffectEnabled )
 				{
-					_ffb_understeerEffectAngle -= (float) Math.PI * 2f;
-				}
+					if ( _ffb_understeerEffectAngle > (float) Math.PI * 2f )
+					{
+						_ffb_understeerEffectAngle -= (float) Math.PI * 2f;
+					}
 
-				if ( Settings.USEffectStyle == 0 )
-				{
-					var wave = Math.Sin( _ffb_understeerEffectAngle );
+					if ( Settings.USEffectStyle == 0 )
+					{
+						var wave = Math.Sin( _ffb_understeerEffectAngle );
 
-					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
-				}
-				else if ( Settings.USEffectStyle == 1 )
-				{
-					var wave = _ffb_understeerEffectAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+					}
+					else if ( Settings.USEffectStyle == 1 )
+					{
+						var wave = _ffb_understeerEffectAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
 
-					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+					}
 				}
 
 				// reset the magnitude index now
@@ -1023,11 +1037,11 @@ namespace MarvinsAIRA
 					_ffb_prettyGraphCurrentX = ( _ffb_prettyGraphCurrentX + 1 ) % FFB_PIXELS_BUFFER_WIDTH;
 				}
 
-				// disable wheel output if we are playing back a recording
+				// disable wheel output if we dont want to send the playback to the wheel
 
-				if ( _ffb_playbackNow )
+				if ( _ffb_playingBackNow && !Settings.PlaybackSendToDevice )
 				{
-					// _ffb_outputWheelMagnitudeBuffer[ x ] = 0;
+					_ffb_outputWheelMagnitudeBuffer[ x ] = 0;
 				}
 			}
 
@@ -1137,6 +1151,8 @@ namespace MarvinsAIRA
 				try
 				{
 					app._ffb_constantForceEffect.SetParameters( app._ffb_effectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
+
+					app._ffb_lastMagnitudeSentToWheel = magnitude;
 				}
 				catch ( Exception exception )
 				{

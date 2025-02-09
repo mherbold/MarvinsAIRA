@@ -18,8 +18,8 @@
         ui:WindowHelper.UseModernWindowStyle="True">
     <StackPanel Margin="10,10,10,20">
         <Label FontSize="18" Content="Press any button on any controller to select it." HorizontalAlignment="Center" FontWeight="Bold" />
-        <Label FontSize="16" Content="If you want to map a button combo, press and release the hold button first," HorizontalAlignment="Center" />
-        <Label FontSize="16" Content="then press and release the click button second." HorizontalAlignment="Center" />
+        <Label FontSize="16" Content="If you want to map a button combo, press and release the hold button first," HorizontalAlignment="Center" FontStyle="Italic" FontWeight="Thin" />
+        <Label FontSize="16" Content="then press and release the click button second." HorizontalAlignment="Center" FontStyle="Italic" FontWeight="Thin" />
         <Label x:Name="Button1NameLabel" FontSize="17" Content="" HorizontalAlignment="Center" Margin="0,10,0,0" />
         <Label x:Name="PlusLabel" FontSize="17" Content="+" HorizontalAlignment="Center" Visibility="Collapsed"/>
         <Label x:Name="Button2NameLabel" FontSize="17" Content="" HorizontalAlignment="Center"/>

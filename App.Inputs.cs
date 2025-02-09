@@ -18,6 +18,8 @@ namespace MarvinsAIRA
 
 		public PressedButton AnyPressedButton { get; private set; } = new();
 
+		public int _input_steeringWheelAngle = 0;
+
 		private readonly List<Joystick> _input_joystickList = [];
 
 		private void InitializeInputs( nint windowHandle )
@@ -116,6 +118,14 @@ namespace MarvinsAIRA
 								mappedButtons.Button1Held = true;
 							}
 						}
+					}
+				}
+
+				if ( _ffb_drivingJoystick != null )
+				{
+					if ( joystick.Information.InstanceGuid == _ffb_drivingJoystick.Information.InstanceGuid )
+					{
+						_input_steeringWheelAngle = joystickState.X;
 					}
 				}
 			}

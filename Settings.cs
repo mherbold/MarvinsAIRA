@@ -1458,6 +1458,49 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Settings tab - Playback tab
+
+		private bool _playbackSendToDevice = true;
+
+		public bool PlaybackSendToDevice
+		{
+			get => _playbackSendToDevice;
+
+			set
+			{
+				if ( _playbackSendToDevice != value )
+				{
+					_playbackSendToDevice = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region Settings tab - Wheel tab
+
+		private bool _autoCenterWheel = true;
+
+		public bool AutoCenterWheel
+		{
+			get => _autoCenterWheel;
+
+			set
+			{
+				if ( _autoCenterWheel != value )
+				{
+					_autoCenterWheel = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+
+		#endregion
+
 		#region Lists
 
 		public void UpdateFFBDeviceList( SerializableDictionary<Guid, string> ffbDeviceList )

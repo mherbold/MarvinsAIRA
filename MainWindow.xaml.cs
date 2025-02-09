@@ -18,10 +18,12 @@ namespace MarvinsAIRA
 
 		private nint _win_windowHandle = 0;
 
-		private readonly System.Timers.Timer _win_timer = new( 50 );
+		private readonly System.Timers.Timer _win_timer = new( 100 );
 
 		private int _win_keepThreadsAlive = 1;
 		private int _win_sendForceFeedbackTestSignalCounter = 0;
+
+		private float _win_guiUpdateTimer = 0;
 
 		private readonly Stopwatch _win_stopwatch = new();
 
@@ -185,7 +187,7 @@ namespace MarvinsAIRA
 							{
 								if ( _win_sendForceFeedbackTestSignalCounter == 1 )
 								{
-									app.UpdateConstantForce( [ 0, 0, 0, 0, 0, 0 ] );
+									app.UpdateConstantForce( [ 0 ] );
 								}
 								else
 								{
@@ -194,131 +196,160 @@ namespace MarvinsAIRA
 
 								_win_sendForceFeedbackTestSignalCounter--;
 							}
-
-							Dispatcher.BeginInvoke( () =>
+							else if ( !app._irsdk_isOnTrack )
 							{
-								// Force feedback status
+								var lastMagnitudeSendToWheel = app.FFB_LastMagnitudeSentToWheel;
+								var rampSpeed = (int) ( deltaTime * 1000 );
 
-								if ( !app.FFB_Initialized )
+								if ( lastMagnitudeSendToWheel > 0 )
 								{
-									ForceFeedbackStatusBarItem.Content = "FFB: Fault";
-									ForceFeedbackStatusBarItem.Foreground = Brushes.Red;
-								}
-								else if ( app.FFB_ClippedTimer > 0 )
-								{
-									ForceFeedbackStatusBarItem.Content = "FFB: CLIPPING!";
-									ForceFeedbackStatusBarItem.Foreground = Brushes.Red;
-								}
-								else if ( app.Settings.ForceFeedbackEnabled )
-								{
-									ForceFeedbackStatusBarItem.Content = $"FFB: {( app.FFB_CurrentMagnitude * 100f / App.DI_FFNOMINALMAX ):F0}%";
-									ForceFeedbackStatusBarItem.Foreground = Brushes.ForestGreen;
+									lastMagnitudeSendToWheel = Math.Max( 0, lastMagnitudeSendToWheel - rampSpeed );
 								}
 								else
 								{
-									ForceFeedbackStatusBarItem.Content = $"FFB: Off";
-									ForceFeedbackStatusBarItem.Foreground = Brushes.Gray;
+									lastMagnitudeSendToWheel = Math.Min( 0, lastMagnitudeSendToWheel + rampSpeed );
 								}
 
-								// Pretty graph
+								app.UpdateConstantForce( [ lastMagnitudeSendToWheel ] );
+							}
 
-								if ( app._ffb_drawPrettyGraph )
+							_win_guiUpdateTimer -= deltaTime;
+
+							if ( _win_guiUpdateTimer <= 0f )
+							{
+								_win_guiUpdateTimer = 0.1f;
+
+								Dispatcher.BeginInvoke( () =>
 								{
-									app._ffb_writeableBitmap?.WritePixels( new Int32Rect( 0, 0, App.FFB_WRITEABLE_BITMAP_WIDTH, App.FFB_WRITEABLE_BITMAP_HEIGHT ), app._ffb_pixels, App.FFB_PIXELS_BUFFER_STRIDE, 0, 0 );
-								}
+									// Force feedback status
 
-								// Recording status
+									if ( !app.FFB_Initialized )
+									{
+										ForceFeedbackStatusBarItem.Content = "FFB: Fault";
+										ForceFeedbackStatusBarItem.Foreground = Brushes.Red;
+									}
+									else if ( app.FFB_ClippedTimer > 0 )
+									{
+										ForceFeedbackStatusBarItem.Content = "FFB: CLIPPING!";
+										ForceFeedbackStatusBarItem.Foreground = Brushes.Red;
+									}
+									else if ( app.Settings.ForceFeedbackEnabled )
+									{
+										ForceFeedbackStatusBarItem.Content = $"FFB: {( app.FFB_LastMagnitudeSentToWheel * 100f / App.DI_FFNOMINALMAX ):F0}%";
+										ForceFeedbackStatusBarItem.Foreground = Brushes.ForestGreen;
+									}
+									else
+									{
+										ForceFeedbackStatusBarItem.Content = $"FFB: Off";
+										ForceFeedbackStatusBarItem.Foreground = Brushes.Gray;
+									}
 
-								if ( app._ffb_recordNow )
-								{
-									RecordingLabel.Visibility = ( ( app._irsdk_tickCount % 120 ) < 30 ) ? Visibility.Hidden : Visibility.Visible;
-								}
-								else
-								{
-									RecordingLabel.Visibility = Visibility.Hidden;
-								}
+									// Pretty graph
 
-								// Playback status
+									if ( app._ffb_drawPrettyGraph )
+									{
+										app._ffb_writeableBitmap?.WritePixels( new Int32Rect( 0, 0, App.FFB_WRITEABLE_BITMAP_WIDTH, App.FFB_WRITEABLE_BITMAP_HEIGHT ), app._ffb_pixels, App.FFB_PIXELS_BUFFER_STRIDE, 0, 0 );
+									}
 
-								if ( app._ffb_playbackNow )
-								{
-									PlaybackLabel.Visibility = Visibility.Visible;
-								}
-								else
-								{
-									PlaybackLabel.Visibility = Visibility.Hidden;
-								}
+									// Recording status
 
-								// Steering wheel angle
+									if ( app._ffb_recordingNow )
+									{
+										var recordTime = GetRecordingIndexAsTime();
 
-								var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / Math.PI;
+										RecordingLabel.Content = $"Recording - {recordTime}";
+										RecordingLabel.Visibility = ( ( app._irsdk_tickCount % 60 ) < 15 ) ? Visibility.Hidden : Visibility.Visible;
+									}
+									else
+									{
+										RecordingLabel.Visibility = Visibility.Hidden;
+									}
 
-								SteeringWheel_Image.RenderTransform = new RotateTransform( -steeringWheelAngleInDegrees );
+									// Playback status
 
-								SteeringWheel_Label.Content = $"{steeringWheelAngleInDegrees:F0}°";
+									if ( app._ffb_playingBackNow )
+									{
+										var recordTime = GetRecordingIndexAsTime();
 
-								if ( (string) SteeringWheel_Label.Content == "-0°" )
-								{
-									SteeringWheel_Label.Content = "0°";
-								}
+										PlaybackLabel.Content = $"Playback - {recordTime}";
+										PlaybackLabel.Visibility = Visibility.Visible;
+									}
+									else
+									{
+										PlaybackLabel.Visibility = Visibility.Hidden;
+									}
 
-								// Speed
+									// Steering wheel angle
 
-								if ( app._irsdk_displayUnits == 0 )
-								{
-									Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_MPH:F0} MPH";
-								}
-								else
-								{
-									Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_KPH:F0} KPH";
-								}
+									var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / Math.PI;
 
-								// Yaw rate
+									SteeringWheel_Image.RenderTransform = new RotateTransform( -steeringWheelAngleInDegrees );
 
-								var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / Math.PI;
+									SteeringWheel_Label.Content = $"{steeringWheelAngleInDegrees:F0}°";
 
-								YawRate_Label.Content = $"{yawRateInDegreesPerSecond:F0}°/sec";
+									if ( (string) SteeringWheel_Label.Content == "-0°" )
+									{
+										SteeringWheel_Label.Content = "0°";
+									}
 
-								if ( (string) YawRate_Label.Content == "-0°/sec" )
-								{
-									YawRate_Label.Content = $"0°/sec";
-								}
+									// Speed
 
-								// Lateral force
+									if ( app._irsdk_displayUnits == 0 )
+									{
+										Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_MPH:F0} MPH";
+									}
+									else
+									{
+										Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_KPH:F0} KPH";
+									}
 
-								LateralForce_Label.Content = $"{app._irsdk_latAccel:F0} m⋅s²";
+									// Yaw rate
 
-								if ( (string) LateralForce_Label.Content == "-0 m⋅s²" )
-								{
-									LateralForce_Label.Content = $"0 m⋅s²";
-								}
+									var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / Math.PI;
 
-								// Yaw rate factor (instant)
+									YawRate_Label.Content = $"{yawRateInDegreesPerSecond:F0}°/sec";
 
-								YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F2}";
+									if ( (string) YawRate_Label.Content == "-0°/sec" )
+									{
+										YawRate_Label.Content = $"0°/sec";
+									}
 
-								// Yaw rate factor (average)
+									// Lateral force
 
-								YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F2}";
+									LateralForce_Label.Content = $"{app._irsdk_latAccel:F0} m⋅s²";
 
-								// Wind status
+									if ( (string) LateralForce_Label.Content == "-0 m⋅s²" )
+									{
+										LateralForce_Label.Content = $"0 m⋅s²";
+									}
 
-								if ( !app.Wind_Initialized )
-								{
-									WindStatusBarItem.Content = "Wind: Fault";
-									WindStatusBarItem.Foreground = Brushes.Red;
-								}
-								else if ( app.Settings.WindSimulatorEnabled )
-								{
-									WindStatusBarItem.Content = $"Wind: {app.Wind_CurrentMagnitude:F0}%";
-									WindStatusBarItem.Foreground = Brushes.ForestGreen;
-								}
-								else
-								{
-									WindStatusBarItem.Content = $"Wind: Off";
-									WindStatusBarItem.Foreground = Brushes.Gray;
-								}
-							} );
+									// Yaw rate factor (instant)
+
+									YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F2}";
+
+									// Yaw rate factor (average)
+
+									YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F2}";
+
+									// Wind status
+
+									if ( !app.Wind_Initialized )
+									{
+										WindStatusBarItem.Content = "Wind: Fault";
+										WindStatusBarItem.Foreground = Brushes.Red;
+									}
+									else if ( app.Settings.WindSimulatorEnabled )
+									{
+										WindStatusBarItem.Content = $"Wind: {app.Wind_CurrentMagnitude:F0}%";
+										WindStatusBarItem.Foreground = Brushes.ForestGreen;
+									}
+									else
+									{
+										WindStatusBarItem.Content = $"Wind: Off";
+										WindStatusBarItem.Foreground = Brushes.Gray;
+									}
+								} );
+							}
 						}
 					}
 				}
@@ -330,6 +361,16 @@ namespace MarvinsAIRA
 			}
 
 			_win_updateLoopRunning = false;
+		}
+
+		private string GetRecordingIndexAsTime()
+		{
+			var app = (App) Application.Current;
+
+			var minutes = app._ffb_recordedSteeringWheelTorqueBufferIndex / ( 360 * 60 );
+			var seconds = app._ffb_recordedSteeringWheelTorqueBufferIndex % ( 360 * 60 ) / 360f;
+
+			return $"{minutes}:{seconds:00.0}";
 		}
 
 		#endregion
@@ -378,43 +419,6 @@ namespace MarvinsAIRA
 			_win_sendForceFeedbackTestSignalCounter = 11;
 		}
 
-		private static void LoadRecording()
-		{
-			var app = (App) Application.Current;
-
-			var filePath = Path.Combine( App.DocumentsFolder, "Recording.bin" );
-
-			if ( File.Exists( filePath ) )
-			{
-				app.WriteLine( "...loading recording..." );
-
-				using var stream = new FileStream( filePath, FileMode.Open, FileAccess.Read, FileShare.None );
-				using var reader = new BinaryReader( stream );
-
-				for ( int x = 0; x < app._ffb_recordedSteeringWheelTorqueBuffer.Length; x++ )
-				{
-					app._ffb_recordedSteeringWheelTorqueBuffer[ x ] = reader.ReadSingle();
-				}
-			}
-		}
-
-		private static void SaveRecording()
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "...saving recording..." );
-
-			var filePath = Path.Combine( App.DocumentsFolder, "Recording.bin" );
-
-			using var stream = new FileStream( filePath, FileMode.Create, FileAccess.Write, FileShare.None );
-			using var writer = new BinaryWriter( stream );
-
-			for ( int x = 0; x < app._ffb_recordedSteeringWheelTorqueBuffer.Length; x++ )
-			{
-				writer.Write( app._ffb_recordedSteeringWheelTorqueBuffer[ x ] );
-			}
-		}
-
 		private void RecordButton_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -422,24 +426,36 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "RecordButton_Click called." );
 
-			app._ffb_recordedSteeringWheelTorqueBufferIndex = 0;
-
-			var wasRecording = app._ffb_recordNow;
-
-			app._ffb_playbackNow = false;
-			app._ffb_recordNow = !app._ffb_recordNow;
-
-			if ( wasRecording )
+			if ( !app._irsdk_connected )
 			{
-				SaveRecording();
+				app.WriteLine( "...the iRacing simulator is not running, so ignoring this." );
 			}
 			else
 			{
-				Array.Clear( app._ffb_recordedSteeringWheelTorqueBuffer );
-			}
+				app._ffb_recordedSteeringWheelTorqueBufferIndex = 0;
 
-			app.WriteLine( $"...recording is now {app._ffb_recordNow}" );
-			app.WriteLine( $"...playback is now {app._ffb_playbackNow}" );
+				var wasRecording = app._ffb_recordingNow;
+
+				app._ffb_playingBackNow = false;
+				app._ffb_recordingNow = !app._ffb_recordingNow;
+
+				if ( wasRecording )
+				{
+					SaveRecording();
+				}
+				else
+				{
+					Array.Clear( app._ffb_recordedSteeringWheelTorqueBuffer );
+				}
+
+				if ( app._ffb_recordingNow && !app._ffb_drawPrettyGraph )
+				{
+					TogglePrettyGraph();
+				}
+
+				app.WriteLine( $"...recording is now {app._ffb_recordingNow}" );
+				app.WriteLine( $"...playback is now {app._ffb_playingBackNow}" );
+			}
 		}
 
 		private void PlayButton_Click( object sender, RoutedEventArgs e )
@@ -449,20 +465,32 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "PlayButton_Click called." );
 
-			var wasRecording = app._ffb_recordNow;
-
-			app._ffb_playbackNow = !app._ffb_playbackNow;
-			app._ffb_recordNow = false;
-
-			if ( wasRecording )
+			if ( !app._irsdk_connected )
 			{
-				SaveRecording();
+				app.WriteLine( "...the iRacing simulator is not running, so ignoring this." );
 			}
+			else
+			{
+				var wasRecording = app._ffb_recordingNow;
 
-			app._ffb_recordedSteeringWheelTorqueBufferIndex = 0;
+				app._ffb_playingBackNow = !app._ffb_playingBackNow;
+				app._ffb_recordingNow = false;
 
-			app.WriteLine( $"...playback is now {app._ffb_playbackNow}" );
-			app.WriteLine( $"...recording is now {app._ffb_recordNow}" );
+				if ( wasRecording )
+				{
+					SaveRecording();
+				}
+
+				app._ffb_recordedSteeringWheelTorqueBufferIndex = 0;
+
+				if ( app._ffb_playingBackNow && !app._ffb_drawPrettyGraph )
+				{
+					TogglePrettyGraph();
+				}
+
+				app.WriteLine( $"...playback is now {app._ffb_playingBackNow}" );
+				app.WriteLine( $"...recording is now {app._ffb_recordingNow}" );
+			}
 		}
 
 		private void ResetForceFeedbackButton_Click( object sender, RoutedEventArgs e )
@@ -545,23 +573,68 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "EnablePrettyGraph_Button_Click called." );
 
+			TogglePrettyGraph();
+		}
+
+		private static void LoadRecording()
+		{
+			var app = (App) Application.Current;
+
+			var filePath = Path.Combine( App.DocumentsFolder, "Recording.bin" );
+
+			if ( File.Exists( filePath ) )
+			{
+				app.WriteLine( "...loading recording..." );
+
+				try
+				{
+					using var stream = new FileStream( filePath, FileMode.Open, FileAccess.Read, FileShare.None );
+					using var reader = new BinaryReader( stream );
+
+					for ( int x = 0; x < app._ffb_recordedSteeringWheelTorqueBuffer.Length; x++ )
+					{
+						app._ffb_recordedSteeringWheelTorqueBuffer[ x ] = reader.ReadSingle();
+					}
+				}
+				catch ( Exception exception )
+				{
+					app.WriteLine( $"Failed to load the recording file, exception was: {exception.Message.Trim()}" );
+				}
+			}
+		}
+
+		private static void SaveRecording()
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "...saving recording..." );
+
+			var filePath = Path.Combine( App.DocumentsFolder, "Recording.bin" );
+
+			using var stream = new FileStream( filePath, FileMode.Create, FileAccess.Write, FileShare.None );
+			using var writer = new BinaryWriter( stream );
+
+			for ( int x = 0; x < app._ffb_recordedSteeringWheelTorqueBuffer.Length; x++ )
+			{
+				writer.Write( app._ffb_recordedSteeringWheelTorqueBuffer[ x ] );
+			}
+		}
+
+		private void TogglePrettyGraph()
+		{
+			var app = (App) Application.Current;
+
 			if ( app.TogglePrettyGraph() )
 			{
-				Dispatcher.BeginInvoke( () =>
-				{
-					PrettyGraph_Border.Visibility = Visibility.Visible;
+				PrettyGraph_Border.Visibility = Visibility.Visible;
 
-					TogglePrettyGraph_Button.Content = "Disable Pretty Graph";
-				} );
+				TogglePrettyGraph_Button.Content = "Disable Pretty Graph";
 			}
 			else
 			{
-				Dispatcher.BeginInvoke( () =>
-				{
-					PrettyGraph_Border.Visibility = Visibility.Collapsed;
+				PrettyGraph_Border.Visibility = Visibility.Collapsed;
 
-					TogglePrettyGraph_Button.Content = "Enable Pretty Graph";
-				} );
+				TogglePrettyGraph_Button.Content = "Enable Pretty Graph";
 			}
 		}
 
@@ -833,6 +906,10 @@ namespace MarvinsAIRA
 				app.Say( app.Settings.SayHello, null, true );
 			}
 		}
+
+		#endregion
+
+		#region Settings tab - Recording tab
 
 		#endregion
 
