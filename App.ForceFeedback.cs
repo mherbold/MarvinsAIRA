@@ -50,10 +50,6 @@ namespace MarvinsAIRA
 		private EffectParameters? _ffb_constantForceEffectParameters = null;
 		private Effect? _ffb_constantForceEffect = null;
 
-		private EffectInfo? _ffb_springEffectInfo = null;
-		private EffectParameters? _ffb_springEffectParameters = null;
-		private Effect? _ffb_springEffect = null;
-
 		private bool _ffb_initialized = false;
 		private int _ffb_updatesToSkip = 0;
 		private bool _ffb_reinitializeNeeded = false;
@@ -120,7 +116,7 @@ namespace MarvinsAIRA
 
 			if ( mainWindow != null )
 			{
-				mainWindow.WheelForceFeedbackImage.Source = _ffb_writeableBitmap;
+				mainWindow.WheelForceFeedback_Image.Source = _ffb_writeableBitmap;
 			}
 
 			var isFirstInitialization = !_ffb_initialized;
@@ -205,10 +201,6 @@ namespace MarvinsAIRA
 					{
 						_ffb_constantForceEffectInfo = effectInfo;
 					}
-					else if ( effectInfo.Guid == EffectGuid.Spring )
-					{
-						_ffb_springEffectInfo = effectInfo;
-					}
 				}
 
 				if ( _ffb_constantForceEffectInfo == null )
@@ -218,12 +210,6 @@ namespace MarvinsAIRA
 				else
 				{
 					WriteLine( "...the device does support constant force effects..." );
-
-					if ( _ffb_springEffectInfo != null )
-					{
-						WriteLine( "...the device also supports spring effects..." );
-					}
-
 					WriteLine( "...we are good to go with this force feedback driving device." );
 
 					_ffb_initialized = true;
@@ -244,42 +230,10 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void UninitializeForceFeedback()
+		private void UninitializeForceFeedback( bool disposeOfDrivingJoystick = true )
 		{
 			WriteLine( "" );
 			WriteLine( "UninitializeForceFeedback called." );
-
-			if ( _ffb_constantForceEffect != null )
-			{
-				WriteLine( "...disposing of the constant force effect..." );
-
-				_ffb_constantForceEffect.Dispose();
-
-				_ffb_constantForceEffect = null;
-
-				WriteLine( "...the constant force effect has been disposed of..." );
-			}
-
-			if ( _ffb_constantForceEffectInfo != null )
-			{
-				_ffb_constantForceEffectInfo = null;
-			}
-
-			if ( _ffb_drivingJoystick != null )
-			{
-				WriteLine( "...unacquiring the force feedback device..." );
-
-				_ffb_drivingJoystick.Unacquire();
-
-				WriteLine( "...the force feedback device has been unacquired..." );
-				WriteLine( "...disposing of the force feedback device..." );
-
-				_ffb_drivingJoystick.Dispose();
-
-				_ffb_drivingJoystick = null;
-
-				WriteLine( "...the force feedback device has been disposed of..." );
-			}
 
 			if ( _ffb_multimediaTimerId != 0 )
 			{
@@ -292,9 +246,49 @@ namespace MarvinsAIRA
 				WriteLine( "...multimedia timer event killed..." );
 			}
 
-			WriteLine( "...force feedback uninitialized." );
+			if ( _ffb_constantForceEffect != null )
+			{
+				WriteLine( "...disposing of the old constant force effect..." );
 
-			_ffb_initialized = false;
+				var constantForceEffect = _ffb_constantForceEffect;
+
+				_ffb_constantForceEffect = null;
+
+				constantForceEffect.Dispose();
+
+				WriteLine( "...the old constant force effect has been disposed of..." );
+			}
+
+			if ( _ffb_drivingJoystick != null )
+			{
+				WriteLine( "...unacquiring the force feedback device..." );
+
+				_ffb_drivingJoystick.Unacquire();
+
+				WriteLine( "...the force feedback device has been unacquired..." );
+
+				if ( disposeOfDrivingJoystick )
+				{
+					if ( _ffb_constantForceEffectInfo != null )
+					{
+						_ffb_constantForceEffectInfo = null;
+					}
+
+					var drivingJoystick = _ffb_drivingJoystick;
+
+					_ffb_drivingJoystick = null;
+
+					WriteLine( "...disposing of the force feedback device..." );
+
+					drivingJoystick.Dispose();
+
+					WriteLine( "...the force feedback device has been disposed of..." );
+
+					_ffb_initialized = false;
+				}
+			}
+
+			WriteLine( "...force feedback uninitialized." );
 		}
 
 		public void ReinitializeForceFeedbackDevice( nint windowHandle )
@@ -324,43 +318,10 @@ namespace MarvinsAIRA
 				throw new Exception( "_ffb_constantForceEffectInfo == null!" );
 			}
 
+			UninitializeForceFeedback( false );
+
 			try
 			{
-				if ( _ffb_multimediaTimerId != 0 )
-				{
-					WriteLine( "...killing the multimedia timer event..." );
-
-					TimeKillEvent( _ffb_multimediaTimerId );
-
-					WriteLine( "...the multimedia timer event killed..." );
-				}
-
-				if ( _ffb_constantForceEffect != null )
-				{
-					WriteLine( "...disposing of the old constant force effect..." );
-
-					_ffb_constantForceEffect.Dispose();
-
-					_ffb_constantForceEffect = null;
-
-					WriteLine( "...the old constant force effect has been disposed of..." );
-				}
-
-				if ( _ffb_springEffect != null )
-				{
-					WriteLine( "...disposing of the old spring effect..." );
-
-					_ffb_springEffect.Dispose();
-
-					_ffb_springEffect = null;
-
-					WriteLine( "...the old spring effect has been disposed of..." );
-				}
-
-				WriteLine( "...unacquiring the force feedback device..." );
-
-				_ffb_drivingJoystick.Unacquire();
-
 				WriteLine( "...the force feedback device has been unacquired..." );
 				WriteLine( "...setting the cooperative level (exclusive background) on the force feedback device..." );
 
@@ -401,48 +362,11 @@ namespace MarvinsAIRA
 				_ffb_constantForceEffect = new Effect( _ffb_drivingJoystick, _ffb_constantForceEffectInfo.Guid, _ffb_constantForceEffectParameters );
 
 				WriteLine( "...the constant force effect has been created..." );
+				WriteLine( "...downloading the constant force effect..." );
 
-				if ( _ffb_springEffectInfo != null )
-				{
-					WriteLine( "...creating the spring effect..." );
+				_ffb_constantForceEffect.Download();
 
-					_ffb_springEffectParameters = new EffectParameters
-					{
-						Flags = EffectFlags.Cartesian | EffectFlags.ObjectOffsets,
-						Duration = int.MaxValue,
-						Gain = DI_FFNOMINALMAX,
-						Axes = [ 0 ],
-						Directions = [ 0 ],
-						SamplePeriod = 0,
-						StartDelay = 0,
-						TriggerButton = DIEB_NOTRIGGER,
-						TriggerRepeatInterval = 0,
-						Envelope = new Envelope
-						{
-							AttackLevel = 0,
-							FadeLevel = 0,
-							AttackTime = 0,
-							FadeTime = 0,
-						},
-						Parameters = new ConditionSet
-						{
-							Conditions = [ new SharpDX.DirectInput.Condition
-							{
-								Offset = 0,
-								PositiveCoefficient = Settings.AutoCenterWheelStrength,
-								NegativeCoefficient = Settings.AutoCenterWheelStrength,
-								PositiveSaturation = Settings.AutoCenterWheelStrength,
-								NegativeSaturation = Settings.AutoCenterWheelStrength,
-								DeadBand = 10
-							} ]
-						}
-					};
-
-					_ffb_springEffect = new Effect( _ffb_drivingJoystick, _ffb_springEffectInfo.Guid, _ffb_springEffectParameters );
-
-					WriteLine( "...the spring effect has been created..." );
-				}
-
+				WriteLine( "...the constant force effect has been downloaded..." );
 				WriteLine( "...starting the multimedia timer event..." );
 
 				UInt32 userCtx = 0;
@@ -670,38 +594,6 @@ namespace MarvinsAIRA
 				_ffb_reinitializeTimer = Math.Max( 1f, _ffb_reinitializeTimer );
 			}
 
-			try
-			{
-				if ( _ffb_springEffect != null )
-				{
-					if ( _irsdk_isOnTrack || !Settings.AutoCenterWheel )
-					{
-						if ( _ffb_springEffect.Status == EffectStatus.Playing )
-						{
-							WriteLine( "" );
-							WriteLine( "Stopping the spring effect." );
-
-							_ffb_springEffect?.Stop();
-						}
-					}
-					else
-					{
-						if ( _ffb_springEffect.Status != EffectStatus.Playing )
-						{
-							WriteLine( "" );
-							WriteLine( "Starting the spring effect." );
-
-							_ffb_springEffect?.Start();
-						}
-					}
-				}
-			}
-			catch ( Exception exception )
-			{
-				WriteLine( "" );
-				WriteLine( $"Exception thrown when trying to read status of, or starting, or stopping the spring effect: {exception.Message.Trim()}" );
-			}
-
 			if ( _ffb_reinitializeTimer > 0 )
 			{
 				_ffb_reinitializeTimer -= deltaTime;
@@ -760,6 +652,50 @@ namespace MarvinsAIRA
 
 				_settings_pauseSerialization = false;
 			}
+
+			if ( !_irsdk_isOnTrack && Settings.AutoCenterWheel && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
+			{
+				var leftRange = Settings.WheelCenterValue - Settings.WheelMinValue;
+				var rightRange = Settings.WheelCenterValue - Settings.WheelMaxValue;
+
+				var leftDelta = Input_CurrentWheelValue - Settings.WheelMinValue;
+				var rightDelta = Input_CurrentWheelValue - Settings.WheelMaxValue;
+
+				if ( ( leftRange != 0 ) && ( rightRange != 0 ) && ( leftDelta != 0 ) && ( rightDelta != 0 ) )
+				{
+					var leftPercentage = 1f - (float) leftDelta / leftRange;
+					var rightPercentage = 1f - (float) rightDelta / rightRange;
+
+					var centeringForceMagnitude = 0;
+
+					var strength = Settings.AutoCenterWheelStrength / 100f * DI_FFNOMINALMAX;
+
+					if ( leftPercentage >= 0f )
+					{
+						if ( leftPercentage < 0.1f )
+						{
+							centeringForceMagnitude = (int) ( leftPercentage * -strength );
+						}
+						else
+						{
+							centeringForceMagnitude = (int) ( -strength * 0.1f );
+						}
+					}
+					else if ( rightPercentage >= 0f )
+					{
+						if ( rightPercentage < 0.1f )
+						{
+							centeringForceMagnitude = (int) ( rightPercentage * strength );
+						}
+						else
+						{
+							centeringForceMagnitude = (int) ( strength * 0.1f );
+						}
+					}
+
+					UpdateConstantForce( [ centeringForceMagnitude ] );
+				}
+			}
 		}
 
 		public bool TogglePrettyGraph()
@@ -805,8 +741,15 @@ namespace MarvinsAIRA
 			_ffb_steadyStateWheelTorque = 0;
 		}
 
-		private void ProcessSteeringWheelTorque()
+		private void UpdateForceFeedback()
 		{
+			if ( !Settings.ForceFeedbackEnabled )
+			{
+				return;
+			}
+
+			var processThisFrame = ( Interlocked.Decrement( ref _ffb_updatesToSkip ) < 0 );
+
 			float[] steeringWheelTorque_ST = [
 				_irsdk_steeringWheelTorque_ST[ 0 ],
 				_irsdk_steeringWheelTorque_ST[ 1 ],
@@ -891,18 +834,19 @@ namespace MarvinsAIRA
 
 			// update the understeer effect
 
-			float understeerAmount = 0; // 0 = 15% below understeer edge, 0.5 = right on understeer edge, 1 = 15% above understeer edge
-			float understeerFrequency = 0.25f; // 0.25 to 1.0
+			float understeerAmount = 0; // 0 = 25% below understeer edge, 1 = right on understeer edge
+			float understeerFrequency = 0;
 
 			var settingYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.USYawRateFactorLeft : Settings.USYawRateFactorRight;
 
 			if ( ( Math.Abs( _irsdk_yawRate ) > 0.1f ) && ( settingYawRateFactor > 0 ) )
 			{
 				var deltaYawRateFactor = settingYawRateFactor - _ffb_yawRateFactorInstant;
-				var margin = settingYawRateFactor * 0.15f;
+				var margin = settingYawRateFactor * 0.35f;
 
-				understeerAmount = Math.Max( 0f, Math.Min( 1f, ( margin - deltaYawRateFactor ) / margin * 0.5f ) );
-				understeerFrequency += understeerAmount * 0.375f;
+				understeerAmount = (float) Math.Pow( Math.Max( 0f, Math.Min( 1f, ( margin - deltaYawRateFactor ) / margin ) ), 1.5f );
+
+				understeerFrequency = Math.Max( 0.05f, understeerAmount );
 
 				if ( Settings.USEffectStyleInvert )
 				{
@@ -918,7 +862,7 @@ namespace MarvinsAIRA
 			{
 				var t = _irsdk_speed / 5;
 
-				speedScale = ( Settings.ParkedScale / 100f ) * ( 1 - t ) + t;
+				speedScale = ( Settings.OverallScale * Settings.ParkedScale / ( 100f * 100f ) ) * ( 1 - t ) + t;
 			}
 
 			// calculate the conversion scale from Newton-meters to (-DI_FFNOMINALMAX, DI_FFNOMINALMAX)
@@ -1022,13 +966,19 @@ namespace MarvinsAIRA
 
 				// apply the speed scale and update the array that the force feedback thread uses
 
-				_ffb_outputWheelMagnitudeBuffer[ x ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale );
+				if ( processThisFrame )
+				{
+					_ffb_outputWheelMagnitudeBuffer[ x ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale );
+				}
 
 				// mix in the low frequency effects
 
 				if ( Settings.LFEToFFBEnabled )
 				{
-					_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
+					if ( processThisFrame )
+					{
+						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
+					}
 				}
 
 				// mix in the sine and sawtooth wave understeer effects
@@ -1042,17 +992,20 @@ namespace MarvinsAIRA
 						_ffb_understeerEffectWaveAngle -= (float) Math.PI * 2f;
 					}
 
-					if ( Settings.USEffectStyle == 0 )
+					if ( processThisFrame )
 					{
-						var wave = Math.Sin( _ffb_understeerEffectWaveAngle );
+						if ( Settings.USEffectStyle == 0 )
+						{
+							var wave = Math.Sin( _ffb_understeerEffectWaveAngle );
 
-						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
-					}
-					else if ( Settings.USEffectStyle == 1 )
-					{
-						var wave = _ffb_understeerEffectWaveAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+						}
+						else if ( Settings.USEffectStyle == 1 )
+						{
+							var wave = _ffb_understeerEffectWaveAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
 
-						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+						}
 					}
 				}
 
@@ -1135,7 +1088,10 @@ namespace MarvinsAIRA
 
 				if ( _ffb_playingBackNow && !Settings.PlaybackSendToDevice )
 				{
-					_ffb_outputWheelMagnitudeBuffer[ x ] = 0;
+					if ( processThisFrame )
+					{
+						_ffb_outputWheelMagnitudeBuffer[ x ] = 0;
+					}
 				}
 			}
 
@@ -1151,17 +1107,6 @@ namespace MarvinsAIRA
 					_ffb_pixels[ offset + 1 ] = 128;
 					_ffb_pixels[ offset + 2 ] = 0;
 					_ffb_pixels[ offset + 3 ] = 255;
-				}
-			}
-		}
-
-		private void UpdateForceFeedback()
-		{
-			if ( Settings.ForceFeedbackEnabled )
-			{
-				if ( Interlocked.Decrement( ref _ffb_updatesToSkip ) < 0 )
-				{
-					ProcessSteeringWheelTorque();
 				}
 			}
 		}
@@ -1236,31 +1181,39 @@ namespace MarvinsAIRA
 				app._ffb_clippedTimer = 3;
 			}
 
-			// send the magnitude to the wheel
+			// update forces on the wheel
 
-			if ( !app._ffb_forceFeedbackExceptionThrown && ( app._ffb_constantForceEffectParameters != null ) && ( app._ffb_constantForceEffect != null ) )
+			if ( !app._ffb_forceFeedbackExceptionThrown )
 			{
-				( (ConstantForce) app._ffb_constantForceEffectParameters.Parameters ).Magnitude = magnitude;
+				// update the constant force effect
 
-				try
+				if ( ( app._ffb_constantForceEffectParameters != null ) && ( app._ffb_constantForceEffect != null ) )
 				{
-					if ( app._ffb_constantForceEffect.Status != EffectStatus.Playing )
+					( (ConstantForce) app._ffb_constantForceEffectParameters.Parameters ).Magnitude = magnitude;
+
+					try
 					{
-						app._ffb_constantForceEffect.Start();
+						if ( app._ffb_constantForceEffect.Status != EffectStatus.Playing )
+						{
+							app.WriteLine( "" );
+							app.WriteLine( "Starting the constant force effect." );
+
+							app._ffb_constantForceEffect.Start();
+						}
+
+						app._ffb_constantForceEffect.SetParameters( app._ffb_constantForceEffectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
+
+						app._ffb_lastMagnitudeSentToWheel = magnitude;
 					}
+					catch ( Exception exception )
+					{
+						app._ffb_forceFeedbackExceptionThrown = true;
+						app._ffb_reinitializeNeeded = true;
 
-					app._ffb_constantForceEffect.SetParameters( app._ffb_constantForceEffectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
-
-					app._ffb_lastMagnitudeSentToWheel = magnitude;
-				}
-				catch ( Exception exception )
-				{
-					app._ffb_forceFeedbackExceptionThrown = true;
-					app._ffb_reinitializeNeeded = true;
-
-					app.WriteLine( "" );
-					app.WriteLine( "An exception was thrown while trying to update the constant force effect parameters!" );
-					app.WriteLine( exception.Message.Trim() );
+						app.WriteLine( "" );
+						app.WriteLine( "An exception was thrown while trying to update the constant force effect parameters!" );
+						app.WriteLine( exception.Message.Trim() );
+					}
 				}
 			}
 		}

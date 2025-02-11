@@ -84,21 +84,21 @@ namespace MarvinsAIRA
 
 			app.UpdateInputs();
 
-			if ( app.AnyPressedButton.DeviceInstanceGuid != Guid.Empty )
+			if ( app.Input_AnyPressedButton.DeviceInstanceGuid != Guid.Empty )
 			{
 				var buttonAlreadyCaptured = false;
 
-				if ( app.AnyPressedButton.DeviceInstanceGuid == MappedButtons.Button1.DeviceInstanceGuid )
+				if ( app.Input_AnyPressedButton.DeviceInstanceGuid == MappedButtons.Button1.DeviceInstanceGuid )
 				{
-					if ( app.AnyPressedButton.ButtonNumber == MappedButtons.Button1.ButtonNumber )
+					if ( app.Input_AnyPressedButton.ButtonNumber == MappedButtons.Button1.ButtonNumber )
 					{
 						buttonAlreadyCaptured = true;
 					}
 				}
 
-				if ( app.AnyPressedButton.DeviceInstanceGuid == MappedButtons.Button2.DeviceInstanceGuid )
+				if ( app.Input_AnyPressedButton.DeviceInstanceGuid == MappedButtons.Button2.DeviceInstanceGuid )
 				{
-					if ( app.AnyPressedButton.ButtonNumber == MappedButtons.Button2.ButtonNumber )
+					if ( app.Input_AnyPressedButton.ButtonNumber == MappedButtons.Button2.ButtonNumber )
 					{
 						buttonAlreadyCaptured = true;
 					}
@@ -108,9 +108,9 @@ namespace MarvinsAIRA
 				{
 					var mappedButton = new Settings.MappedButton
 					{
-						DeviceInstanceGuid = app.AnyPressedButton.DeviceInstanceGuid,
-						DeviceProductName = app.AnyPressedButton.DeviceProductName,
-						ButtonNumber = app.AnyPressedButton.ButtonNumber
+						DeviceInstanceGuid = app.Input_AnyPressedButton.DeviceInstanceGuid,
+						DeviceProductName = app.Input_AnyPressedButton.DeviceProductName,
+						ButtonNumber = app.Input_AnyPressedButton.ButtonNumber
 					};
 
 					if ( MappedButtons.Button1.DeviceInstanceGuid == Guid.Empty )

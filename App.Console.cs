@@ -78,9 +78,9 @@ namespace MarvinsAIRA
 
 				if ( mainWindow != null )
 				{
-					mainWindow.ConsoleTextBox.Text += $"{messageWithTime}\r\n";
-					mainWindow.ConsoleTextBox.CaretIndex = mainWindow.ConsoleTextBox.Text.Length;
-					mainWindow.ConsoleTextBox.ScrollToEnd();
+					mainWindow.Console_TextBox.Text += $"{messageWithTime}\r\n";
+					mainWindow.Console_TextBox.CaretIndex = mainWindow.Console_TextBox.Text.Length;
+					mainWindow.Console_TextBox.ScrollToEnd();
 				}
 			} );
 		}

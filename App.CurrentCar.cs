@@ -65,8 +65,8 @@ namespace MarvinsAIRA
 
 					if ( mainWindow != null )
 					{
-						mainWindow.CurrentCarStatusBarItem.Content = _car_currentCarScreenName;
-						mainWindow.CurrentCarStatusBarItem.Foreground = ( _car_currentCarScreenName == NO_CAR_SCREEN_NAME ) ? Brushes.Gray : Brushes.ForestGreen;
+						mainWindow.CurrentCar_StatusBarItem.Content = _car_currentCarScreenName;
+						mainWindow.CurrentCar_StatusBarItem.Foreground = ( _car_currentCarScreenName == NO_CAR_SCREEN_NAME ) ? Brushes.Gray : Brushes.ForestGreen;
 					}
 				} );
 			}

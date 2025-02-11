@@ -1,4 +1,5 @@
 ﻿
+using SharpDX.DirectInput;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -42,20 +43,6 @@ namespace MarvinsAIRA
 				}
 			}
 		}
-
-		/* Lists */
-
-		private SerializableDictionary<Guid, string> _ffbDeviceList = [];
-
-		public SerializableDictionary<Guid, string> FFBDeviceList { get => _ffbDeviceList; }
-
-		private SerializableDictionary<Guid, string> _lfeDeviceList = [];
-
-		public SerializableDictionary<Guid, string> LFEDeviceList { get => _lfeDeviceList; }
-
-		private SerializableDictionary<string, string> _voiceList = [];
-
-		public SerializableDictionary<string, string> VoiceList { get => _voiceList; }
 
 		/* Selected FFB device */
 
@@ -1481,6 +1468,145 @@ namespace MarvinsAIRA
 
 		#region Settings tab - Wheel tab
 
+		private JoystickOffset _selectedWheelAxis = JoystickOffset.X;
+
+		public JoystickOffset SelectedWheelAxis
+		{
+			get => _selectedWheelAxis;
+
+			set
+			{
+				if ( _selectedWheelAxis != value )
+				{
+					_selectedWheelAxis = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _wheelAxisValueString = "0";
+
+		public string WheelAxisValueString
+		{
+			get => _wheelAxisValueString;
+
+			set
+			{
+				_wheelAxisValueString = value;
+
+				OnPropertyChanged( false );
+			}
+		}
+
+		private int _wheelMinValue = 0;
+
+		public int WheelMinValue
+		{
+			get => _wheelMinValue;
+
+			set
+			{
+				if ( _wheelMinValue != value )
+				{
+					_wheelMinValue = value;
+
+					WheelMinValueString = _wheelMinValue.ToString();
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _wheelMinValueString = "0";
+
+		public string WheelMinValueString
+		{
+			get => _wheelMinValueString;
+
+			set
+			{
+				if ( _wheelMinValueString != value )
+				{
+					_wheelMinValueString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private int _wheelCenterValue = 0;
+
+		public int WheelCenterValue
+		{
+			get => _wheelCenterValue;
+
+			set
+			{
+				if ( _wheelCenterValue != value )
+				{
+					_wheelCenterValue = value;
+
+					WheelCenterValueString = _wheelCenterValue.ToString();
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _wheelCenterValueString = "0";
+
+		public string WheelCenterValueString
+		{
+			get => _wheelCenterValueString;
+
+			set
+			{
+				if ( _wheelCenterValueString != value )
+				{
+					_wheelCenterValueString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private int _wheelMaxValue = 0;
+
+		public int WheelMaxValue
+		{
+			get => _wheelMaxValue;
+
+			set
+			{
+				if ( _wheelMaxValue != value )
+				{
+					_wheelMaxValue = value;
+
+					WheelMaxValueString = _wheelMaxValue.ToString();
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _wheelMaxValueString = "0";
+
+		public string WheelMaxValueString
+		{
+			get => _wheelMaxValueString;
+
+			set
+			{
+				if ( _wheelMaxValueString != value )
+				{
+					_wheelMaxValueString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		private bool _autoCenterWheel = true;
 
 		public bool AutoCenterWheel
@@ -1498,7 +1624,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private int _autoCenterWheelStrength = 1000;
+		private int _autoCenterWheelStrength = 20;
 
 		public int AutoCenterWheelStrength
 		{
@@ -1506,6 +1632,8 @@ namespace MarvinsAIRA
 
 			set
 			{
+				value = Math.Max( 1, Math.Min( 100, value ) );
+
 				if ( _autoCenterWheelStrength != value )
 				{
 					_autoCenterWheelStrength = value;
@@ -1519,25 +1647,49 @@ namespace MarvinsAIRA
 
 		#region Lists
 
+		private SerializableDictionary<Guid, string> _ffbDeviceList = [];
+
+		public SerializableDictionary<Guid, string> FFBDeviceList { get => _ffbDeviceList; }
+
+
 		public void UpdateFFBDeviceList( SerializableDictionary<Guid, string> ffbDeviceList )
 		{
 			_ffbDeviceList = ffbDeviceList;
 
-			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( FFBDeviceList ) ) );
+			OnPropertyChanged( false, nameof( FFBDeviceList ) );
 		}
+
+		private SerializableDictionary<Guid, string> _lfeDeviceList = [];
+
+		public SerializableDictionary<Guid, string> LFEDeviceList { get => _lfeDeviceList; }
 
 		public void UpdateLFEDeviceList( SerializableDictionary<Guid, string> lfeDeviceList )
 		{
 			_lfeDeviceList = lfeDeviceList;
 
-			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( LFEDeviceList ) ) );
+			OnPropertyChanged( false, nameof( LFEDeviceList ) );
 		}
+
+		private SerializableDictionary<string, string> _voiceList = [];
+
+		public SerializableDictionary<string, string> VoiceList { get => _voiceList; }
 
 		public void UpdateVoiceList( SerializableDictionary<string, string> voiceList )
 		{
 			_voiceList = voiceList;
 
-			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( VoiceList ) ) );
+			OnPropertyChanged( false, nameof( VoiceList ) );
+		}
+
+		private SerializableDictionary<JoystickOffset, string> _wheelAxisList = [];
+
+		public SerializableDictionary<JoystickOffset, string> WheelAxisList { get => _wheelAxisList; }
+
+		public void UpdateWheelAxisList( SerializableDictionary<JoystickOffset, string> wheelAxisList )
+		{
+			_wheelAxisList = wheelAxisList;
+
+			OnPropertyChanged( false, nameof( WheelAxisList ) );
 		}
 
 		#endregion
@@ -1546,11 +1698,14 @@ namespace MarvinsAIRA
 
 		public event PropertyChangedEventHandler? PropertyChanged;
 
-		protected void OnPropertyChanged( [CallerMemberName] string? name = null )
+		protected void OnPropertyChanged( bool queueForSerialization = true, [CallerMemberName] string? name = null )
 		{
 			var app = (App) Application.Current;
 
-			app.QueueForSerialization();
+			if ( queueForSerialization )
+			{
+				app.QueueForSerialization();
+			}
 
 			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( name ) );
 		}

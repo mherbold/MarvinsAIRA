@@ -73,8 +73,8 @@ namespace MarvinsAIRA
 
 					if ( mainWindow != null )
 					{
-						mainWindow.CurrentTrackStatusBarItem.Content = $"{_track_currentTrackDisplayName} ({_track_currentTrackConfigName})";
-						mainWindow.CurrentTrackStatusBarItem.Foreground = ( _track_currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;					}
+						mainWindow.CurrentTrack_StatusBarItem.Content = $"{_track_currentTrackDisplayName} ({_track_currentTrackConfigName})";
+						mainWindow.CurrentTrack_StatusBarItem.Foreground = ( _track_currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;					}
 				} );
 			}
 		}

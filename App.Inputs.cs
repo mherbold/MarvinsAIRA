@@ -16,9 +16,13 @@ namespace MarvinsAIRA
 			public int ButtonNumber { get; set; } = 0;
 		}
 
-		public PressedButton AnyPressedButton { get; private set; } = new();
+		public PressedButton Input_AnyPressedButton { get; private set; } = new();
 
 		private readonly List<Joystick> _input_joystickList = [];
+
+		private int _input_currentWheelValue = 0;
+
+		public int Input_CurrentWheelValue { get => _input_currentWheelValue; }
 
 		private void InitializeInputs( nint windowHandle )
 		{
@@ -73,6 +77,12 @@ namespace MarvinsAIRA
 			Settings.UpdateFFBDeviceList( ffbDeviceList );
 
 			WriteLine( $"...a total of {_input_joystickList.Count} controller devices were found." );
+
+			var wheelAxisList = new SerializableDictionary<JoystickOffset, string> {
+				{ JoystickOffset.X, "X Axis" },
+			};
+
+			Settings.UpdateWheelAxisList( wheelAxisList );
 		}
 
 		public void UpdateInputs()
@@ -95,9 +105,9 @@ namespace MarvinsAIRA
 				mappedButton.ClickCount = 0;
 			}
 
-			AnyPressedButton.DeviceInstanceGuid = Guid.Empty;
-			AnyPressedButton.DeviceProductName = string.Empty;
-			AnyPressedButton.ButtonNumber = 0;
+			Input_AnyPressedButton.DeviceInstanceGuid = Guid.Empty;
+			Input_AnyPressedButton.DeviceProductName = string.Empty;
+			Input_AnyPressedButton.ButtonNumber = 0;
 
 			JoystickState joystickState = new();
 
@@ -128,19 +138,38 @@ namespace MarvinsAIRA
 
 					var joystickUpdateArray = joystick.GetBufferedData();
 
-					if ( ( joystickUpdateArray.Length > 0 ) && ( AnyPressedButton.DeviceInstanceGuid == Guid.Empty ) )
+					if ( joystickUpdateArray.Length > 0 )
 					{
-						foreach ( var joystickUpdate in joystickUpdateArray )
+						if ( Input_AnyPressedButton.DeviceInstanceGuid == Guid.Empty )
 						{
-							if ( ( joystickUpdateArray[ 0 ].Offset >= JoystickOffset.Buttons0 ) && ( joystickUpdateArray[ 0 ].Offset <= JoystickOffset.Buttons127 ) )
+							foreach ( var joystickUpdate in joystickUpdateArray )
 							{
-								if ( joystickUpdate.Value != 0 )
+								if ( ( joystickUpdateArray[ 0 ].Offset >= JoystickOffset.Buttons0 ) && ( joystickUpdateArray[ 0 ].Offset <= JoystickOffset.Buttons127 ) )
 								{
-									AnyPressedButton.DeviceInstanceGuid = joystick.Information.InstanceGuid;
-									AnyPressedButton.DeviceProductName = joystick.Information.ProductName;
-									AnyPressedButton.ButtonNumber = joystickUpdateArray[ 0 ].Offset - JoystickOffset.Buttons0;
+									if ( joystickUpdate.Value != 0 )
+									{
+										Input_AnyPressedButton.DeviceInstanceGuid = joystick.Information.InstanceGuid;
+										Input_AnyPressedButton.DeviceProductName = joystick.Information.ProductName;
+										Input_AnyPressedButton.ButtonNumber = joystickUpdateArray[ 0 ].Offset - JoystickOffset.Buttons0;
 
-									break;
+										break;
+									}
+								}
+							}
+						}
+
+						if ( _ffb_drivingJoystick != null )
+						{
+							if ( joystick.Information.InstanceGuid == _ffb_drivingJoystick.Information.InstanceGuid )
+							{
+								foreach ( var joystickUpdate in joystickUpdateArray )
+								{
+									if ( joystickUpdate.Offset == Settings.SelectedWheelAxis )
+									{
+										_input_currentWheelValue = joystickUpdate.Value;
+
+										Settings.WheelAxisValueString = joystickUpdate.Value.ToString();
+									}
 								}
 							}
 						}

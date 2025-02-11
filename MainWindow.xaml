@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.27"
+        Title="Marvin's Awesome iRacing App v0.28"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -40,15 +40,15 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
-                            <ComboBox x:Name="FFBDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding FFBDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedFFBDeviceGuid}" SelectionChanged="FFBDeviceComboBox_SelectionChanged" />
-                            <Button Grid.Column="2" x:Name="ForceFeedbackTestButton" Margin="15,0,0,0" Content="TEST" Click="ForceFeedbackTestButton_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                            <Button Grid.Column="3" x:Name="RecordButton" Margin="10,0,0,0" Click="RecordButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <ComboBox x:Name="FFBDevice_ComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding FFBDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedFFBDeviceGuid}" SelectionChanged="FFBDevice_ComboBox_SelectionChanged" />
+                            <Button Grid.Column="2" x:Name="ForceFeedbackTest_Button" Margin="15,0,0,0" Content="TEST" Click="ForceFeedbackTest_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                            <Button Grid.Column="3" x:Name="Record_Button" Margin="10,0,0,0" Click="Record_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/record-button.png"/>
                             </Button>
-                            <Button Grid.Column="4" x:Name="PlayButton" Click="PlayButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="4" x:Name="Play_Button" Click="Play_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/play-button.png"/>
                             </Button>
-                            <Button Grid.Column="5" x:Name="ResetForceFeedbackButton" Click="ResetForceFeedbackButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="5" x:Name="ResetForceFeedback_Button" Click="ResetForceFeedback_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/r-button.png"/>
                             </Button>
                         </Grid>
@@ -68,7 +68,7 @@
                             <Label Grid.Column="3" Content="Target" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="This your target overall scale force in Newton-meters." />
                             <TextBox Grid.Column="4" Text="{Binding TargetForceString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
                             <Slider Grid.Column="5" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="25" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding TargetForce}" TickFrequency="2" />
-                            <Button Grid.Column="6" x:Name="AutoOverallScaleButton" Margin="10,0,0,0" Click="AutoOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="6" x:Name="AutoOverallScale_Button" Margin="10,0,0,0" Click="AutoOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/a-button.png"/>
                             </Button>
                         </Grid>
@@ -83,10 +83,10 @@
                             <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
                             <TextBox Grid.Column="1" Text="{Binding OverallScaleString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
                             <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OverallScale}" TickFrequency="5" />
-                            <Button Grid.Column="3" x:Name="DecreaseOverallScaleButton" Margin="10,0,0,0" Click="DecreaseOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="3" x:Name="DecreaseOverallScale_Button" Margin="10,0,0,0" Click="DecreaseOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/minus-button.png"/>
                             </Button>
-                            <Button Grid.Column="4" x:Name="IncreaseOverallScaleButton" Click="IncreaseOverallScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="4" x:Name="IncreaseOverallScale_Button" Click="IncreaseOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/plus-button.png"/>
                             </Button>
                         </Grid>
@@ -101,10 +101,10 @@
                             <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
                             <TextBox Grid.Column="1" Text="{Binding DetailScaleString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
                             <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale}" TickFrequency="10" />
-                            <Button Grid.Column="3" x:Name="DecreaseDetailScaleButton" Margin="10,0,0,0" Click="DecreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="3" x:Name="DecreaseDetailScale_Button" Margin="10,0,0,0" Click="DecreaseDetailScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/minus-button.png"/>
                             </Button>
-                            <Button Grid.Column="4" x:Name="IncreaseDetailScaleButton" Click="IncreaseDetailScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="4" x:Name="IncreaseDetailScale_Button" Click="IncreaseDetailScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/plus-button.png"/>
                             </Button>
                         </Grid>
@@ -126,7 +126,7 @@
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" Content="Frequency" VerticalAlignment="Center" Width="90" />
                             <TextBox Grid.Column="1" Text="{Binding FrequencyString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                            <Slider x:Name="FrequencySlider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="16" SmallChange="1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding Frequency}" TickFrequency="1" ValueChanged="FrequencySlider_ValueChanged" />
+                            <Slider x:Name="Frequency_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="16" SmallChange="1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding Frequency}" TickFrequency="1" ValueChanged="Frequency_Slider_ValueChanged" />
                         </Grid>
                     </StackPanel>
                     <StackPanel Margin="0,10,0,0">
@@ -135,10 +135,10 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <Image Grid.Row="0" x:Name="WheelForceFeedbackImage" Height="200" Width="978"/>
-                                <Label Grid.Row="0" x:Name="RecordingLabel" Content="RECORDING" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FFF32828" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
-                                <Label Grid.Row="0" x:Name="PlaybackLabel" Content="PLAYBACK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FF67C50D" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
-                                <Label Grid.Row="0" x:Name="SimulatorNotRunningLabel" Content="The iRacing Simulator is Not Running" HorizontalAlignment="Center" VerticalAlignment="Center" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" />
+                                <Image Grid.Row="0" x:Name="WheelForceFeedback_Image" Height="200" Width="978"/>
+                                <Label Grid.Row="0" x:Name="Recording_Label" Content="RECORDING" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FFF32828" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                <Label Grid.Row="0" x:Name="Playback_Label" Content="PLAYBACK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FF67C50D" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                <Label Grid.Row="0" x:Name="SimulatorNotRunning_Label" Content="The iRacing Simulator is Not Running" HorizontalAlignment="Center" VerticalAlignment="Center" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" />
                             </Grid>
                         </Border>
                         <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
@@ -205,7 +205,7 @@
                                 <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorRight}" TickFrequency="5" />
                             </Grid>
                         </StackPanel>
-                        <Button Grid.Column="1" x:Name="UndersteerEffectButton" Margin="10,0,0,0" Click="UndersteerEffectButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                        <Button Grid.Column="1" x:Name="UndersteerEffect_Button" Margin="10,0,0,0" Click="UndersteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                             <Image Source="/u-button.png"/>
                         </Button>
                     </Grid>
@@ -227,7 +227,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
-                        <ComboBox x:Name="LFEDeviceComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding LFEDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedLFEDeviceGuid}" SelectionChanged="LFEDeviceComboBox_SelectionChanged" />
+                        <ComboBox x:Name="LFEDevice_ComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding LFEDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedLFEDeviceGuid}" SelectionChanged="LFEDevice_ComboBox_SelectionChanged" />
                     </Grid>
                     <Grid Margin="0,5,0,0">
                         <Grid.ColumnDefinitions>
@@ -240,10 +240,10 @@
                         <Label Grid.Column="0" Content="Scale" VerticalAlignment="Center" ToolTip="This is how strongly to add the low frequency effect signal to the force feedback." />
                         <TextBox Grid.Column="1" Text="{Binding LFEScaleString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
                         <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding LFEScale}" TickFrequency="5" />
-                        <Button Grid.Column="3" x:Name="DecreaseLEFScaleButton" Margin="10,0,0,0" Click="DecreaseLFEScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                        <Button Grid.Column="3" x:Name="DecreaseLEFScale_Button" Margin="10,0,0,0" Click="DecreaseLFEScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                             <Image Source="/minus-button.png"/>
                         </Button>
-                        <Button Grid.Column="4" x:Name="IncreaseLFEScaleButton" Click="IncreaseLFEScaleButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                        <Button Grid.Column="4" x:Name="IncreaseLFEScale_Button" Click="IncreaseLFEScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                             <Image Source="/plus-button.png"/>
                         </Button>
                     </Grid>
@@ -458,7 +458,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Column="0" Content="Enable Click Sound" IsChecked="{Binding EnableClickSound}" />
-                                <Slider x:Name="ClickSoundVolume" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="ClickSoundVolume_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding ClickSoundVolume}"/>
+                                <Slider x:Name="ClickSoundVolume_Slider" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="ClickSoundVolume_Slider_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding ClickSoundVolume}"/>
                                 <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center" Margin="10,0,0,0"/>
                             </Grid>
                         </StackPanel>
@@ -472,8 +472,8 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Column="0" Content="Enable Voice" MinWidth="0" IsChecked="{Binding EnableSpeechSynthesizer}" />
-                                <Slider x:Name="SpeechSynthesizerVolume" Grid.Column="1"  Margin="10,0,0,0" ValueChanged="SpeechSynthesizerVolume_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="10" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume}"/>
-                                <ComboBox Grid.Column="3" x:Name="SelectedVoiceComboBox" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding VoiceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedVoice}" SelectionChanged="SelectedVoice_SelectionChanged" />
+                                <Slider x:Name="SpeechSynthesizerVolume_Slider" Grid.Column="1"  Margin="10,0,0,0" ValueChanged="SpeechSynthesizerVolume_Slider_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="10" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume}"/>
+                                <ComboBox Grid.Column="3" x:Name="SelectedVoice_ComboBox" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding VoiceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedVoice}" SelectionChanged="SelectedVoice_ComboBox_SelectionChanged" />
                             </Grid>
                             <ScrollViewer Margin="0,10,0,0" Height="300" Padding="0,0,25,0">
                                 <StackPanel>
@@ -610,13 +610,68 @@
                         <StackPanel Margin="10,10,10,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Label Content="Axis" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" x:Name="WheelAxis_ComboBox" HorizontalAlignment="Stretch" ItemsSource="{Binding WheelAxisList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedWheelAxis}" SelectionChanged="SelectedWheelAxis_ComboBox_SelectionChanged" />
+                                        <TextBox Grid.Column="1" Text="{Binding WheelAxisValueString, Mode=OneWay}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Label Content="Full Left" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" x:Name="SetWheelMinValue_Button" Content="SET" Click="SetWheelMinValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                        <TextBox Grid.Column="1" Text="{Binding WheelMinValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <Label Content="Center" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" x:Name="SetWheelCenterValue_Button" Content="SET" Click="SetWheelCenterValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                        <TextBox Grid.Column="1" Text="{Binding WheelCenterValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Column="6">
+                                    <Label Content="Full Right" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" x:Name="SetWheelMaxValue_Button" Content="SET" Click="SetWheelMaxValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                        <TextBox Grid.Column="1" Text="{Binding WheelMaxValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Center the wheel when out of the car or when the iRacing simulator disconnects" IsChecked="{Binding AutoCenterWheel}" Click="AutoCenterWheel_CheckBox_Click"/>
                                 <Label Grid.Column="1" Content="Strength" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
-                                <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="10" Maximum="10000" SmallChange="1" LargeChange="100" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="1000" ValueChanged="AutoCenterWheelStrength_Slider_ValueChanged" />
+                                <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="1" LargeChange="5" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="10" ValueChanged="AutoCenterWheelStrength_Slider_ValueChanged" />
                             </Grid>
                         </StackPanel>
                     </TabItem>
@@ -627,7 +682,7 @@
                     <Label Content="Console" VerticalAlignment="Center" />
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <TextBox x:Name="ConsoleTextBox" Text="" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="320" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <TextBox x:Name="Console_TextBox" Text="" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="320" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                 </StackPanel>
             </TabItem>
             <TabItem>
@@ -635,9 +690,9 @@
                     <Label Content="Help" VerticalAlignment="Center" />
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <Button x:Name="SeeHelpDocumentation" HorizontalAlignment="Stretch" Content="See the Documentation" Click="SeeHelpDocumentation_Click" />
-                    <Button x:Name="GoToIracingForumThread" HorizontalAlignment="Stretch" Content="Go to the iRacing Forum Thread" Click="GoToIRacingForumThread_Click" Margin="0,5,0,0" />
-                    <Button x:Name="SendMarvinYourConsoleLog" HorizontalAlignment="Stretch" Content="Send Marvin Your Console Log" Click="SendMarvinYourConsoleLog_Click" Margin="0,5,0,0" />
+                    <Button x:Name="SeeHelpDocumentation_Button" HorizontalAlignment="Stretch" Content="See the Documentation" Click="SeeHelpDocumentation_Button_Click" />
+                    <Button x:Name="GoToIracingForumThread_Button" HorizontalAlignment="Stretch" Content="Go to the iRacing Forum Thread" Click="GoToIRacingForumThread_Button_Click" Margin="0,5,0,0" />
+                    <Button x:Name="SendMarvinYourConsoleLog_Button" HorizontalAlignment="Stretch" Content="Send Marvin Your Console Log" Click="SendMarvinYourConsoleLog_Button_Click" Margin="0,5,0,0" />
                     <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Justify" Margin="0,5,0,0">You must have an iRacing Forums account to use the above button. When you click on the button, your console log will be copied to the Windows clipboard. A browser window will be opened, taking you to the iRacing Forum New Message page. Type in a short description of the problem, and then hit Ctrl+V on a blank line, to paste your console log into the message.</TextBlock>
                 </StackPanel>
             </TabItem>
@@ -660,15 +715,15 @@
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
-            <StatusBarItem Grid.Column="0" x:Name="ConnectionStatusBarItem" Content="iRacing Simulator is Not Running" Foreground="Gray"/>
+            <StatusBarItem Grid.Column="0" x:Name="Connection_StatusBarItem" Content="iRacing Simulator is Not Running" Foreground="Gray"/>
             <Separator Grid.Column="1" />
-            <StatusBarItem Grid.Column="2" x:Name="CurrentCarStatusBarItem" Content="No Car" Foreground="Gray"/>
+            <StatusBarItem Grid.Column="2" x:Name="CurrentCar_StatusBarItem" Content="No Car" Foreground="Gray"/>
             <Separator Grid.Column="3" />
-            <StatusBarItem Grid.Column="4" x:Name="CurrentTrackStatusBarItem" Content="No Track" Foreground="Gray"/>
+            <StatusBarItem Grid.Column="4" x:Name="CurrentTrack_StatusBarItem" Content="No Track" Foreground="Gray"/>
             <Separator Grid.Column="5" />
-            <StatusBarItem Grid.Column="6" x:Name="ForceFeedbackStatusBarItem" Content="FFB" Foreground="Gray"/>
+            <StatusBarItem Grid.Column="6" x:Name="ForceFeedback_StatusBarItem" Content="FFB" Foreground="Gray"/>
             <Separator Grid.Column="7" />
-            <StatusBarItem Grid.Column="8" x:Name="WindStatusBarItem" Content="Wind" Foreground="Gray"/>
+            <StatusBarItem Grid.Column="8" x:Name="Wind_StatusBarItem" Content="Wind" Foreground="Gray"/>
         </StatusBar>
     </StackPanel>
 </Window>

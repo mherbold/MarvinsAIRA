@@ -198,7 +198,7 @@ namespace MarvinsAIRA
 
 							if ( _win_guiUpdateTimer <= 0f )
 							{
-								_win_guiUpdateTimer = 0.1f;
+								_win_guiUpdateTimer = 0.05f;
 
 								Dispatcher.BeginInvoke( () =>
 								{
@@ -206,23 +206,23 @@ namespace MarvinsAIRA
 
 									if ( !app.FFB_Initialized )
 									{
-										ForceFeedbackStatusBarItem.Content = "FFB: Fault";
-										ForceFeedbackStatusBarItem.Foreground = Brushes.Red;
+										ForceFeedback_StatusBarItem.Content = "FFB: Fault";
+										ForceFeedback_StatusBarItem.Foreground = Brushes.Red;
 									}
 									else if ( app.FFB_ClippedTimer > 0 )
 									{
-										ForceFeedbackStatusBarItem.Content = "FFB: CLIPPING!";
-										ForceFeedbackStatusBarItem.Foreground = Brushes.Red;
+										ForceFeedback_StatusBarItem.Content = "FFB: CLIPPING!";
+										ForceFeedback_StatusBarItem.Foreground = Brushes.Red;
 									}
 									else if ( app.Settings.ForceFeedbackEnabled )
 									{
-										ForceFeedbackStatusBarItem.Content = $"FFB: {( app.FFB_LastMagnitudeSentToWheel * 100f / App.DI_FFNOMINALMAX ):F0}%";
-										ForceFeedbackStatusBarItem.Foreground = Brushes.ForestGreen;
+										ForceFeedback_StatusBarItem.Content = $"FFB: {( app.FFB_LastMagnitudeSentToWheel * 100f / App.DI_FFNOMINALMAX ):F0}%";
+										ForceFeedback_StatusBarItem.Foreground = Brushes.ForestGreen;
 									}
 									else
 									{
-										ForceFeedbackStatusBarItem.Content = $"FFB: Off";
-										ForceFeedbackStatusBarItem.Foreground = Brushes.Gray;
+										ForceFeedback_StatusBarItem.Content = $"FFB: Off";
+										ForceFeedback_StatusBarItem.Foreground = Brushes.Gray;
 									}
 
 									// Pretty graph
@@ -238,12 +238,12 @@ namespace MarvinsAIRA
 									{
 										var recordTime = GetRecordingIndexAsTime();
 
-										RecordingLabel.Content = $"Recording - {recordTime}";
-										RecordingLabel.Visibility = ( ( app._irsdk_tickCount % 60 ) < 15 ) ? Visibility.Hidden : Visibility.Visible;
+										Recording_Label.Content = $"Recording - {recordTime}";
+										Recording_Label.Visibility = ( ( app._irsdk_tickCount % 60 ) < 15 ) ? Visibility.Hidden : Visibility.Visible;
 									}
 									else
 									{
-										RecordingLabel.Visibility = Visibility.Hidden;
+										Recording_Label.Visibility = Visibility.Hidden;
 									}
 
 									// Playback status
@@ -252,12 +252,12 @@ namespace MarvinsAIRA
 									{
 										var recordTime = GetRecordingIndexAsTime();
 
-										PlaybackLabel.Content = $"Playback - {recordTime}";
-										PlaybackLabel.Visibility = Visibility.Visible;
+										Playback_Label.Content = $"Playback - {recordTime}";
+										Playback_Label.Visibility = Visibility.Visible;
 									}
 									else
 									{
-										PlaybackLabel.Visibility = Visibility.Hidden;
+										Playback_Label.Visibility = Visibility.Hidden;
 									}
 
 									// Steering wheel angle
@@ -316,18 +316,18 @@ namespace MarvinsAIRA
 
 									if ( !app.Wind_Initialized )
 									{
-										WindStatusBarItem.Content = "Wind: Fault";
-										WindStatusBarItem.Foreground = Brushes.Red;
+										Wind_StatusBarItem.Content = "Wind: Fault";
+										Wind_StatusBarItem.Foreground = Brushes.Red;
 									}
 									else if ( app.Settings.WindSimulatorEnabled )
 									{
-										WindStatusBarItem.Content = $"Wind: {app.Wind_CurrentMagnitude:F0}%";
-										WindStatusBarItem.Foreground = Brushes.ForestGreen;
+										Wind_StatusBarItem.Content = $"Wind: {app.Wind_CurrentMagnitude:F0}%";
+										Wind_StatusBarItem.Foreground = Brushes.ForestGreen;
 									}
 									else
 									{
-										WindStatusBarItem.Content = $"Wind: Off";
-										WindStatusBarItem.Foreground = Brushes.Gray;
+										Wind_StatusBarItem.Content = $"Wind: Off";
+										Wind_StatusBarItem.Foreground = Brushes.Gray;
 									}
 								} );
 							}
@@ -377,35 +377,35 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void FFBDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
+		private void FFBDevice_ComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "FFBDeviceComboBox_SelectionChanged called." );
+				app.WriteLine( "FFBDevice_ComboBox_SelectionChanged called." );
 
 				app.InitializeForceFeedback( _win_windowHandle );
 			}
 		}
 
-		private void ForceFeedbackTestButton_Click( object sender, RoutedEventArgs e )
+		private void ForceFeedbackTest_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "ForceFeedbackTestButton_Click called." );
+			app.WriteLine( "ForceFeedbackTest_Button_Click called." );
 
 			_win_sendForceFeedbackTestSignalCounter = 11;
 		}
 
-		private void RecordButton_Click( object sender, RoutedEventArgs e )
+		private void Record_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "RecordButton_Click called." );
+			app.WriteLine( "Record_Button_Click called." );
 
 			if ( !app._irsdk_connected )
 			{
@@ -439,7 +439,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void PlayButton_Click( object sender, RoutedEventArgs e )
+		private void Play_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
@@ -474,74 +474,74 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void ResetForceFeedbackButton_Click( object sender, RoutedEventArgs e )
+		private void ResetForceFeedback_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "ResetForceFeedbackButton_Click called." );
+			app.WriteLine( "ResetForceFeedback_Button_Click called." );
 
 			app.Settings.ReinitForceFeedbackButtons = ShowMapButtonsWindow( app.Settings.ReinitForceFeedbackButtons );
 		}
 
-		private void AutoOverallScaleButton_Click( object sender, RoutedEventArgs e )
+		private void AutoOverallScale_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "AutoOverallScaleButton_Click called." );
+			app.WriteLine( "AutoOverallScale_Button_Click called." );
 
 			app.Settings.AutoOverallScaleButtons = ShowMapButtonsWindow( app.Settings.AutoOverallScaleButtons );
 		}
 
-		private void DecreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
+		private void DecreaseOverallScale_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "DecreaseOverallScaleButton_Click called." );
+			app.WriteLine( "DecreaseOverallScale_Button_Click called." );
 
 			app.Settings.DecreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseOverallScaleButtons );
 		}
 
-		private void IncreaseOverallScaleButton_Click( object sender, RoutedEventArgs e )
+		private void IncreaseOverallScale_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "IncreaseOverallScaleButton_Click called." );
+			app.WriteLine( "IncreaseOverallScale_Button_Click called." );
 
 			app.Settings.IncreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseOverallScaleButtons );
 		}
 
-		private void DecreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
+		private void DecreaseDetailScale_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "DecreaseDetailScaleButton_Click called." );
+			app.WriteLine( "DecreaseDetailScale_Button_Click called." );
 
 			app.Settings.DecreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseDetailScaleButtons );
 		}
 
-		private void IncreaseDetailScaleButton_Click( object sender, RoutedEventArgs e )
+		private void IncreaseDetailScale_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "IncreaseDetailScaleButton_Click called." );
+			app.WriteLine( "IncreaseDetailScale_Button_Click called." );
 
 			app.Settings.IncreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseDetailScaleButtons );
 		}
 
-		private void FrequencySlider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		private void Frequency_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "FrequencySlider_ValueChanged called." );
+				app.WriteLine( "Frequency_Slider_ValueChanged called." );
 
 				app.ScheduleReinitializeForceFeedback();
 			}
@@ -552,7 +552,7 @@ namespace MarvinsAIRA
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "EnablePrettyGraph_Button_Click called." );
+			app.WriteLine( "TogglePrettyGraph_Button_Click called." );
 
 			TogglePrettyGraph();
 		}
@@ -670,12 +670,12 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void UndersteerEffectButton_Click( object sender, RoutedEventArgs e )
+		private void UndersteerEffect_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "UndersteerEffectButton_Click called." );
+			app.WriteLine( "UndersteerEffect_Button_Click called." );
 
 			ShowMapButtonsWindow( app.Settings.UndersteerEffectButtons );
 		}
@@ -692,7 +692,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "LFEToFFB_CheckBox_Click called." );
 		}
 
-		private void LFEDeviceComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
+		private void LFEDevice_ComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
@@ -705,22 +705,22 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void DecreaseLFEScaleButton_Click( object sender, RoutedEventArgs e )
+		private void DecreaseLFEScale_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "DecreaseLFEScaleButton_Click called." );
+			app.WriteLine( "DecreaseLFEScale_Button_Click called." );
 
 			app.Settings.DecreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseLFEScaleButtons );
 		}
 
-		private void IncreaseLFEScaleButton_Click( object sender, RoutedEventArgs e )
+		private void IncreaseLFEScale_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
-			app.WriteLine( "IncreaseLFEScaleButton_Click called." );
+			app.WriteLine( "IncreaseLFEScale_Button_Click called." );
 
 			app.Settings.IncreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseLFEScaleButtons );
 		}
@@ -841,14 +841,14 @@ namespace MarvinsAIRA
 
 		#region Settings tab - Audio tab
 
-		private void ClickSoundVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		private void ClickSoundVolume_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "ClickSoundVolume_ValueChanged called." );
+				app.WriteLine( "ClickSoundVolume_Slider_ValueChanged called." );
 
 				app.PlayClick();
 			}
@@ -858,14 +858,14 @@ namespace MarvinsAIRA
 
 		#region Settings tab - Voice tab
 
-		private void SpeechSynthesizerVolume_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		private void SpeechSynthesizerVolume_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "SpeechSynthesizerVolume_ValueChanged called." );
+				app.WriteLine( "SpeechSynthesizerVolume_Slider_ValueChanged called." );
 
 				app.UpdateVolume();
 
@@ -873,14 +873,14 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void SelectedVoice_SelectionChanged( object sender, RoutedEventArgs e )
+		private void SelectedVoice_ComboBox_SelectionChanged( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
 
 				app.WriteLine( "" );
-				app.WriteLine( "SelectedVoice_SelectionChanged called." );
+				app.WriteLine( "SelectedVoice_ComboBox_SelectionChanged called." );
 
 				app.InitializeVoice();
 
@@ -895,6 +895,47 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region Settings tab - Wheel tab
+
+		private void SelectedWheelAxis_ComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.WriteLine( "" );
+				app.WriteLine( "SelectedWheelAxis_ComboBox_SelectionChanged called." );
+			}
+		}
+
+		private void SetWheelMinValue_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "SetWheelMinValue_Button_Click called." );
+
+			app.Settings.WheelMinValue = app.Input_CurrentWheelValue;
+		}
+
+		private void SetWheelCenterValue_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "SetWheelCenterValue_Button_Click called." );
+
+			app.Settings.WheelCenterValue = app.Input_CurrentWheelValue;
+		}
+
+		private void SetWheelMaxValue_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "SetWheelMaxValue_Button_Click called." );
+
+			app.Settings.WheelMaxValue = app.Input_CurrentWheelValue;
+		}
 
 		private void AutoCenterWheel_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
@@ -921,7 +962,7 @@ namespace MarvinsAIRA
 
 		#region Help tab
 
-		private void SeeHelpDocumentation_Click( object sender, RoutedEventArgs e )
+		private void SeeHelpDocumentation_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
@@ -938,7 +979,7 @@ namespace MarvinsAIRA
 			Process.Start( processStartInfo );
 		}
 
-		private void GoToIRacingForumThread_Click( object sender, RoutedEventArgs e )
+		private void GoToIRacingForumThread_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
@@ -955,14 +996,14 @@ namespace MarvinsAIRA
 			Process.Start( processStartInfo );
 		}
 
-		private void SendMarvinYourConsoleLog_Click( object sender, RoutedEventArgs e )
+		private void SendMarvinYourConsoleLog_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
 			app.WriteLine( "" );
 			app.WriteLine( "SendMarvinYourConsoleLog_Click called." );
 
-			var text = ConsoleTextBox.Text.Replace( "\r\n", "\r\n\t" );
+			var text = Console_TextBox.Text.Replace( "\r\n", "\r\n\t" );
 
 			Clipboard.SetText( $"\r\n\r\n\t{text}\r\n" );
 

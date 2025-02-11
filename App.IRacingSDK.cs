@@ -103,10 +103,10 @@ namespace MarvinsAIRA
 
 				if ( mainWindow != null )
 				{
-					mainWindow.ConnectionStatusBarItem.Content = "Connected";
-					mainWindow.ConnectionStatusBarItem.Foreground = Brushes.ForestGreen;
+					mainWindow.Connection_StatusBarItem.Content = "Connected";
+					mainWindow.Connection_StatusBarItem.Foreground = Brushes.ForestGreen;
 
-					mainWindow.SimulatorNotRunningLabel.Visibility = Visibility.Hidden;
+					mainWindow.SimulatorNotRunning_Label.Visibility = Visibility.Hidden;
 				}
 			} );
 		}
@@ -142,6 +142,8 @@ namespace MarvinsAIRA
 			_ffb_recordingNow = false;
 			_ffb_playingBackNow = false;
 
+			UpdateConstantForce( [ 0 ] );
+
 			Say( Settings.SayDisconnected );
 
 			Dispatcher.BeginInvoke( () =>
@@ -150,10 +152,10 @@ namespace MarvinsAIRA
 
 				if ( mainWindow != null )
 				{
-					mainWindow.ConnectionStatusBarItem.Content = "Disconnected";
-					mainWindow.ConnectionStatusBarItem.Foreground = Brushes.Red;
+					mainWindow.Connection_StatusBarItem.Content = "Disconnected";
+					mainWindow.Connection_StatusBarItem.Foreground = Brushes.Red;
 
-					mainWindow.SimulatorNotRunningLabel.Visibility = Visibility.Visible;
+					mainWindow.SimulatorNotRunning_Label.Visibility = Visibility.Visible;
 
 					UpdateCurrentCar();
 					UpdateCurrentTrack();
