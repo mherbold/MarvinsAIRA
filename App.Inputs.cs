@@ -203,10 +203,7 @@ namespace MarvinsAIRA
 						{
 							foreach ( var joystickUpdate in joystickUpdateArray )
 							{
-                                //bug was here joystickupdatearray[ 0 ] was been used instead of joystickupdate
-								//the problem was half the time my inputs would not be read from my wheel
-								//since changling the following it has fixed it
-                                if ( (joystickUpdate.Offset >= JoystickOffset.Buttons0 ) && (joystickUpdate.Offset <= JoystickOffset.Buttons127 ) )
+								if ( ( joystickUpdate.Offset >= JoystickOffset.Buttons0 ) && ( joystickUpdate.Offset <= JoystickOffset.Buttons127 ) )
 								{
 									if ( joystickUpdate.Value != 0 )
 									{
@@ -254,7 +251,7 @@ namespace MarvinsAIRA
 						}
 					}
 
-                }
+				}
 				catch ( Exception )
 				{
 					joystick.Acquire();

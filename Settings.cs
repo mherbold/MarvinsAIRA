@@ -1603,7 +1603,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private int _autoCenterWheelStrength = 180;
+		private int _autoCenterWheelStrength = 15;
 
 		public int AutoCenterWheelStrength
 		{
@@ -1611,20 +1611,20 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 1, Math.Min( 500, value ) );
+				value = Math.Max( 1, Math.Min( 100, value ) );
 
 				if ( _autoCenterWheelStrength != value )
 				{
 					_autoCenterWheelStrength = value;
 
-					AutoCenterWheelStrengthString = _autoCenterWheelStrength.ToString();
+					AutoCenterWheelStrengthString = $"{_autoCenterWheelStrength}%";
 
 					OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _autoCenterWheelStrengthString = "180";
+		private string _autoCenterWheelStrengthString = "15%";
 
 		public string AutoCenterWheelStrengthString
 		{
@@ -1635,6 +1635,23 @@ namespace MarvinsAIRA
 				if ( _autoCenterWheelStrengthString != value )
 				{
 					_autoCenterWheelStrengthString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private int _autoCenterWheelType = 1;
+		
+		public int AutoCenterWheelType
+		{
+			get => _autoCenterWheelType;
+
+			set
+			{
+				if ( _autoCenterWheelType != value )
+				{
+					_autoCenterWheelType = value;
 
 					OnPropertyChanged();
 				}
@@ -1755,7 +1772,6 @@ namespace MarvinsAIRA
 
 		public SerializableDictionary<Guid, string> FFBDeviceList { get => _ffbDeviceList; }
 
-
 		public void UpdateFFBDeviceList( SerializableDictionary<Guid, string> ffbDeviceList )
 		{
 			_ffbDeviceList = ffbDeviceList;
@@ -1795,6 +1811,8 @@ namespace MarvinsAIRA
 
 			OnPropertyChanged( false, nameof( WheelAxisList ) );
 		}
+
+		public SerializableDictionary<int, string> AutoCenterWheelTypeList { get; } = new SerializableDictionary<int, string> { { 0, "Slow and Steady" }, { 1, "Springy" } };
 
 		#endregion
 

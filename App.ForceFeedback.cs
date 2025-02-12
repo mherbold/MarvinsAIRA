@@ -1,5 +1,4 @@
 ﻿
-using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -670,33 +669,47 @@ namespace MarvinsAIRA
 					var leftPercentage = 1f - leftDelta / leftRange;
 					var rightPercentage = 1f - rightDelta / rightRange;
 
-					var normalizedWheelVelocity = Math.Abs( _input_currentWheelVelocity / deltaTime );
-					var targetWheelVelocity = 10000f;
-
-					var forceMagnitudeScale = Math.Max( 0f, Math.Min( 1f, ( targetWheelVelocity - normalizedWheelVelocity ) / targetWheelVelocity ) );
 					var forceMagnitude = 0;
 
-					if ( leftPercentage >= 0.015f )
+					if ( Settings.AutoCenterWheelType == 0 )
 					{
-						if ( normalizedWheelVelocity < targetWheelVelocity )
+						var normalizedWheelVelocity = Math.Abs( _input_currentWheelVelocity / deltaTime );
+						var targetWheelVelocity = 10000f;
+
+						var forceMagnitudeScale = Math.Max( 0f, Math.Min( 1f, ( targetWheelVelocity - normalizedWheelVelocity ) / targetWheelVelocity ) );
+
+						if ( leftPercentage >= 0.02f )
 						{
-							forceMagnitude = -Settings.AutoCenterWheelStrength;
+							if ( normalizedWheelVelocity < targetWheelVelocity )
+							{
+								forceMagnitude = -Settings.AutoCenterWheelStrength * 5;
+							}
+							else
+							{
+								forceMagnitude = -Settings.AutoCenterWheelStrength * 3;
+							}
 						}
-						else
+						else if ( rightPercentage >= 0.02f )
 						{
-							forceMagnitude = -Settings.AutoCenterWheelStrength * 2 / 3;
+							if ( normalizedWheelVelocity <= targetWheelVelocity )
+							{
+								forceMagnitude = Settings.AutoCenterWheelStrength * 5;
+							}
+							else
+							{
+								forceMagnitude = Settings.AutoCenterWheelStrength * 3;
+							}
 						}
 					}
-					else if ( rightPercentage >= 0.015f )
+					else if ( Settings.AutoCenterWheelType == 1 )
 					{
-
-						if ( normalizedWheelVelocity <= targetWheelVelocity )
+						if ( leftPercentage >= 0.02f )
 						{
-							forceMagnitude = Settings.AutoCenterWheelStrength;
+							forceMagnitude = (int) ( leftPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / -100f );
 						}
-						else
+						else if ( rightPercentage >= 0.02f )
 						{
-							forceMagnitude = Settings.AutoCenterWheelStrength * 2 / 3;
+							forceMagnitude = (int) ( rightPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / 100f );
 						}
 					}
 
@@ -903,6 +916,10 @@ namespace MarvinsAIRA
 			var normalizedDetailScaleSetting = Settings.DetailScale / 100f;
 			var normalizedLFEScaleSetting = Settings.LFEScale / 100f;
 
+			// apply crash protection to detail scale
+
+			normalizedDetailScaleSetting *= _ffb_crashProtectionScale;
+
 			// map scales into DI units (detail scale will be the same as the overall scale if detail scale slider is set to 100%)
 
 			var overallScaleToDirectInputUnits = normalizedOverallScaleSetting * newtonMetersToDirectInputUnits;
@@ -992,11 +1009,11 @@ namespace MarvinsAIRA
 					_ffb_runningSteeringWheelTorque = ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * normalizedDetailScaleSetting ) + ( steadyStateWheelTorque * ( 1 - normalizedDetailScaleSetting ) );
 				}
 
-				// apply the speed and crash protection scales
+				// apply the speed scale
 
 				if ( processThisFrame )
 				{
-					_ffb_outputWheelMagnitudeBuffer[ x ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale * _ffb_crashProtectionScale );
+					_ffb_outputWheelMagnitudeBuffer[ x ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale );
 				}
 
 				// mix in the low frequency effects
