@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -99,6 +100,9 @@ namespace MarvinsAIRA
 		private int _ffb_lateralForceFactorBufferIndex = 0;
 
 		private float _ffb_understeerEffectWaveAngle = 0;
+
+		private float _ffb_crashProtectionTimer = 0;
+		private float _ffb_crashProtectionScale = 1;
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
@@ -513,13 +517,13 @@ namespace MarvinsAIRA
 					{
 						Settings.USYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
 
-						Say( Settings.SayLeftYawRateFactor, Settings.USYawRateFactorLeft.ToString() );
+						Say( Settings.SayLeftYawRateFactor, Settings.USYawRateFactorLeft.ToString(), true );
 					}
 					else
 					{
 						Settings.USYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
 
-						Say( Settings.SayRightYawRateFactor, Settings.USYawRateFactorRight.ToString() );
+						Say( Settings.SayRightYawRateFactor, Settings.USYawRateFactorRight.ToString(), true );
 					}
 				}
 
@@ -655,45 +659,48 @@ namespace MarvinsAIRA
 
 			if ( !_irsdk_isOnTrack && Settings.AutoCenterWheel && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
 			{
-				var leftRange = Settings.WheelCenterValue - Settings.WheelMinValue;
-				var rightRange = Settings.WheelCenterValue - Settings.WheelMaxValue;
+				var leftRange = (float) ( Settings.WheelCenterValue - Settings.WheelMinValue );
+				var rightRange = (float) ( Settings.WheelCenterValue - Settings.WheelMaxValue );
 
-				var leftDelta = Input_CurrentWheelValue - Settings.WheelMinValue;
-				var rightDelta = Input_CurrentWheelValue - Settings.WheelMaxValue;
-
-				if ( ( leftRange != 0 ) && ( rightRange != 0 ) && ( leftDelta != 0 ) && ( rightDelta != 0 ) )
+				if ( ( leftRange != 0f ) && ( rightRange != 0f ) )
 				{
-					var leftPercentage = 1f - (float) leftDelta / leftRange;
-					var rightPercentage = 1f - (float) rightDelta / rightRange;
+					var leftDelta = (float) ( Input_CurrentWheelPosition - Settings.WheelMinValue );
+					var rightDelta = (float) ( Input_CurrentWheelPosition - Settings.WheelMaxValue );
 
-					var centeringForceMagnitude = 0;
+					var leftPercentage = 1f - leftDelta / leftRange;
+					var rightPercentage = 1f - rightDelta / rightRange;
 
-					var strength = Settings.AutoCenterWheelStrength / 100f * DI_FFNOMINALMAX;
+					var normalizedWheelVelocity = Math.Abs( _input_currentWheelVelocity / deltaTime );
+					var targetWheelVelocity = 10000f;
 
-					if ( leftPercentage >= 0f )
+					var forceMagnitudeScale = Math.Max( 0f, Math.Min( 1f, ( targetWheelVelocity - normalizedWheelVelocity ) / targetWheelVelocity ) );
+					var forceMagnitude = 0;
+
+					if ( leftPercentage >= 0.015f )
 					{
-						if ( leftPercentage < 0.1f )
+						if ( normalizedWheelVelocity < targetWheelVelocity )
 						{
-							centeringForceMagnitude = (int) ( leftPercentage * -strength );
+							forceMagnitude = -Settings.AutoCenterWheelStrength;
 						}
 						else
 						{
-							centeringForceMagnitude = (int) ( -strength * 0.1f );
+							forceMagnitude = -Settings.AutoCenterWheelStrength * 2 / 3;
 						}
 					}
-					else if ( rightPercentage >= 0f )
+					else if ( rightPercentage >= 0.015f )
 					{
-						if ( rightPercentage < 0.1f )
+
+						if ( normalizedWheelVelocity <= targetWheelVelocity )
 						{
-							centeringForceMagnitude = (int) ( rightPercentage * strength );
+							forceMagnitude = Settings.AutoCenterWheelStrength;
 						}
 						else
 						{
-							centeringForceMagnitude = (int) ( strength * 0.1f );
+							forceMagnitude = Settings.AutoCenterWheelStrength * 2 / 3;
 						}
 					}
 
-					UpdateConstantForce( [ centeringForceMagnitude ] );
+					UpdateConstantForce( [ forceMagnitude ] );
 				}
 			}
 		}
@@ -780,6 +787,27 @@ namespace MarvinsAIRA
 				_ffb_previousSteeringWheelTorque = 0;
 				_ffb_runningSteeringWheelTorque = 0;
 				_ffb_steadyStateWheelTorque = 0;
+			}
+
+			// crash protection processing
+
+			if ( Settings.EnableCrashProtection )
+			{
+				if ( Math.Abs( _irsdk_gForce ) >= ( Settings.GForce / 10f ) )
+				{
+					_ffb_crashProtectionTimer = Settings.CrashDuration / 10f;
+				}
+			}
+
+			if ( _ffb_crashProtectionTimer > 0 )
+			{
+				_ffb_crashProtectionTimer -= 1f / _irsdk_tickRate;
+
+				_ffb_crashProtectionScale = 0.1f;
+			}
+			else
+			{
+				_ffb_crashProtectionScale = ( _ffb_crashProtectionScale * 0.99f ) + ( 1f * 0.01f );
 			}
 
 			// calculate current instant yaw rate factor
@@ -964,11 +992,11 @@ namespace MarvinsAIRA
 					_ffb_runningSteeringWheelTorque = ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * normalizedDetailScaleSetting ) + ( steadyStateWheelTorque * ( 1 - normalizedDetailScaleSetting ) );
 				}
 
-				// apply the speed scale and update the array that the force feedback thread uses
+				// apply the speed and crash protection scales
 
 				if ( processThisFrame )
 				{
-					_ffb_outputWheelMagnitudeBuffer[ x ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale );
+					_ffb_outputWheelMagnitudeBuffer[ x ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale * _ffb_crashProtectionScale );
 				}
 
 				// mix in the low frequency effects

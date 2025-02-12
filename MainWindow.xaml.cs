@@ -890,10 +890,6 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Settings tab - Recording tab
-
-		#endregion
-
 		#region Settings tab - Wheel tab
 
 		private void SelectedWheelAxis_ComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
@@ -914,7 +910,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "SetWheelMinValue_Button_Click called." );
 
-			app.Settings.WheelMinValue = app.Input_CurrentWheelValue;
+			app.Settings.WheelMinValue = app.Input_CurrentWheelPosition;
 		}
 
 		private void SetWheelCenterValue_Button_Click( object sender, RoutedEventArgs e )
@@ -924,7 +920,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "SetWheelCenterValue_Button_Click called." );
 
-			app.Settings.WheelCenterValue = app.Input_CurrentWheelValue;
+			app.Settings.WheelCenterValue = app.Input_CurrentWheelPosition;
 		}
 
 		private void SetWheelMaxValue_Button_Click( object sender, RoutedEventArgs e )
@@ -934,7 +930,7 @@ namespace MarvinsAIRA
 			app.WriteLine( "" );
 			app.WriteLine( "SetWheelMaxValue_Button_Click called." );
 
-			app.Settings.WheelMaxValue = app.Input_CurrentWheelValue;
+			app.Settings.WheelMaxValue = app.Input_CurrentWheelPosition;
 		}
 
 		private void AutoCenterWheel_CheckBox_Click( object sender, RoutedEventArgs e )
@@ -953,8 +949,6 @@ namespace MarvinsAIRA
 
 				app.WriteLine( "" );
 				app.WriteLine( "AutoCenterWheelStrength_Slider_ValueChanged called." );
-
-				app.ScheduleReinitializeForceFeedback();
 			}
 		}
 

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.28"
+        Title="Marvin's Awesome iRacing App v0.29"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -601,78 +601,106 @@
                             </ScrollViewer>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Recording">
-                        <StackPanel Margin="10,10,10,10">
-                            <CheckBox x:Name="PlaybackSendToDevice_CheckBox" Content="When playing back a recording, send the force feedback signal to the wheel." IsChecked="{Binding PlaybackSendToDevice}"/>
-                        </StackPanel>
-                    </TabItem>
                     <TabItem Header="Wheel">
                         <StackPanel Margin="10,10,10,10">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <Label Content="Axis" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                    <Grid Margin="0,5,0,0">
+                            <GroupBox Header="Calibration">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <Label Content="Axis" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        <Grid Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox Grid.Column="0" x:Name="WheelAxis_ComboBox" HorizontalAlignment="Stretch" ItemsSource="{Binding WheelAxisList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedWheelAxis}" SelectionChanged="SelectedWheelAxis_ComboBox_SelectionChanged" />
+                                            <TextBox Grid.Column="1" Text="{Binding WheelAxisValueString, Mode=OneWay}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        </Grid>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <Label Content="Full Left" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        <Grid Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" x:Name="SetWheelMinValue_Button" Content="SET" Click="SetWheelMinValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                            <TextBox Grid.Column="1" Text="{Binding WheelMinValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        </Grid>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="4">
+                                        <Label Content="Center" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        <Grid Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" x:Name="SetWheelCenterValue_Button" Content="SET" Click="SetWheelCenterValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                            <TextBox Grid.Column="1" Text="{Binding WheelCenterValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        </Grid>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="6">
+                                        <Label Content="Full Right" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        <Grid Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" x:Name="SetWheelMaxValue_Button" Content="SET" Click="SetWheelMaxValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                            <TextBox Grid.Column="1" Text="{Binding WheelMaxValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="Auto Centering">
+                                <StackPanel>
+                                    <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Enable Auto Centering" IsChecked="{Binding AutoCenterWheel}" Click="AutoCenterWheel_CheckBox_Click"/>
+                                    <Grid Margin="0,15,0,0">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="90"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" x:Name="WheelAxis_ComboBox" HorizontalAlignment="Stretch" ItemsSource="{Binding WheelAxisList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedWheelAxis}" SelectionChanged="SelectedWheelAxis_ComboBox_SelectionChanged" />
-                                        <TextBox Grid.Column="1" Text="{Binding WheelAxisValueString, Mode=OneWay}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Label Grid.Column="0" Content="Strength" VerticalAlignment="Center" ToolTip="You want to lower this slider until your wheel stops oscillating." />
+                                        <TextBox Grid.Column="1" Text="{Binding AutoCenterWheelStrengthString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="500" SmallChange="10" LargeChange="100" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="10" ValueChanged="AutoCenterWheelStrength_Slider_ValueChanged" />
                                     </Grid>
                                 </StackPanel>
-                                <StackPanel Grid.Column="2">
-                                    <Label Content="Full Left" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                    <Grid Margin="0,5,0,0">
+                            </GroupBox>
+                            <GroupBox Header="Recordings">
+                                <StackPanel>
+                                    <CheckBox x:Name="PlaybackSendToDevice_CheckBox" Content="Send Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Crash Protection">
+                                <StackPanel>
+                                    <CheckBox x:Name="EnableCrashProtection_CheckBox" Content="Enable Crash Protection" IsChecked="{Binding EnableCrashProtection}"/>
+                                    <Grid>
                                         <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="90"/>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="90"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" x:Name="SetWheelMinValue_Button" Content="SET" Click="SetWheelMinValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                                        <TextBox Grid.Column="1" Text="{Binding WheelMinValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Label Grid.Column="0" Content="G-Force" VerticalAlignment="Center" ToolTip="This is much G-Force your car needs to sustain before it is considered in a crash." />
+                                        <TextBox Grid.Column="1" Text="{Binding GForceString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Slider Grid.Column="2" x:Name="GForce_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="10" Maximum="50" SmallChange="1" LargeChange="5" TickPlacement="TopLeft" Value="{Binding GForce}" TickFrequency="1" />
+                                        <Label Grid.Column="3" Content="Duration" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="This is how long, in seconds, to reduce forces on your steering wheel." />
+                                        <TextBox Grid.Column="4" Text="{Binding CrashDurationString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                                        <Slider Grid.Column="5" x:Name="CrashDuration_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="50" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding CrashDuration}" TickFrequency="1" />
                                     </Grid>
                                 </StackPanel>
-                                <StackPanel Grid.Column="4">
-                                    <Label Content="Center" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" x:Name="SetWheelCenterValue_Button" Content="SET" Click="SetWheelCenterValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                                        <TextBox Grid.Column="1" Text="{Binding WheelCenterValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                    </Grid>
-                                </StackPanel>
-                                <StackPanel Grid.Column="6">
-                                    <Label Content="Full Right" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" x:Name="SetWheelMaxValue_Button" Content="SET" Click="SetWheelMaxValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                                        <TextBox Grid.Column="1" Text="{Binding WheelMaxValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                            <Grid Margin="0,10,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Center the wheel when out of the car or when the iRacing simulator disconnects" IsChecked="{Binding AutoCenterWheel}" Click="AutoCenterWheel_CheckBox_Click"/>
-                                <Label Grid.Column="1" Content="Strength" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
-                                <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="1" LargeChange="5" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="10" ValueChanged="AutoCenterWheelStrength_Slider_ValueChanged" />
-                            </Grid>
+                            </GroupBox>
                         </StackPanel>
                     </TabItem>
                 </TabControl>

@@ -1445,27 +1445,6 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Settings tab - Playback tab
-
-		private bool _playbackSendToDevice = true;
-
-		public bool PlaybackSendToDevice
-		{
-			get => _playbackSendToDevice;
-
-			set
-			{
-				if ( _playbackSendToDevice != value )
-				{
-					_playbackSendToDevice = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		#endregion
-
 		#region Settings tab - Wheel tab
 
 		private JoystickOffset _selectedWheelAxis = JoystickOffset.X;
@@ -1624,7 +1603,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private int _autoCenterWheelStrength = 20;
+		private int _autoCenterWheelStrength = 180;
 
 		public int AutoCenterWheelStrength
 		{
@@ -1632,11 +1611,136 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 1, Math.Min( 100, value ) );
+				value = Math.Max( 1, Math.Min( 500, value ) );
 
 				if ( _autoCenterWheelStrength != value )
 				{
 					_autoCenterWheelStrength = value;
+
+					AutoCenterWheelStrengthString = _autoCenterWheelStrength.ToString();
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _autoCenterWheelStrengthString = "180";
+
+		public string AutoCenterWheelStrengthString
+		{
+			get => _autoCenterWheelStrengthString;
+
+			set
+			{
+				if ( _autoCenterWheelStrengthString != value )
+				{
+					_autoCenterWheelStrengthString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _playbackSendToDevice = true;
+
+		public bool PlaybackSendToDevice
+		{
+			get => _playbackSendToDevice;
+
+			set
+			{
+				if ( _playbackSendToDevice != value )
+				{
+					_playbackSendToDevice = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _enableCrashProtection = false;
+
+		public bool EnableCrashProtection
+		{
+			get => _enableCrashProtection;
+
+			set
+			{
+				if ( _enableCrashProtection != value )
+				{
+					_enableCrashProtection = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private int _gForce = 20;
+
+		public int GForce
+		{
+			get => _gForce;
+
+			set
+			{
+				if ( _gForce != value )
+				{
+					_gForce = value;
+
+					GForceString = $"{(float) _gForce / 10:F1} G";
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _gForceString = "2.0 G";
+
+		public string GForceString
+		{
+			get => _gForceString;
+
+			set
+			{
+				if ( _gForceString != value )
+				{
+					_gForceString = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private int _crashDuration = 20;
+
+		public int CrashDuration
+		{
+			get => _crashDuration;
+
+			set
+			{
+				if ( _crashDuration != value )
+				{
+					_crashDuration = value;
+
+					CrashDurationString = $"{(float) _crashDuration / 10:F1} sec";
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private string _crashDurationString = "2.0 sec";
+
+		public string CrashDurationString
+		{
+			get => _crashDurationString;
+
+			set
+			{
+				if ( _crashDurationString != value )
+				{
+					_crashDurationString = value;
 
 					OnPropertyChanged();
 				}
