@@ -676,7 +676,7 @@ namespace MarvinsAIRA
 
 						//work out the force to apply to the wheel
 						int forceMultiplyer = 50;
-						int minForce = 300; //this is needed for some wheels, particaly belt drvin wheels that have inherent friction
+						int minForce = 100; //this is needed for some wheels, particaly belt drvin wheels that have inherent friction
 						//even my csl dd need this value for min force
 						int forceMagnitude = 0;
 
@@ -1098,9 +1098,17 @@ namespace MarvinsAIRA
 					}
 				}
 
-				// reset the magnitude index now
+				float dist = 0;
+				dist = ( _irsdk_steeringWheelMaxAngle * .5f) - Math.Abs(_irsdk_steeringWheelAngle);
 
-				_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
+                if (_irsdk_steeringWheelAngle < -_irsdk_steeringWheelMaxAngle * .5f)
+					_ffb_outputWheelMagnitudeBuffer[x] = (int)(Settings.WheelMaxForce * -1000 * dist);
+
+                if (_irsdk_steeringWheelAngle > _irsdk_steeringWheelMaxAngle * .5f)
+                    _ffb_outputWheelMagnitudeBuffer[x] = (int)(Settings.WheelMaxForce * 1000 * dist);
+                // reset the magnitude index now
+
+                _ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
 
 				// update the pretty graph
 
