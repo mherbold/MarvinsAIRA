@@ -45,11 +45,14 @@ namespace MarvinsAIRA
 
 			foreach ( var installedVoice in installedVoices )
 			{
-				voiceList.Add( installedVoice.VoiceInfo.Name, installedVoice.VoiceInfo.Description );
-
-				if ( Settings.SelectedVoice == string.Empty )
+				if ( !voiceList.ContainsKey( installedVoice.VoiceInfo.Name ) )
 				{
-					Settings.SelectedVoice = installedVoice.VoiceInfo.Name;
+					voiceList.Add( installedVoice.VoiceInfo.Name, installedVoice.VoiceInfo.Description );
+
+					if ( Settings.SelectedVoice == string.Empty )
+					{
+						Settings.SelectedVoice = installedVoice.VoiceInfo.Name;
+					}
 				}
 			}
 
