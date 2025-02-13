@@ -1098,6 +1098,8 @@ namespace MarvinsAIRA
 					}
 				}
 
+				//here is some demo code to add a force to the wheel when the wheel is turned past the maxmum angle the car supports
+				//currently if I max the angle of the car the wheel goes light and somtimes forces are applyied in the wrong direction
 				float dist = 0;
 				dist = ( _irsdk_steeringWheelMaxAngle * .5f) - Math.Abs(_irsdk_steeringWheelAngle);
 
