@@ -1812,7 +1812,7 @@ namespace MarvinsAIRA
 			OnPropertyChanged( false, nameof( WheelAxisList ) );
 		}
 
-		public SerializableDictionary<int, string> AutoCenterWheelTypeList { get; } = new SerializableDictionary<int, string> { { 0, "Slow and Steady" }, { 1, "Springy" } };
+		public SerializableDictionary<int, string> AutoCenterWheelTypeList { get; } = new SerializableDictionary<int, string> { { 0, "Slow and Steady" }, { 1, "Springy" }, { 2, "Cublic" } };
 
 		#endregion
 
