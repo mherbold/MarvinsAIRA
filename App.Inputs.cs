@@ -138,6 +138,10 @@ namespace MarvinsAIRA
 					}
 				}
 
+				///there is a random crash here
+				///inital _ffb_DrivingJoystick is not null and passes the if check
+				///but by the next line it becomes null when changing auto center type.
+				///this is random only happens every now and then so i guess its a threading issue
 				if ( _ffb_drivingJoystick != null )
 				{
 					if ( joystick.Information.InstanceGuid == _ffb_drivingJoystick.Information.InstanceGuid )

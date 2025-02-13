@@ -404,8 +404,8 @@ namespace MarvinsAIRA
 		{
 			_ffb_reinitializeNeeded = true;
 		}
-
-		public void UpdateForceFeedback( float deltaTime, bool checkButtons, nint windowHandle )
+        float _timeUnderThreashfold = 0;
+        public void UpdateForceFeedback( float deltaTime, bool checkButtons, nint windowHandle )
 		{
 			if ( checkButtons )
 			{
@@ -658,63 +658,102 @@ namespace MarvinsAIRA
 
 			if ( !_irsdk_isOnTrack && Settings.AutoCenterWheel && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
 			{
-				var leftRange = (float) ( Settings.WheelCenterValue - Settings.WheelMinValue );
-				var rightRange = (float) ( Settings.WheelCenterValue - Settings.WheelMaxValue );
 
-				if ( ( leftRange != 0f ) && ( rightRange != 0f ) )
+				if (Settings.AutoCenterWheelType == 2) //my costom wheel centering
 				{
-					var leftDelta = (float) ( Input_CurrentWheelPosition - Settings.WheelMinValue );
-					var rightDelta = (float) ( Input_CurrentWheelPosition - Settings.WheelMaxValue );
+					if (Settings.WheelCenterValue != 0) //make sure the center value is not 0. if it is we cannot center the wheel
+						if (Math.Abs(_input_currentWheelVelocity) < 100) //check if the wheel is moving slow enough to stop centering
+							_timeUnderThreashfold += deltaTime; 
+						else
+							_timeUnderThreashfold = 0;
 
-					var leftPercentage = 1f - leftDelta / leftRange;
-					var rightPercentage = 1f - rightDelta / rightRange;
-
-					var forceMagnitude = 0;
-
-					if ( Settings.AutoCenterWheelType == 0 )
+					if (_timeUnderThreashfold < 3f) //if the wheel has been under the threshold continue centering cocde
 					{
-						var normalizedWheelVelocity = Math.Abs( _input_currentWheelVelocity / deltaTime );
-						var targetWheelVelocity = 10000f;
+						//work out percentage of distance from center
+						float percentage = ((float)(Input_CurrentWheelPosition - Settings.WheelCenterValue) / (float)Settings.WheelCenterValue);
+						//clamp between 1 and 0
+						percentage = Math.Clamp(percentage, -1, 1);
 
-						var forceMagnitudeScale = Math.Max( 0f, Math.Min( 1f, ( targetWheelVelocity - normalizedWheelVelocity ) / targetWheelVelocity ) );
+						//work out the force to apply to the wheel
+						int forceMultiplyer = 50;
+						int minForce = 300; //this is needed for some wheels, particaly belt drvin wheels that have inherent friction
+						//even my csl dd need this value for min force
+						int forceMagnitude = 0;
 
-						if ( leftPercentage >= 0.02f )
-						{
-							if ( normalizedWheelVelocity < targetWheelVelocity )
-							{
-								forceMagnitude = -Settings.AutoCenterWheelStrength * 5;
-							}
-							else
-							{
-								forceMagnitude = -Settings.AutoCenterWheelStrength * 3;
-							}
-						}
-						else if ( rightPercentage >= 0.02f )
-						{
-							if ( normalizedWheelVelocity <= targetWheelVelocity )
-							{
-								forceMagnitude = Settings.AutoCenterWheelStrength * 5;
-							}
-							else
-							{
-								forceMagnitude = Settings.AutoCenterWheelStrength * 3;
-							}
-						}
-					}
-					else if ( Settings.AutoCenterWheelType == 1 )
-					{
-						if ( leftPercentage >= 0.02f )
-						{
-							forceMagnitude = (int) ( leftPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / -100f );
-						}
-						else if ( rightPercentage >= 0.02f )
-						{
-							forceMagnitude = (int) ( rightPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / 100f );
-						}
-					}
+						//check that the wheel is moving in the correct direction to center it
+						if (Math.Sign(_input_currentWheelVelocity) != Math.Sign(percentage))
+							percentage = percentage * percentage * percentage; //if we are moving in the correct direction use a cubic curve to make the wheel return to center smother
 
-					UpdateConstantForce( [ forceMagnitude ] );
+						forceMagnitude = (int)(Settings.AutoCenterWheelStrength * percentage) * forceMultiplyer; //multply all forces
+
+						if (Math.Abs(forceMagnitude) < minForce) //check that force is grater than min force
+							forceMagnitude = minForce * Math.Sign(percentage);
+
+                        UpdateConstantForce([forceMagnitude]);
+                    }
 				}
+				else
+				{
+
+					var leftRange = (float)(Settings.WheelCenterValue - Settings.WheelMinValue);
+					var rightRange = (float)(Settings.WheelCenterValue - Settings.WheelMaxValue);
+
+					if ((leftRange != 0f) && (rightRange != 0f))
+					{
+						var leftDelta = (float)(Input_CurrentWheelPosition - Settings.WheelMinValue);
+						var rightDelta = (float)(Input_CurrentWheelPosition - Settings.WheelMaxValue);
+
+						var leftPercentage = 1f - leftDelta / leftRange;
+						var rightPercentage = 1f - rightDelta / rightRange;
+
+						var forceMagnitude = 0;
+
+						if (Settings.AutoCenterWheelType == 0)
+						{
+							var normalizedWheelVelocity = Math.Abs(_input_currentWheelVelocity / deltaTime);
+							var targetWheelVelocity = 10000f;
+
+							var forceMagnitudeScale = Math.Max(0f, Math.Min(1f, (targetWheelVelocity - normalizedWheelVelocity) / targetWheelVelocity));
+
+							if (leftPercentage >= 0.02f)
+							{
+								if (normalizedWheelVelocity < targetWheelVelocity)
+								{
+									forceMagnitude = -Settings.AutoCenterWheelStrength * 5;
+								}
+								else
+								{
+									forceMagnitude = -Settings.AutoCenterWheelStrength * 3;
+								}
+							}
+							else if (rightPercentage >= 0.02f)
+							{
+								if (normalizedWheelVelocity <= targetWheelVelocity)
+								{
+									forceMagnitude = Settings.AutoCenterWheelStrength * 5;
+								}
+								else
+								{
+									forceMagnitude = Settings.AutoCenterWheelStrength * 3;
+								}
+							}
+						}
+						else if (Settings.AutoCenterWheelType == 1)
+						{
+							if (leftPercentage >= 0.02f)
+							{
+								forceMagnitude = (int)(leftPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / -100f);
+							}
+							else if (rightPercentage >= 0.02f)
+							{
+								forceMagnitude = (int)(rightPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / 100f);
+							}
+						}
+
+						UpdateConstantForce([forceMagnitude]);
+					}
+				}
+				
 			}
 		}
 
@@ -768,7 +807,12 @@ namespace MarvinsAIRA
 				return;
 			}
 
-			var processThisFrame = ( Interlocked.Decrement( ref _ffb_updatesToSkip ) < 0 );
+            if (Math.Abs(_irsdk_steeringWheelAngle) < .1f)
+            {
+                Settings.WheelCenterValue = Input_CurrentWheelPosition; //set center position for wheel
+            }
+
+            var processThisFrame = ( Interlocked.Decrement( ref _ffb_updatesToSkip ) < 0 );
 
 			float[] steeringWheelTorque_ST = [
 				_irsdk_steeringWheelTorque_ST[ 0 ],
