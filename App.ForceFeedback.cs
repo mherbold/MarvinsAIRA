@@ -1100,13 +1100,14 @@ namespace MarvinsAIRA
 
 				//here is some demo code to add a force to the wheel when the wheel is turned past the maxmum angle the car supports
 				//currently if I max the angle of the car the wheel goes light and somtimes forces are applyied in the wrong direction
-				float dist = 0;
-				dist = ( _irsdk_steeringWheelMaxAngle * .5f) - Math.Abs(_irsdk_steeringWheelAngle);
 
+				//it would be good to have a speed limit on return out of this zone, unforcanatly i havent been abel to figure that out.
+				float dist = ( _irsdk_steeringWheelMaxAngle * .5f) - Math.Abs(_irsdk_steeringWheelAngle);
+				//WriteLine($"{dist}");
                 if (_irsdk_steeringWheelAngle < -_irsdk_steeringWheelMaxAngle * .5f)
-					_ffb_outputWheelMagnitudeBuffer[x] = (int)(Settings.WheelMaxForce * -1000 * dist);
+	                _ffb_outputWheelMagnitudeBuffer[x] = (int)(Settings.WheelMaxForce * -1000 * dist);
 
-                if (_irsdk_steeringWheelAngle > _irsdk_steeringWheelMaxAngle * .5f)
+				if (_irsdk_steeringWheelAngle > _irsdk_steeringWheelMaxAngle * .5f)
                     _ffb_outputWheelMagnitudeBuffer[x] = (int)(Settings.WheelMaxForce * 1000 * dist);
                 // reset the magnitude index now
 
