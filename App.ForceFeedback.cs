@@ -816,7 +816,7 @@ namespace MarvinsAIRA
 			{
 				_ffb_crashProtectionTimer -= 1f / _irsdk_tickRate;
 
-				_ffb_crashProtectionScale = 0.1f;
+				_ffb_crashProtectionScale = 0;
 			}
 			else
 			{
