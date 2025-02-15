@@ -6,6 +6,8 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 
+using System.Windows.Input;
+
 namespace MarvinsAIRA
 {
 	public partial class MainWindow : Window
@@ -1053,6 +1055,95 @@ namespace MarvinsAIRA
 			return mappedButtons;
 		}
 
-		#endregion
-	}
+        #endregion
+
+		private char[] validNums = "0123456789.".ToCharArray();
+
+		private string Validate( string str )
+		{
+			string output = string.Empty;
+			bool foundDot = false;
+			foreach (char c in str)
+			{
+				if (c == '.')
+				{
+					if (foundDot)
+						break;
+					foundDot = true;
+				}
+				output += c;
+			}
+			
+            output = new string( output.Where( c => validNums.Contains( c ) ).ToArray() ); //remove not valid chars
+
+			if (output[output.Length-1] == '.') //check that dos not end it dot
+				output = $"{output}0"; //add 0 if needed
+
+			return output;
+		}
+
+
+
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (textBox != null)
+            {
+				App app = (App)Application.Current;
+                app.Settings.WheelMaxForce = Math.Clamp(float.Parse(Validate(textBox.Text)), 1, 50);
+            }
+        }
+
+        private void MoveFocusToNextControl()
+        {
+            TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Next);
+            UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
+
+            if (elementWithFocus != null)
+            {
+                elementWithFocus.MoveFocus(request);
+            }
+        }
+
+
+        private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                TextBox textBox = sender as TextBox;
+                if (textBox != null)
+                {
+                    App app = (App)Application.Current;
+                    app.Settings.WheelMaxForce = Math.Clamp(float.Parse(Validate(textBox.Text)),1,50);
+                }
+                MoveFocusToNextControl();
+            }
+        }
+
+        private void TextBox_LostFocus_1(object sender, RoutedEventArgs e)
+        {
+
+            TextBox textBox = sender as TextBox;
+            if (textBox != null)
+            {
+                App app = (App)Application.Current;
+                app.Settings.TargetForce = Math.Clamp(float.Parse(Validate(textBox.Text)), 1, 25);
+            }
+        }
+
+        private void TextBox_KeyDown_1(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                TextBox textBox = sender as TextBox;
+                if (textBox != null)
+                {
+                    App app = (App)Application.Current;
+                    app.Settings.TargetForce = Math.Clamp(float.Parse(Validate(textBox.Text)), 1, 25);
+                }
+                MoveFocusToNextControl();
+            }
+        }
+    }
 }

@@ -63,10 +63,10 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
-                            <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                            <TextBox Grid.Column="1" Text="{Binding WheelMaxForceString}" VerticalAlignment="Center" IsReadOnly="False" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown"  />
                             <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce}" TickFrequency="2" />
                             <Label Grid.Column="3" Content="Target" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="This your target overall scale force in Newton-meters." />
-                            <TextBox Grid.Column="4" Text="{Binding TargetForceString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" />
+                            <TextBox Grid.Column="4" Text="{Binding TargetForceString}" VerticalAlignment="Center" IsReadOnly="false" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" LostFocus="TextBox_LostFocus_1" KeyDown="TextBox_KeyDown_1" />
                             <Slider Grid.Column="5" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="25" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding TargetForce}" TickFrequency="2" />
                             <Button Grid.Column="6" x:Name="AutoOverallScale_Button" Margin="10,0,0,0" Click="AutoOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/a-button.png"/>
