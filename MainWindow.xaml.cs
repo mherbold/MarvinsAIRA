@@ -1,6 +1,8 @@
 ﻿
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -35,8 +37,23 @@ namespace MarvinsAIRA
 
 		#region Window
 
-		public MainWindow()
+		[DllImport("user32.dll")]
+		private static extern bool SetForegroundWindow(IntPtr hWnd); //used to set a current instance of app to forground
+
+
+        public MainWindow()
 		{
+			string appName = Assembly.GetExecutingAssembly().GetName().Name;
+			Process[] runningProcesses = Process.GetProcessesByName(appName);
+
+			if (runningProcesses.Length > 1) //2 or more instances running
+			{
+				// Terminate the current instance
+				SetForegroundWindow(runningProcesses[0].MainWindowHandle); //set currently running instance to forgound
+				Environment.Exit(0);
+				return;
+			}
+
 			InitializeComponent();
 
 			Instance = this;
