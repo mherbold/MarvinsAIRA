@@ -1,6 +1,6 @@
 ﻿
 using System.Windows;
-
+using System.Windows.Interop;
 using SharpDX.DirectInput;
 
 using static MarvinsAIRA.Settings;
@@ -25,6 +25,29 @@ namespace MarvinsAIRA
 
 		public int Input_CurrentWheelPosition { get => _input_currentWheelPosition; }
 		public int Input_CurrentWheelVelocity { get => _input_currentWheelVelocity; }
+
+		public int FFBInputCount { get; private set; } = 0;
+
+		public int GetValidFFBInputCount()
+		{
+			int _validInputCount = 0;
+			DirectInput directInput = new DirectInput();
+
+            DeviceType[] deviceTypeArray = [DeviceType.Keyboard, DeviceType.Joystick, DeviceType.Gamepad, DeviceType.Driving, DeviceType.Flight, DeviceType.FirstPerson, DeviceType.ControlDevice, DeviceType.ScreenPointer, DeviceType.Remote, DeviceType.Supplemental];
+
+            foreach (var deviceType in deviceTypeArray)
+            {
+                var deviceInstanceList = directInput.GetDevices(deviceType, DeviceEnumerationFlags.AttachedOnly);
+
+                foreach (var joystickDeviceInstance in deviceInstanceList)
+                {
+                    if (joystickDeviceInstance.ForceFeedbackDriverGuid != Guid.Empty)
+						_validInputCount++;
+                }
+            }
+
+			return _validInputCount;
+        }
 
 		private void InitializeInputs( nint windowHandle )
 		{
@@ -76,8 +99,10 @@ namespace MarvinsAIRA
 				}
 			}
 
+			FFBInputCount = ffbDeviceList.Count;
 			Settings.UpdateFFBDeviceList( ffbDeviceList );
-
+	
+			
 			WriteLine( $"...a total of {_input_joystickList.Count} controller devices were found." );
 
 			var wheelAxisList = new SerializableDictionary<JoystickOffset, string> {
@@ -94,8 +119,37 @@ namespace MarvinsAIRA
 			Settings.UpdateWheelAxisList( wheelAxisList );
 		}
 
+
+		private float _lookForNewInputsTimer = 0;
 		public void UpdateInputs( float deltaTime )
 		{
+			_lookForNewInputsTimer+= deltaTime;
+			if (_lookForNewInputsTimer > 1)
+			{
+				_lookForNewInputsTimer = 0;
+				if (GetValidFFBInputCount() > FFBInputCount) //we have found a new input
+				{
+					_lookForNewInputsTimer = -4; //reset so we dont look for at least 5 seconds
+
+                    var app = (App)Application.Current;
+
+					bool skip = false;
+
+					Dispatcher.BeginInvoke(() =>
+					{
+						nint _win_windowHandle = new WindowInteropHelper(app.MainWindow).Handle;
+						app.InitializeInputs(_win_windowHandle);
+                        app.InitializeForceFeedback(_win_windowHandle); //im calling this to be on safe side
+						skip = true;
+						//but in my testing it dosnt seem to be needed
+                    }).Wait(); //dont know if i need to call wait calling it to lock thread to stop any potential threading issues
+
+					if (skip)
+						return;
+                }
+			}
+
+
 			MappedButtons[] mappedButtonsList = [
 				Settings.ReinitForceFeedbackButtons,
 				Settings.AutoOverallScaleButtons,
