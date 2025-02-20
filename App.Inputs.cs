@@ -94,7 +94,7 @@ namespace MarvinsAIRA
 			Settings.UpdateWheelAxisList( wheelAxisList );
 		}
 
-		public void UpdateInputs()
+		public void UpdateInputs( float deltaTime )
 		{
 			MappedButtons[] mappedButtonsList = [
 				Settings.ReinitForceFeedbackButtons,
@@ -138,9 +138,11 @@ namespace MarvinsAIRA
 					}
 				}
 
-				if ( _ffb_drivingJoystick != null )
+				var drivingJoystick = _ffb_drivingJoystick;
+
+				if ( drivingJoystick != null )
 				{
-					if ( joystick.Information.InstanceGuid == _ffb_drivingJoystick.Information.InstanceGuid )
+					if ( joystick.Information.InstanceGuid == drivingJoystick.Information.InstanceGuid )
 					{
 						var lastWheelPosition = _input_currentWheelPosition;
 
@@ -181,7 +183,7 @@ namespace MarvinsAIRA
 
 						if ( lastWheelPosition != -1 )
 						{
-							_input_currentWheelVelocity = _input_currentWheelPosition - lastWheelPosition;
+							_input_currentWheelVelocity = (int) ( ( _input_currentWheelPosition - lastWheelPosition ) / deltaTime );
 						}
 
 						Settings.WheelAxisValueString = _input_currentWheelPosition.ToString();

@@ -24,6 +24,7 @@ namespace MarvinsAIRA
 		private IRacingSdkDatum? _irsdk_latAccelDatum = null;
 		private IRacingSdkDatum? _irsdk_longAccelDatum = null;
 		private IRacingSdkDatum? _irsdk_steeringWheelAngleDatum = null;
+		private IRacingSdkDatum? _irsdk_steeringWheelAngleMaxDatum = null;
 		private IRacingSdkDatum? _irsdk_displayUnitsDatum = null;
 
 		private bool _irsdk_telemetryDataInitialized = false;
@@ -32,20 +33,23 @@ namespace MarvinsAIRA
 
 		public int _irsdk_tickRate = 0;
 		public int _irsdk_tickCount = 0;
-		public int _irsdk_tickCountLastFrame = 0;
 
 		public float[] _irsdk_steeringWheelTorque_ST = new float[ IRSDK_360HZ_SAMPLES_PER_FRAME ];
 		public float _irsdk_steeringWheelTorque;
 		public bool _irsdk_isOnTrack = false;
 		public float _irsdk_speed = 0;
-		public float _irsdk_speedLastFrame = 0;
 		public float _irsdk_velocityX = 0;
 		public float _irsdk_velocityY = 0;
 		public float _irsdk_yawRate = 0;
 		public float _irsdk_latAccel = 0;
 		public float _irsdk_longAccel = 0;
 		public float _irsdk_steeringWheelAngle = 0;
+		public float _irsdk_steeringWheelAngleMax = 0;
 		public int _irsdk_displayUnits = 0;
+
+		public int _irsdk_tickCountLastFrame = 0;
+		public bool _irsdk_isOnTrackLastFrame = false;
+		public float _irsdk_speedLastFrame = 0;
 
 		public float _irsdk_gForce = 0;
 
@@ -127,7 +131,6 @@ namespace MarvinsAIRA
 
 			_irsdk_tickRate = 0;
 			_irsdk_tickCount = 0;
-			_irsdk_tickCountLastFrame = 0;
 
 			_irsdk_steeringWheelTorque_ST[ 0 ] = 0;
 			_irsdk_steeringWheelTorque_ST[ 1 ] = 0;
@@ -139,10 +142,13 @@ namespace MarvinsAIRA
 			_irsdk_steeringWheelTorque = 0;
 			_irsdk_isOnTrack = false;
 			_irsdk_speed = 0;
-			_irsdk_speedLastFrame = 0;
 			_irsdk_velocityX = 0;
 			_irsdk_velocityY = 0;
 			_irsdk_displayUnits = 0;
+
+			_irsdk_tickCountLastFrame = 0;
+			_irsdk_speedLastFrame = 0;
+			_irsdk_isOnTrackLastFrame = false;
 
 			_irsdk_gForce = 0;
 
@@ -152,8 +158,7 @@ namespace MarvinsAIRA
 
 			_ffb_recordingNow = false;
 			_ffb_playingBackNow = false;
-
-			UpdateConstantForce( [ 0 ] );
+			_ffb_startCooldownNow = true;
 
 			Say( Settings.SayDisconnected );
 
@@ -194,12 +199,15 @@ namespace MarvinsAIRA
 				_irsdk_latAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LatAccel" ];
 				_irsdk_longAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LongAccel" ];
 				_irsdk_steeringWheelAngleDatum = _irsdk.Data.TelemetryDataProperties[ "SteeringWheelAngle" ];
+				_irsdk_steeringWheelAngleMaxDatum = _irsdk.Data.TelemetryDataProperties[ "SteeringWheelAngleMax" ];
 				_irsdk_displayUnitsDatum = _irsdk.Data.TelemetryDataProperties[ "DisplayUnits" ];
 
 				_irsdk_telemetryDataInitialized = true;
 			}
 
 			_irsdk_tickCountLastFrame = _irsdk_tickCount;
+			_irsdk_speedLastFrame = _irsdk_speed;
+			_irsdk_isOnTrackLastFrame = _irsdk_isOnTrack;
 
 			_irsdk_tickRate = _irsdk.Data.TickRate;
 			_irsdk_tickCount = _irsdk.Data.TickCount;
@@ -208,14 +216,14 @@ namespace MarvinsAIRA
 
 			_irsdk_steeringWheelTorque = _irsdk.Data.GetFloat( _irsdk_steeringWheelTorque_Datum );
 			_irsdk_isOnTrack = _irsdk.Data.GetBool( _irsdk_isOnTrackDatum );
-			_irsdk_speedLastFrame = _irsdk_speed;
 			_irsdk_speed = _irsdk.Data.GetFloat( _irsdk_speedDatum );
 			_irsdk_velocityX = _irsdk.Data.GetFloat( _irsdk_velocityXDatum );
 			_irsdk_velocityY = _irsdk.Data.GetFloat( _irsdk_velocityYDatum );
 			_irsdk_yawRate = _irsdk.Data.GetFloat( _irsdk_yawRateDatum );
 			_irsdk_latAccel = _irsdk.Data.GetFloat( _irsdk_latAccelDatum );
-			_irsdk_longAccel = _irsdk.Data.GetFloat(_irsdk_longAccelDatum );
+			_irsdk_longAccel = _irsdk.Data.GetFloat( _irsdk_longAccelDatum );
 			_irsdk_steeringWheelAngle = _irsdk.Data.GetFloat( _irsdk_steeringWheelAngleDatum );
+			_irsdk_steeringWheelAngleMax = _irsdk.Data.GetFloat( _irsdk_steeringWheelAngleMaxDatum );
 			_irsdk_displayUnits = _irsdk.Data.GetInt( _irsdk_displayUnitsDatum );
 
 			var deltaTime = ( _irsdk_tickCount - _irsdk_tickCountLastFrame ) / (float) _irsdk_tickRate;

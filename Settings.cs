@@ -1,5 +1,4 @@
-﻿
-using SharpDX.DirectInput;
+﻿using SharpDX.DirectInput;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -92,7 +91,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 1, Math.Min( 500, value ) );
+				value = Math.Clamp( value, 1, 500 );
 
 				if ( _wheelMaxForce != value )
 				{
@@ -132,7 +131,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 1, Math.Min( 250, value ) );
+				value = Math.Clamp( value, 1, 250 );
 
 				if ( _targetForce != value )
 				{
@@ -191,7 +190,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 1, Math.Min( 250, value ) );
+				value = Math.Clamp( value, 1, 250 );
 
 				if ( _overallScale != value )
 				{
@@ -231,7 +230,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 500, value ) );
+				value = Math.Clamp( value, 0, 500 );
 
 				if ( _detailScale != value )
 				{
@@ -347,7 +346,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 100, value ) );
+				value = Math.Clamp( value, 0, 100 );
 
 				if ( _parkedScale != value )
 				{
@@ -387,7 +386,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 2, Math.Min( 16, value ) );
+				value = Math.Clamp( value, 2, 16 );
 
 				if ( _frequency != value )
 				{
@@ -490,7 +489,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 100, value ) );
+				value = Math.Clamp( value, 0, 100 );
 
 				if ( _usEffectStrength != value )
 				{
@@ -530,7 +529,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 200, value ) );
+				value = Math.Clamp( value, 0, 200 );
 
 				if ( _usYawRateFactorLeft != value )
 				{
@@ -570,7 +569,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 200, value ) );
+				value = Math.Clamp( value, 0, 200 );
 
 				if ( _usYawRateFactorRight != value )
 				{
@@ -671,7 +670,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 0, Math.Min( 250, value ) );
+				value = Math.Clamp( value, 0, 250 );
 
 				if ( _lfeScale != value )
 				{
@@ -1611,7 +1610,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Max( 1, Math.Min( 100, value ) );
+				value = Math.Clamp( value, 1, 100 );
 
 				if ( _autoCenterWheelStrength != value )
 				{
@@ -1642,7 +1641,7 @@ namespace MarvinsAIRA
 		}
 
 		private int _autoCenterWheelType = 1;
-		
+
 		public int AutoCenterWheelType
 		{
 			get => _autoCenterWheelType;

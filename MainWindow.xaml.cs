@@ -164,9 +164,9 @@ namespace MarvinsAIRA
 
 					if ( _win_keepThreadsAlive == 1 )
 					{
-						var deltaTime = Math.Min( 0.5f, (float) _win_stopwatch.Elapsed.TotalSeconds );
+						var deltaTime = Math.Min( 0.1f, (float) _win_stopwatch.Elapsed.TotalSeconds );
 
-						if ( deltaTime > 0.002f )
+						if ( deltaTime >= 1f / 120f )
 						{
 							_win_stopwatch.Restart();
 
@@ -174,7 +174,7 @@ namespace MarvinsAIRA
 
 							if ( !_win_pauseButtons )
 							{
-								app.UpdateInputs();
+								app.UpdateInputs( deltaTime );
 							}
 
 							app.UpdateForceFeedback( deltaTime, !_win_pauseButtons, _win_windowHandle );

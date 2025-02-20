@@ -78,6 +78,10 @@ namespace MarvinsAIRA
 		private int _ffb_resetOutputWheelMagnitudeBufferTimerNow = 0;
 		private int _ffb_lastMagnitudeSentToWheel = 0;
 
+		private bool _ffb_startCooldownNow = false;
+		private float _ffb_magnitudeCoolDownTimer = 0;
+		private int _ffb_lastNonCooldownMagnitudeSentToWheel = 0;
+
 		private float _ffb_previousSteeringWheelTorque = 0;
 		private float _ffb_runningSteeringWheelTorque = 0;
 		private float _ffb_steadyStateWheelTorque = 0;
@@ -102,6 +106,8 @@ namespace MarvinsAIRA
 
 		private float _ffb_crashProtectionTimer = 0;
 		private float _ffb_crashProtectionScale = 1;
+
+		private int _ffb_centerWheelForce = 0;
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
@@ -272,21 +278,8 @@ namespace MarvinsAIRA
 
 				if ( disposeOfDrivingJoystick )
 				{
-					if ( _ffb_constantForceEffectInfo != null )
-					{
-						_ffb_constantForceEffectInfo = null;
-					}
-
-					var drivingJoystick = _ffb_drivingJoystick;
-
+					_ffb_constantForceEffectInfo = null;
 					_ffb_drivingJoystick = null;
-
-					WriteLine( "...disposing of the force feedback device..." );
-
-					drivingJoystick.Dispose();
-
-					WriteLine( "...the force feedback device has been disposed of..." );
-
 					_ffb_initialized = false;
 				}
 			}
@@ -659,55 +652,72 @@ namespace MarvinsAIRA
 			if ( !_irsdk_isOnTrack && Settings.AutoCenterWheel && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
 			{
 				var leftRange = (float) ( Settings.WheelCenterValue - Settings.WheelMinValue );
-				var rightRange = (float) ( Settings.WheelCenterValue - Settings.WheelMaxValue );
+				var rightRange = (float) ( Settings.WheelMaxValue - Settings.WheelCenterValue );
 
-				if ( ( leftRange != 0f ) && ( rightRange != 0f ) )
+				if ( ( leftRange > 0f ) && ( rightRange > 0f ) )
 				{
-					var leftDelta = (float) ( Input_CurrentWheelPosition - Settings.WheelMinValue );
-					var rightDelta = (float) ( Input_CurrentWheelPosition - Settings.WheelMaxValue );
+					var normalizedRange = leftRange + rightRange;
 
-					var leftPercentage = 1f - leftDelta / leftRange;
-					var rightPercentage = 1f - rightDelta / rightRange;
+					var currentWheelPosition = Math.Clamp( Input_CurrentWheelPosition, Settings.WheelMinValue, Settings.WheelMaxValue );
+
+					var leftDelta = (float) -Math.Min( 0, currentWheelPosition - Settings.WheelCenterValue );
+					var rightDelta = (float) Math.Max( 0, currentWheelPosition - Settings.WheelCenterValue );
+
+					var leftPercentage = leftDelta / leftRange; // 0 to 1
+					var rightPercentage = rightDelta / rightRange; // 0 to 1
+
+					var normalizedPercentage = rightPercentage - leftPercentage; // -1 to 1
 
 					var forceMagnitude = 0;
 
 					if ( Settings.AutoCenterWheelType == 0 )
 					{
-						var normalizedWheelVelocity = Math.Abs( _input_currentWheelVelocity / deltaTime );
-						var targetWheelVelocity = 10000f;
+						var targetWheelVelocity = normalizedRange / 10;
 
-						var forceMagnitudeScale = Math.Max( 0f, Math.Min( 1f, ( targetWheelVelocity - normalizedWheelVelocity ) / targetWheelVelocity ) );
-
-						if ( leftPercentage >= 0.02f )
+						if ( Math.Sign( Input_CurrentWheelVelocity ) == Math.Sign( normalizedPercentage ) )
 						{
-							if ( normalizedWheelVelocity < targetWheelVelocity )
+							_ffb_centerWheelForce = 0;
+
+							forceMagnitude = Input_CurrentWheelVelocity / 50;
+						}
+						else if ( leftPercentage >= 0.015f )
+						{
+							if ( Input_CurrentWheelVelocity < targetWheelVelocity )
 							{
-								forceMagnitude = -Settings.AutoCenterWheelStrength * 5;
+								_ffb_centerWheelForce -= Settings.AutoCenterWheelStrength * 2;
+
+								forceMagnitude = _ffb_centerWheelForce;
 							}
 							else
 							{
-								forceMagnitude = -Settings.AutoCenterWheelStrength * 3;
+								_ffb_centerWheelForce += Settings.AutoCenterWheelStrength;
+
+								forceMagnitude = _ffb_centerWheelForce;
 							}
 						}
-						else if ( rightPercentage >= 0.02f )
+						else if ( rightPercentage >= 0.015f )
 						{
-							if ( normalizedWheelVelocity <= targetWheelVelocity )
+							if ( Input_CurrentWheelVelocity > -targetWheelVelocity )
 							{
-								forceMagnitude = Settings.AutoCenterWheelStrength * 5;
+								_ffb_centerWheelForce += Settings.AutoCenterWheelStrength * 2;
+
+								forceMagnitude = _ffb_centerWheelForce;
 							}
 							else
 							{
-								forceMagnitude = Settings.AutoCenterWheelStrength * 3;
+								_ffb_centerWheelForce -= Settings.AutoCenterWheelStrength;
+
+								forceMagnitude = _ffb_centerWheelForce;
 							}
 						}
 					}
 					else if ( Settings.AutoCenterWheelType == 1 )
 					{
-						if ( leftPercentage >= 0.02f )
+						if ( leftPercentage >= 0.05f )
 						{
 							forceMagnitude = (int) ( leftPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / -100f );
 						}
-						else if ( rightPercentage >= 0.02f )
+						else if ( rightPercentage >= 0.05f )
 						{
 							forceMagnitude = (int) ( rightPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / 100f );
 						}
@@ -727,7 +737,7 @@ namespace MarvinsAIRA
 
 		public void SendTestForceFeedbackSignal( bool invert )
 		{
-			var magnitude = invert ? -1500 : 1500;
+			var magnitude = invert ? -500 : 500;
 
 			UpdateConstantForce( [ magnitude * 1, magnitude * 2, magnitude * 3, magnitude * 2, magnitude * 1, 0 ] );
 		}
@@ -779,6 +789,8 @@ namespace MarvinsAIRA
 				_irsdk_steeringWheelTorque_ST[ 5 ]
 			];
 
+			var steeringWheelStopsMagnitude = 0;
+
 			if ( _ffb_playingBackNow )
 			{
 				for ( var x = 0; x < steeringWheelTorque_ST.Length; x++ )
@@ -790,16 +802,23 @@ namespace MarvinsAIRA
 			}
 			else if ( !_irsdk_isOnTrack )
 			{
+				if ( _irsdk_isOnTrackLastFrame )
+				{
+					_ffb_startCooldownNow = true;
+				}
+
 				steeringWheelTorque_ST[ 0 ] = 0;
 				steeringWheelTorque_ST[ 1 ] = 0;
 				steeringWheelTorque_ST[ 2 ] = 0;
 				steeringWheelTorque_ST[ 3 ] = 0;
 				steeringWheelTorque_ST[ 4 ] = 0;
 				steeringWheelTorque_ST[ 5 ] = 0;
+			}
+			else
+			{
+				var anglePastMax = Math.Abs( _irsdk_steeringWheelAngle ) - ( _irsdk_steeringWheelAngleMax * .5f );
 
-				_ffb_previousSteeringWheelTorque = 0;
-				_ffb_runningSteeringWheelTorque = 0;
-				_ffb_steadyStateWheelTorque = 0;
+				steeringWheelStopsMagnitude = (int) ( Math.Clamp( anglePastMax * 0.5f, 0, 0.5f ) * -Math.Sign( _irsdk_steeringWheelAngle ) * DI_FFNOMINALMAX );
 			}
 
 			// crash protection processing
@@ -885,7 +904,7 @@ namespace MarvinsAIRA
 				var deltaYawRateFactor = settingYawRateFactor - _ffb_yawRateFactorInstant;
 				var margin = settingYawRateFactor * 0.35f;
 
-				understeerAmount = (float) Math.Pow( Math.Max( 0f, Math.Min( 1f, ( margin - deltaYawRateFactor ) / margin ) ), 1.5f );
+				understeerAmount = (float) Math.Pow( Math.Clamp( ( margin - deltaYawRateFactor ) / margin, 0f, 1f ), 1.5f );
 
 				understeerFrequency = Math.Max( 0.05f, understeerAmount );
 
@@ -962,7 +981,7 @@ namespace MarvinsAIRA
 
 				// delta limiter
 
-				var limitedDeltaSteeringWheelTorque = Math.Max( -0.09f, Math.Min( 0.09f, deltaSteeringWheelTorque ) );
+				var limitedDeltaSteeringWheelTorque = Math.Clamp( deltaSteeringWheelTorque, -0.09f, 0.09f );
 
 				_ffb_steadyStateWheelTorque += limitedDeltaSteeringWheelTorque * overallScaleToDirectInputUnits;
 
@@ -1025,6 +1044,10 @@ namespace MarvinsAIRA
 						_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
 					}
 				}
+
+				// add in the steering wheel stops magnitude
+
+				_ffb_outputWheelMagnitudeBuffer[ x ] += steeringWheelStopsMagnitude;
 
 				// mix in the sine and sawtooth wave understeer effects
 
@@ -1171,7 +1194,9 @@ namespace MarvinsAIRA
 
 			app._ffb_stopwatch.Restart();
 
-			// update the magnitude timer
+			var deltaSeconds = deltaMilliseconds / 1000f;
+
+			// update the magnitude buffer timer
 
 			app._ffb_outputWheelMagnitudeBufferTimer += deltaMilliseconds;
 
@@ -1184,7 +1209,7 @@ namespace MarvinsAIRA
 
 			// figure out where we are at in the magnitude buffer
 
-			var outputWheelMagnitudeBufferIndex = app._ffb_outputWheelMagnitudeBufferTimer * 360 / 1000;
+			var outputWheelMagnitudeBufferIndex = app._ffb_outputWheelMagnitudeBufferTimer * 360f / 1000f;
 
 			// get the current magnitude, cubic interpolated
 
@@ -1206,10 +1231,7 @@ namespace MarvinsAIRA
 
 			// update clipped timer
 
-			if ( app._ffb_clippedTimer > 0 )
-			{
-				app._ffb_clippedTimer -= deltaMilliseconds / 1000f;
-			}
+			app._ffb_clippedTimer = Math.Max( 0, app._ffb_clippedTimer - deltaSeconds );
 
 			// light clip indicator if we are out of range
 
@@ -1226,6 +1248,31 @@ namespace MarvinsAIRA
 				app._ffb_clippedTimer = 3;
 			}
 
+			// when magnitude is zero apply cool down to prevent sore thumbs
+
+			if ( app._ffb_startCooldownNow )
+			{
+				app._ffb_startCooldownNow = false;
+				app._ffb_magnitudeCoolDownTimer = 1f;
+
+				app.UpdateConstantForce( [ 0 ] );
+			}
+
+			if ( app._ffb_magnitudeCoolDownTimer > 0 )
+			{
+				app._ffb_magnitudeCoolDownTimer = Math.Max( 0, app._ffb_magnitudeCoolDownTimer - deltaSeconds );
+
+				magnitude = (int) ( app._ffb_magnitudeCoolDownTimer * app._ffb_lastNonCooldownMagnitudeSentToWheel );
+			}
+			else
+			{
+				app._ffb_lastNonCooldownMagnitudeSentToWheel = magnitude;
+			}
+
+			// update last magnitude sent to wheel
+
+			app._ffb_lastMagnitudeSentToWheel = magnitude;
+
 			// update forces on the wheel
 
 			if ( !app._ffb_forceFeedbackExceptionThrown )
@@ -1238,17 +1285,7 @@ namespace MarvinsAIRA
 
 					try
 					{
-						if ( app._ffb_constantForceEffect.Status != EffectStatus.Playing )
-						{
-							app.WriteLine( "" );
-							app.WriteLine( "Starting the constant force effect." );
-
-							app._ffb_constantForceEffect.Start();
-						}
-
-						app._ffb_constantForceEffect.SetParameters( app._ffb_constantForceEffectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.NoRestart );
-
-						app._ffb_lastMagnitudeSentToWheel = magnitude;
+						app._ffb_constantForceEffect.SetParameters( app._ffb_constantForceEffectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.Start );
 					}
 					catch ( Exception exception )
 					{

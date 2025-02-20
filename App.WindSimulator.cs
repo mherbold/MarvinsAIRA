@@ -78,8 +78,8 @@ namespace MarvinsAIRA
 							var velocityX = _irsdk_velocityX;
 							var velocityY = _irsdk_velocityY;
 
-							var leftWindForceScale = 1f - 0.85f * Math.Max( 0, Math.Min( 1, velocityY * 5f ) );
-							var rightWindForceScale = 1f - 0.85f * Math.Max( 0, Math.Min( 1, -velocityY * 5f ) );
+							var leftWindForceScale = 1f - 0.85f * Math.Clamp( velocityY * 5f, 0f, 1f );
+							var rightWindForceScale = 1f - 0.85f * Math.Clamp( -velocityY * 5f, 0f, 1f );
 
 							if ( _irsdk_displayUnits == 0 )
 							{
@@ -160,7 +160,7 @@ namespace MarvinsAIRA
 					leftWindForce = 3;
 				}
 
-				var leftFanPower = Math.Min( 320, Math.Max( 0, (int) ( 320 * leftWindForce / 100 ) ) );
+				var leftFanPower = Math.Clamp( (int) ( 320 * leftWindForce / 100 ), 0, 320 );
 
 				if ( leftFanPower == 0 )
 				{
@@ -182,7 +182,7 @@ namespace MarvinsAIRA
 					rightWindForce = 3;
 				}
 
-				var rightFanPower = Math.Min( 320, Math.Max( 0, (int) ( 320 * rightWindForce / 100 ) ) );
+				var rightFanPower = Math.Clamp( (int) ( 320 * rightWindForce / 100 ), 0, 320 );
 
 				if ( rightFanPower == 0 )
 				{

@@ -82,7 +82,7 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.UpdateInputs();
+			app.UpdateInputs( 1f / 60f );
 
 			if ( app.Input_AnyPressedButton.DeviceInstanceGuid != Guid.Empty )
 			{
