@@ -119,12 +119,13 @@ namespace MarvinsAIRA
 			Settings.UpdateWheelAxisList( wheelAxisList );
 		}
 
+		const int TIME_BETWEEN_LOOOK_FOR_NEW_INPUTS = 1;
 
 		private float _lookForNewInputsTimer = 0;
 		public void UpdateInputs( float deltaTime )
 		{
 			_lookForNewInputsTimer+= deltaTime;
-			if (_lookForNewInputsTimer > 1)
+			if (_lookForNewInputsTimer > TIME_BETWEEN_LOOOK_FOR_NEW_INPUTS)
 			{
 				_lookForNewInputsTimer = 0;
 				if (GetValidFFBInputCount() > FFBInputCount) //we have found a new input
