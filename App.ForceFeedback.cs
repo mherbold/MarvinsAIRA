@@ -825,9 +825,9 @@ namespace MarvinsAIRA
 
 			if ( Settings.EnableCrashProtection )
 			{
-				if ( Math.Abs( _irsdk_gForce ) >= ( Settings.GForce / 10f ) )
+				if ( Math.Abs( _irsdk_gForce ) >= Settings.GForce )
 				{
-					_ffb_crashProtectionTimer = Settings.CrashDuration / 10f;
+					_ffb_crashProtectionTimer = Settings.CrashDuration;
 				}
 			}
 
