@@ -91,16 +91,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 1, 500 );
+				value = Math.Clamp( value, 1, 50 );
 
 				if ( _wheelMaxForce != value )
 				{
 					_wheelMaxForce = value;
 
-					WheelMaxForceString = $"{_wheelMaxForce:F1} N⋅m";
-
 					OnPropertyChanged();
 				}
+
+				WheelMaxForceString = $"!{_wheelMaxForce:F1} N⋅m";
 			}
 		}
 
@@ -112,11 +112,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _wheelMaxForceString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_wheelMaxForceString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _wheelMaxForceString != value )
+					{
+						_wheelMaxForceString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -137,10 +142,10 @@ namespace MarvinsAIRA
 				{
 					_targetForce = value;
 
-					TargetForceString = $"{_targetForce:F1} N⋅m";
-
 					OnPropertyChanged();
 				}
+
+				TargetForceString = $"!{_targetForce:F1} N⋅m";
 			}
 		}
 
@@ -152,11 +157,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _targetForceString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_targetForceString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _targetForceString != value )
+					{
+						_targetForceString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -196,10 +206,10 @@ namespace MarvinsAIRA
 				{
 					_overallScale = value;
 
-					OverallScaleString = $"{_overallScale}%";
-
 					OnPropertyChanged();
 				}
+
+				OverallScaleString = $"!{_overallScale}%";
 			}
 		}
 
@@ -211,11 +221,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _overallScaleString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_overallScaleString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _overallScaleString != value )
+					{
+						_overallScaleString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -236,10 +251,10 @@ namespace MarvinsAIRA
 				{
 					_detailScale = value;
 
-					DetailScaleString = $"{_detailScale}%";
-
 					OnPropertyChanged();
 				}
+
+				DetailScaleString = $"!{_detailScale}%";
 			}
 		}
 
@@ -251,11 +266,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _detailScaleString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_detailScaleString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _detailScaleString != value )
+					{
+						_detailScaleString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -352,10 +372,10 @@ namespace MarvinsAIRA
 				{
 					_parkedScale = value;
 
-					ParkedScaleString = $"{_parkedScale}%";
-
 					OnPropertyChanged();
 				}
+
+				ParkedScaleString = $"!{_parkedScale}%";
 			}
 		}
 
@@ -367,11 +387,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _parkedScaleString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_parkedScaleString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _parkedScaleString != value )
+					{
+						_parkedScaleString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -392,10 +417,10 @@ namespace MarvinsAIRA
 				{
 					_frequency = value;
 
-					FrequencyString = $"{1000.0f / ( 18 - _frequency ):F2} Hz";
-
 					OnPropertyChanged();
 				}
+
+				FrequencyString = $"{1000.0f / ( 18 - _frequency ):F2} Hz";
 			}
 		}
 
@@ -495,10 +520,10 @@ namespace MarvinsAIRA
 				{
 					_usEffectStrength = value;
 
-					USEffectStrengthString = $"{_usEffectStrength}%";
-
 					OnPropertyChanged();
 				}
+
+				USEffectStrengthString = $"!{_usEffectStrength}%";
 			}
 		}
 
@@ -510,11 +535,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _usEffectStrengthString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_usEffectStrengthString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _usEffectStrengthString != value )
+					{
+						_usEffectStrengthString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -535,10 +565,10 @@ namespace MarvinsAIRA
 				{
 					_usYawRateFactorLeft = value;
 
-					USYawRateFactorLeftString = $"{_usYawRateFactorLeft}";
-
 					OnPropertyChanged();
 				}
+
+				USYawRateFactorLeftString = $"!{_usYawRateFactorLeft}";
 			}
 		}
 
@@ -550,11 +580,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _usYawRateFactorLeftString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_usYawRateFactorLeftString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _usYawRateFactorLeftString != value )
+					{
+						_usYawRateFactorLeftString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -575,10 +610,10 @@ namespace MarvinsAIRA
 				{
 					_usYawRateFactorRight = value;
 
-					USYawRateFactorRightString = $"{_usYawRateFactorRight}";
-
 					OnPropertyChanged();
 				}
+
+				USYawRateFactorRightString = $"!{_usYawRateFactorRight}";
 			}
 		}
 
@@ -590,11 +625,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _usYawRateFactorRightString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_usYawRateFactorRightString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _usYawRateFactorRightString != value )
+					{
+						_usYawRateFactorRightString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -670,16 +710,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 0, 250 );
+				value = Math.Clamp( value, 0, 100 );
 
 				if ( _lfeScale != value )
 				{
 					_lfeScale = value;
 
-					LFEScaleString = $"{_lfeScale}%";
-
 					OnPropertyChanged();
 				}
+
+				LFEScaleString = $"!{_lfeScale}%";
 			}
 		}
 
@@ -691,11 +731,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _lfeScaleString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_lfeScaleString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _lfeScaleString != value )
+					{
+						_lfeScaleString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -1489,10 +1534,10 @@ namespace MarvinsAIRA
 				{
 					_wheelMinValue = value;
 
-					WheelMinValueString = _wheelMinValue.ToString();
-
 					OnPropertyChanged();
 				}
+
+				WheelMinValueString = _wheelMinValue.ToString();
 			}
 		}
 
@@ -1525,10 +1570,10 @@ namespace MarvinsAIRA
 				{
 					_wheelCenterValue = value;
 
-					WheelCenterValueString = _wheelCenterValue.ToString();
-
 					OnPropertyChanged();
 				}
+
+				WheelCenterValueString = _wheelCenterValue.ToString();
 			}
 		}
 
@@ -1561,10 +1606,10 @@ namespace MarvinsAIRA
 				{
 					_wheelMaxValue = value;
 
-					WheelMaxValueString = _wheelMaxValue.ToString();
-
 					OnPropertyChanged();
 				}
+
+				WheelMaxValueString = _wheelMaxValue.ToString();
 			}
 		}
 
@@ -1616,10 +1661,10 @@ namespace MarvinsAIRA
 				{
 					_autoCenterWheelStrength = value;
 
-					AutoCenterWheelStrengthString = $"{_autoCenterWheelStrength}%";
-
 					OnPropertyChanged();
 				}
+
+				AutoCenterWheelStrengthString = $"!{_autoCenterWheelStrength}%";
 			}
 		}
 
@@ -1631,11 +1676,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _autoCenterWheelStrengthString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_autoCenterWheelStrengthString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _autoCenterWheelStrengthString != value )
+					{
+						_autoCenterWheelStrengthString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -1691,22 +1741,24 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private int _gForce = 20;
+		private float _gForce = 2f;
 
-		public int GForce
+		public float GForce
 		{
 			get => _gForce;
 
 			set
 			{
+				value = Math.Clamp( value, 1, 10 );
+
 				if ( _gForce != value )
 				{
 					_gForce = value;
 
-					GForceString = $"{(float) _gForce / 10:F1} G";
-
 					OnPropertyChanged();
 				}
+
+				GForceString = $"!{(float) _gForce:F1} G";
 			}
 		}
 
@@ -1718,31 +1770,38 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _gForceString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_gForceString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _gForceString != value )
+					{
+						_gForceString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
 
-		private int _crashDuration = 20;
+		private float _crashDuration = 2f;
 
-		public int CrashDuration
+		public float CrashDuration
 		{
 			get => _crashDuration;
 
 			set
 			{
+				value = Math.Clamp( value, 1, 10 );
+
 				if ( _crashDuration != value )
 				{
 					_crashDuration = value;
 
-					CrashDurationString = $"{(float) _crashDuration / 10:F1} sec";
-
 					OnPropertyChanged();
 				}
+
+				CrashDurationString = $"!{(float) _crashDuration:F1} sec";
 			}
 		}
 
@@ -1754,11 +1813,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _crashDurationString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_crashDurationString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _crashDurationString != value )
+					{
+						_crashDurationString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}

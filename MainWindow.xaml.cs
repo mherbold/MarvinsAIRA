@@ -1,8 +1,11 @@
 ﻿
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 
@@ -352,6 +355,67 @@ namespace MarvinsAIRA
 			var seconds = app._ffb_recordedSteeringWheelTorqueBufferIndex % ( 360 * 60 ) / 360f;
 
 			return $"{minutes}:{seconds:00.0}";
+		}
+
+		#endregion
+
+		#region Generic text box <---> slider functions
+
+		[GeneratedRegex( "[^0123456789.]" )]
+		private partial Regex NotDecimalNumbersRegex();
+
+		[GeneratedRegex( "[0123456789.]" )]
+		private partial Regex DecimalNumbersRegex();
+
+		private void TextBox_GotKeyboardFocus( object sender, KeyboardFocusChangedEventArgs e )
+		{
+			if ( sender is TextBox textBox )
+			{
+				textBox.Text = NotDecimalNumbersRegex().Replace( textBox.Text, "" );
+			}
+		}
+
+		private void TextBox_PreviewTextInput( object sender, TextCompositionEventArgs e )
+		{
+			if ( sender is TextBox textBox )
+			{
+				if ( !DecimalNumbersRegex().IsMatch( e.Text ) || ( e.Text.Contains( '.' ) && textBox.Text.Contains( '.' ) ) )
+				{
+					e.Handled = true;
+				}
+			}
+		}
+
+		private void TextBox_LostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs e )
+		{
+			if ( sender is TextBox textBox )
+			{
+				if ( !float.TryParse( textBox.Text, out var value ) )
+				{
+					value = 0;
+				}
+
+				var sliderObject = GetNextTab( textBox, textBox.Parent, true );
+
+				if ( sliderObject is Slider slider )
+				{
+					slider.Value = value;
+				}
+			}
+		}
+
+		public static DependencyObject? GetNextTab( DependencyObject element, DependencyObject containerElement, bool goDownOnly )
+		{
+			var keyboardNavigation = typeof( FrameworkElement )?.GetProperty( "KeyboardNavigation", BindingFlags.NonPublic | BindingFlags.Static )?.GetValue( null );
+
+			var method = keyboardNavigation?.GetType()?.GetMethod( "GetNextTab", BindingFlags.NonPublic | BindingFlags.Instance );
+
+			if ( method != null )
+			{
+				return method.Invoke( keyboardNavigation, [ element, containerElement, goDownOnly ] ) as DependencyObject;
+			}
+
+			return null;
 		}
 
 		#endregion
