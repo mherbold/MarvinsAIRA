@@ -11,6 +11,7 @@
         Width="1000"
         Closing="Window_Closing"
         Activated="Window_Activated"
+        SourceInitialized="Window_SourceInitialized"
         SizeToContent="Height"
         ResizeMode="CanMinimize"
         Icon="/icon.ico"
@@ -148,7 +149,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="UndersteerEffect_CheckBox" VerticalAlignment="Center" IsChecked="{Binding UndersteerEffectEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" Click="UndersteerEffect_CheckBox_Click" />
+                        <CheckBox x:Name="UndersteerEffect_CheckBox" VerticalAlignment="Center" IsChecked="{Binding UndersteerEffectEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
                         <Label Content="Understeer Effect" VerticalAlignment="Center" Margin="10,0,0,0" />
                     </StackPanel>
                 </TabItem.Header>
@@ -214,7 +215,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="LFEToFFB_CheckBox" VerticalAlignment="Center" IsChecked="{Binding LFEToFFBEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" Click="LFEToFFB_CheckBox_Click" />
+                        <CheckBox x:Name="LFEToFFB_CheckBox" VerticalAlignment="Center" IsChecked="{Binding LFEToFFBEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
                         <Label Content="LFE ⮕ FFB" VerticalAlignment="Center" Margin="10,0,0,0" />
                     </StackPanel>
                 </TabItem.Header>
@@ -252,7 +253,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="WindSimulator_CheckBox" VerticalAlignment="Center" IsChecked="{Binding WindSimulatorEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" Click="WindSimulator_CheckBox_Click" />
+                        <CheckBox x:Name="WindSimulator_CheckBox" VerticalAlignment="Center" IsChecked="{Binding WindSimulatorEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
                         <Label Content="Wind Simulator" VerticalAlignment="Center" Margin="10,0,0,0" />
                     </StackPanel>
                 </TabItem.Header>
@@ -601,6 +602,13 @@
                             </ScrollViewer>
                         </StackPanel>
                     </TabItem>
+                    <TabItem Header="Devices">
+                        <StackPanel Margin="10,10,10,10">
+                            <StackPanel>
+                                <CheckBox Content="Reinitialize when devices are added or removed from the system" IsChecked="{Binding ReinitializeWhenDevicesChanged}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </TabItem>
                     <TabItem Header="Wheel">
                         <StackPanel Margin="10,10,10,10">
                             <GroupBox Header="Calibration">
@@ -621,7 +629,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <ComboBox Grid.Column="0" x:Name="WheelAxis_ComboBox" HorizontalAlignment="Stretch" ItemsSource="{Binding WheelAxisList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedWheelAxis}" SelectionChanged="SelectedWheelAxis_ComboBox_SelectionChanged" />
+                                            <ComboBox Grid.Column="0" x:Name="WheelAxis_ComboBox" HorizontalAlignment="Stretch" ItemsSource="{Binding WheelAxisList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedWheelAxis}" />
                                             <TextBox Grid.Column="1" Text="{Binding WheelAxisValueString, Mode=OneWay}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
                                         </Grid>
                                     </StackPanel>
@@ -662,7 +670,7 @@
                             </GroupBox>
                             <GroupBox Header="Auto Centering">
                                 <StackPanel>
-                                    <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Enable Auto Centering" IsChecked="{Binding AutoCenterWheel}" Click="AutoCenterWheel_CheckBox_Click"/>
+                                    <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Enable Auto Centering" IsChecked="{Binding AutoCenterWheel}" />
                                     <Grid Margin="0,15,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -673,7 +681,7 @@
                                         </Grid.ColumnDefinitions>
                                         <Label Grid.Column="0" Content="Strength" VerticalAlignment="Center" ToolTip="You want to lower this slider until your wheel stops oscillating." />
                                         <TextBox Grid.Column="1" Text="{Binding AutoCenterWheelStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="5" ValueChanged="AutoCenterWheelStrength_Slider_ValueChanged" />
+                                        <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="5" />
                                         <Label Grid.Column="3" Content="Type" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="What type of wheel centering effect do you want to use?" />
                                         <ComboBox Grid.Column="4" x:Name="AutoCenterWheelType_ComboBox" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding AutoCenterWheelTypeList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding AutoCenterWheelType}" />
                                     </Grid>

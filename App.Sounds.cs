@@ -2,6 +2,7 @@
 using System.Windows;
 
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace MarvinsAIRA
 {
@@ -10,6 +11,7 @@ namespace MarvinsAIRA
 		private readonly WaveOutEvent _sounds_clickWaveOutEvent = new();
 
 		private WaveStream? _sounds_clickWaveStream;
+		private VolumeSampleProvider? _sounds_volumeSampleProvider;
 		private bool _sounds_initialized = false;
 
 		private void InitializeSounds()
@@ -25,13 +27,17 @@ namespace MarvinsAIRA
 
 			_sounds_clickWaveStream = new WaveFileReader( resourceStream.Stream );
 
+			_sounds_volumeSampleProvider = new VolumeSampleProvider( _sounds_clickWaveStream.ToSampleProvider() );
+
 			WriteLine( "...click sound loaded..." );
 
 			try
 			{
 				WriteLine( "...initializing wave out event..." );
 
-				_sounds_clickWaveOutEvent.Init( _sounds_clickWaveStream );
+				_sounds_clickWaveOutEvent.Init( _sounds_volumeSampleProvider );
+
+				_sounds_clickWaveOutEvent.Volume = 1;
 
 				WriteLine( "...wave out event initialized." );
 
@@ -45,11 +51,11 @@ namespace MarvinsAIRA
 
 		public void PlayClick()
 		{
-			if ( Settings.EnableClickSound && _sounds_initialized )
+			if ( Settings.EnableClickSound && _sounds_initialized && ( _sounds_clickWaveStream != null ) && ( _sounds_volumeSampleProvider != null ) )
 			{
-				_sounds_clickWaveStream?.Seek( 0, System.IO.SeekOrigin.Begin );
+				_sounds_clickWaveStream.Seek( 0, System.IO.SeekOrigin.Begin );
 
-				_sounds_clickWaveOutEvent.Volume = Settings.ClickSoundVolume / 100f;
+				_sounds_volumeSampleProvider.Volume = Settings.ClickSoundVolume / 100f;
 
 				_sounds_clickWaveOutEvent.Play();
 			}

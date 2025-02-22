@@ -116,24 +116,22 @@ namespace MarvinsAIRA
 		public float FFB_YawRateFactorAverage { get => _ffb_yawRateFactorAverage; }
 		public float FFB_LateralForceFactorAverage { get => _ffb_lateralForceFactorAverage; }
 
-		public void InitializeForceFeedback( nint windowHandle )
+		public void InitializeForceFeedback( nint windowHandle, bool isFirstInitialization = false )
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeForceFeedback called." );
-
 			var mainWindow = MarvinsAIRA.MainWindow.Instance;
 
-			if ( mainWindow != null )
+			if ( isFirstInitialization && ( mainWindow != null ) )
 			{
 				mainWindow.WheelForceFeedback_Image.Source = _ffb_writeableBitmap;
 			}
-
-			var isFirstInitialization = !_ffb_initialized;
 
 			if ( _ffb_initialized )
 			{
 				UninitializeForceFeedback();
 			}
+
+			WriteLine( "" );
+			WriteLine( "InitializeForceFeedback called." );
 
 			_ffb_stopwatch.Restart();
 
@@ -289,6 +287,8 @@ namespace MarvinsAIRA
 
 		public void ReinitializeForceFeedbackDevice( nint windowHandle )
 		{
+			UninitializeForceFeedback( false );
+
 			WriteLine( "" );
 			WriteLine( "ReinitializeForceFeedbackDevice called." );
 
@@ -314,11 +314,8 @@ namespace MarvinsAIRA
 				throw new Exception( "_ffb_constantForceEffectInfo == null!" );
 			}
 
-			UninitializeForceFeedback( false );
-
 			try
 			{
-				WriteLine( "...the force feedback device has been unacquired..." );
 				WriteLine( "...setting the cooperative level (exclusive background) on the force feedback device..." );
 
 				_ffb_drivingJoystick.SetCooperativeLevel( windowHandle, CooperativeLevel.Exclusive | CooperativeLevel.Background );
@@ -363,11 +360,12 @@ namespace MarvinsAIRA
 				_ffb_constantForceEffect.Download();
 
 				WriteLine( "...the constant force effect has been downloaded..." );
-				WriteLine( "...starting the multimedia timer event..." );
 
 				UInt32 userCtx = 0;
 
 				var periodInMilliseconds = (UInt32) ( 18 - Settings.Frequency );
+
+				WriteLine( $"...starting the multimedia timer event (period = {periodInMilliseconds} ms)..." );
 
 				_ffb_multimediaTimerId = TimeSetEvent( periodInMilliseconds, 0, MultimediaTimerEventCallback, ref userCtx, EVENTTYPE_PERIODIC );
 
@@ -378,7 +376,7 @@ namespace MarvinsAIRA
 			}
 			catch ( Exception exception )
 			{
-				WriteLine( "...failed to reacquire the force feedback device:" );
+				WriteLine( "...failed to reinitialize the force feedback device:" );
 				WriteLine( exception.Message.Trim() );
 
 				_ffb_forceFeedbackExceptionThrown = true;

@@ -1,7 +1,8 @@
-﻿using SharpDX.DirectInput;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+
+using SharpDX.DirectInput;
 
 namespace MarvinsAIRA
 {
@@ -36,6 +37,10 @@ namespace MarvinsAIRA
 			{
 				if ( _forceFeedbackEnabled != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ForceFeedbackEnabled changed - before {_forceFeedbackEnabled} now {value}" );
+
 					_forceFeedbackEnabled = value;
 
 					OnPropertyChanged();
@@ -55,6 +60,10 @@ namespace MarvinsAIRA
 			{
 				if ( _selectedFFBDeviceGuid != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SelectedFFBDeviceGuid changed - before {_selectedFFBDeviceGuid} now {value}" );
+
 					_selectedFFBDeviceGuid = value;
 
 					OnPropertyChanged();
@@ -95,6 +104,10 @@ namespace MarvinsAIRA
 
 				if ( _wheelMaxForce != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WheelMaxForce changed - before {_wheelMaxForce} now {value}" );
+
 					_wheelMaxForce = value;
 
 					OnPropertyChanged();
@@ -140,6 +153,10 @@ namespace MarvinsAIRA
 
 				if ( _targetForce != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"TargetForce changed - before {_targetForce} now {value}" );
+
 					_targetForce = value;
 
 					OnPropertyChanged();
@@ -204,6 +221,10 @@ namespace MarvinsAIRA
 
 				if ( _overallScale != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OverallScale changed - before {_overallScale} now {value}" );
+
 					_overallScale = value;
 
 					OnPropertyChanged();
@@ -249,6 +270,10 @@ namespace MarvinsAIRA
 
 				if ( _detailScale != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"DetailScale changed - before {_detailScale} now {value}" );
+
 					_detailScale = value;
 
 					OnPropertyChanged();
@@ -370,6 +395,10 @@ namespace MarvinsAIRA
 
 				if ( _parkedScale != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ParkedScale changed - before {_parkedScale} now {value}" );
+
 					_parkedScale = value;
 
 					OnPropertyChanged();
@@ -415,6 +444,10 @@ namespace MarvinsAIRA
 
 				if ( _frequency != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"Frequency changed - before {_frequency} now {value}" );
+
 					_frequency = value;
 
 					OnPropertyChanged();
@@ -457,6 +490,10 @@ namespace MarvinsAIRA
 			{
 				if ( _understeerEffectEnabled != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"UndersteerEffectEnabled changed - before {_understeerEffectEnabled} now {value}" );
+
 					_understeerEffectEnabled = value;
 
 					OnPropertyChanged();
@@ -480,6 +517,10 @@ namespace MarvinsAIRA
 			{
 				if ( _usEffectStyle != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USEffectStyle changed - before {_usEffectStyle} now {value}" );
+
 					_usEffectStyle = value;
 
 					OnPropertyChanged();
@@ -497,6 +538,10 @@ namespace MarvinsAIRA
 			{
 				if ( _usEffectStyleInvert != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USEffectStyleInvert changed - before {_usEffectStyleInvert} now {value}" );
+
 					_usEffectStyleInvert = value;
 
 					OnPropertyChanged();
@@ -518,6 +563,10 @@ namespace MarvinsAIRA
 
 				if ( _usEffectStrength != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USEffectStrength changed - before {_usEffectStrength} now {value}" );
+
 					_usEffectStrength = value;
 
 					OnPropertyChanged();
@@ -563,6 +612,10 @@ namespace MarvinsAIRA
 
 				if ( _usYawRateFactorLeft != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USYawRateFactorLeft changed - before {_usYawRateFactorLeft} now {value}" );
+
 					_usYawRateFactorLeft = value;
 
 					OnPropertyChanged();
@@ -608,6 +661,10 @@ namespace MarvinsAIRA
 
 				if ( _usYawRateFactorRight != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USYawRateFactorRight changed - before {_usYawRateFactorRight} now {value}" );
+
 					_usYawRateFactorRight = value;
 
 					OnPropertyChanged();
@@ -674,6 +731,10 @@ namespace MarvinsAIRA
 			{
 				if ( _lfeToFFBEnabled != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"LFEToFFBEnabled changed - before {_lfeToFFBEnabled} now {value}" );
+
 					_lfeToFFBEnabled = value;
 
 					OnPropertyChanged();
@@ -693,6 +754,10 @@ namespace MarvinsAIRA
 			{
 				if ( _selectedLFEDeviceGuid != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SelectedLFEDeviceGuid changed - before {_selectedLFEDeviceGuid} now {value}" );
+
 					_selectedLFEDeviceGuid = value;
 
 					OnPropertyChanged();
@@ -714,6 +779,10 @@ namespace MarvinsAIRA
 
 				if ( _lfeScale != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"LFEScale changed - before {_lfeScale} now {value}" );
+
 					_lfeScale = value;
 
 					OnPropertyChanged();
@@ -818,6 +887,10 @@ namespace MarvinsAIRA
 			{
 				if ( _windSimulatorEnabled != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WindSimulatorEnabled changed - before {_windSimulatorEnabled} now {value}" );
+
 					_windSimulatorEnabled = value;
 
 					OnPropertyChanged();
@@ -1250,6 +1323,10 @@ namespace MarvinsAIRA
 			{
 				if ( _startMinimized != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"StartMinimized changed - before {_startMinimized} now {value}" );
+
 					_startMinimized = value;
 
 					OnPropertyChanged();
@@ -1269,13 +1346,16 @@ namespace MarvinsAIRA
 			{
 				if ( _topmostWindow != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"TopmostWindow changed - before {_topmostWindow} now {value}" );
+
 					_topmostWindow = value;
 
 					OnPropertyChanged();
 				}
 			}
 		}
-
 
 		#endregion
 
@@ -1291,6 +1371,10 @@ namespace MarvinsAIRA
 			{
 				if ( _saveSettingsPerWheel != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SaveSettingsPerWheel changed - before {_saveSettingsPerWheel} now {value}" );
+
 					_saveSettingsPerWheel = value;
 
 					OnPropertyChanged();
@@ -1308,6 +1392,10 @@ namespace MarvinsAIRA
 			{
 				if ( _saveSettingsPerCar != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SaveSettingsPerCar changed - before {_saveSettingsPerCar} now {value}" );
+
 					_saveSettingsPerCar = value;
 
 					OnPropertyChanged();
@@ -1325,6 +1413,10 @@ namespace MarvinsAIRA
 			{
 				if ( _saveSettingsPerTrack != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SaveSettingsPerTrack changed - before {_saveSettingsPerTrack} now {value}" );
+
 					_saveSettingsPerTrack = value;
 
 					OnPropertyChanged();
@@ -1342,6 +1434,10 @@ namespace MarvinsAIRA
 			{
 				if ( _saveSettingsPerTrackConfiguration != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SaveSettingsPerTrackConfig changed - before {_saveSettingsPerTrackConfiguration} now {value}" );
+
 					_saveSettingsPerTrackConfiguration = value;
 
 					OnPropertyChanged();
@@ -1366,6 +1462,10 @@ namespace MarvinsAIRA
 			{
 				if ( _enableClickSound != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableClickSound changed - before {_enableClickSound} now {value}" );
+
 					_enableClickSound = value;
 
 					OnPropertyChanged();
@@ -1385,6 +1485,10 @@ namespace MarvinsAIRA
 			{
 				if ( _clickSoundVolume != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ClickSoundVolume changed - before {_clickSoundVolume} now {value}" );
+
 					_clickSoundVolume = value;
 
 					OnPropertyChanged();
@@ -1408,6 +1512,10 @@ namespace MarvinsAIRA
 			{
 				if ( _enableSpeechSynthesizer != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableSpeechSynthesizer changed - before {_enableSpeechSynthesizer} now {value}" );
+
 					_enableSpeechSynthesizer = value;
 
 					OnPropertyChanged();
@@ -1427,6 +1535,10 @@ namespace MarvinsAIRA
 			{
 				if ( _speechSynthesizerVolume != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SpeechSynthesizerVolume changed - before {_speechSynthesizerVolume} now {value}" );
+
 					_speechSynthesizerVolume = value;
 
 					OnPropertyChanged();
@@ -1446,6 +1558,10 @@ namespace MarvinsAIRA
 			{
 				if ( _selectedVoice != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SelectedVoice changed - before {_selectedVoice} now {value}" );
+
 					_selectedVoice = value;
 
 					OnPropertyChanged();
@@ -1489,6 +1605,33 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Settings tab - Devices
+
+		/* Reinitialize when devices changed */
+
+		private bool _reinitializeWhenDevicesChanged = true;
+
+		public bool ReinitializeWhenDevicesChanged
+		{
+			get => _reinitializeWhenDevicesChanged;
+
+			set
+			{
+				if ( _reinitializeWhenDevicesChanged != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ReinitializeWhenDevicesChanged changed - before {_reinitializeWhenDevicesChanged} now {value}" );
+
+					_reinitializeWhenDevicesChanged = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		#region Settings tab - Wheel tab
 
 		private JoystickOffset _selectedWheelAxis = JoystickOffset.X;
@@ -1501,6 +1644,10 @@ namespace MarvinsAIRA
 			{
 				if ( _selectedWheelAxis != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SelectedWheelAxis changed - before {_selectedWheelAxis} now {value}" );
+
 					_selectedWheelAxis = value;
 
 					OnPropertyChanged();
@@ -1532,6 +1679,10 @@ namespace MarvinsAIRA
 			{
 				if ( _wheelMinValue != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WheelMinValue changed - before {_wheelMinValue} now {value}" );
+
 					_wheelMinValue = value;
 
 					OnPropertyChanged();
@@ -1568,6 +1719,10 @@ namespace MarvinsAIRA
 			{
 				if ( _wheelCenterValue != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WheelCenterValue changed - before {_wheelCenterValue} now {value}" );
+
 					_wheelCenterValue = value;
 
 					OnPropertyChanged();
@@ -1604,6 +1759,10 @@ namespace MarvinsAIRA
 			{
 				if ( _wheelMaxValue != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WheelMaxValue changed - before {_wheelMaxValue} now {value}" );
+
 					_wheelMaxValue = value;
 
 					OnPropertyChanged();
@@ -1640,6 +1799,10 @@ namespace MarvinsAIRA
 			{
 				if ( _autoCenterWheel != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"AutoCenterWheel changed - before {_autoCenterWheel} now {value}" );
+
 					_autoCenterWheel = value;
 
 					OnPropertyChanged();
@@ -1659,6 +1822,10 @@ namespace MarvinsAIRA
 
 				if ( _autoCenterWheelStrength != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"AutoCenterWheelStrength changed - before {_autoCenterWheelStrength} now {value}" );
+
 					_autoCenterWheelStrength = value;
 
 					OnPropertyChanged();
@@ -1700,6 +1867,10 @@ namespace MarvinsAIRA
 			{
 				if ( _autoCenterWheelType != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"AutoCenterWheelType changed - before {_autoCenterWheelType} now {value}" );
+
 					_autoCenterWheelType = value;
 
 					OnPropertyChanged();
@@ -1717,6 +1888,10 @@ namespace MarvinsAIRA
 			{
 				if ( _playbackSendToDevice != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PlaybackSendToDevice changed - before {_playbackSendToDevice} now {value}" );
+
 					_playbackSendToDevice = value;
 
 					OnPropertyChanged();
@@ -1734,6 +1909,10 @@ namespace MarvinsAIRA
 			{
 				if ( _enableCrashProtection != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableCrashProtection changed - before {_enableCrashProtection} now {value}" );
+
 					_enableCrashProtection = value;
 
 					OnPropertyChanged();
@@ -1753,6 +1932,10 @@ namespace MarvinsAIRA
 
 				if ( _gForce != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"GForce changed - before {_gForce} now {value}" );
+
 					_gForce = value;
 
 					OnPropertyChanged();
@@ -1796,6 +1979,10 @@ namespace MarvinsAIRA
 
 				if ( _crashDuration != value )
 				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"CrashDuration changed - before {_crashDuration} now {value}" );
+
 					_crashDuration = value;
 
 					OnPropertyChanged();

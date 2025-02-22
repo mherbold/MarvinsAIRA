@@ -57,7 +57,6 @@ namespace MarvinsAIRA
 				{
 					_settings_serializationTimer = 0;
 
-					WriteLine( "" );
 					WriteLine( $"Saving configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}]" );
 
 					var forceFeedbackSettingsFound = false;

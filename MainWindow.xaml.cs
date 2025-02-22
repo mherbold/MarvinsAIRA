@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,6 +28,9 @@ namespace MarvinsAIRA
 		private int _win_sendForceFeedbackTestSignalCounter = 0;
 
 		private float _win_guiUpdateTimer = 0;
+		private float _win_inputReinitTimer = 0;
+
+		private IntPtr _win_deviceChangeNotificationHandle = 0;
 
 		private readonly Stopwatch _win_stopwatch = new();
 
@@ -75,6 +79,12 @@ namespace MarvinsAIRA
 				app.WriteLine( "...update loop killed..." );
 			}
 
+			app.WriteLine( "...unregistering device change notificiation..." );
+
+			UnregisterDeviceChangeNotification();
+
+			app.WriteLine( "...device change notificiation unregistered..." );
+
 			app.Stop();
 
 			Instance = null;
@@ -118,10 +128,10 @@ namespace MarvinsAIRA
 
 				app.WriteLine( "" );
 				app.WriteLine( $"{Title} has been initialized!" );
+				app.WriteLine( "" );
 
 				if ( app.Settings.TopmostWindow )
 				{
-					app.WriteLine( "" );
 					app.WriteLine( "Setting window to be topmost." );
 
 					Topmost = true;
@@ -129,7 +139,6 @@ namespace MarvinsAIRA
 
 				if ( app.Settings.StartMinimized )
 				{
-					app.WriteLine( "" );
 					app.WriteLine( "Minimizing the window." );
 
 					WindowState = WindowState.Minimized;
@@ -137,6 +146,92 @@ namespace MarvinsAIRA
 
 				_win_initialized = true;
 			}
+		}
+
+		private void Window_SourceInitialized( object sender, EventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "" );
+			app.WriteLine( "Registering device change notification..." );
+
+			var source = PresentationSource.FromVisual( this ) as HwndSource;
+
+			source?.AddHook( WndProc );
+
+			RegisterDeviceChangeNotification();
+
+			app.WriteLine( "...device change notification registered." );
+		}
+
+		private void RegisterDeviceChangeNotification()
+		{
+			var devBroadcastDeviceInterface = new DeviceChangeNotification.DEV_BROADCAST_DEVICEINTERFACE();
+
+			devBroadcastDeviceInterface.dbcc_size = Marshal.SizeOf( devBroadcastDeviceInterface );
+			devBroadcastDeviceInterface.dbcc_devicetype = DeviceChangeNotification.DBT_DEVTYP_DEVICEINTERFACE;
+			devBroadcastDeviceInterface.dbcc_reserved = 0;
+			devBroadcastDeviceInterface.dbcc_classguid = DeviceChangeNotification.USB_HID_GUID;
+
+			var devBroadcastDeviceInterfacePtr = Marshal.AllocHGlobal( devBroadcastDeviceInterface.dbcc_size );
+
+			Marshal.StructureToPtr( devBroadcastDeviceInterface, devBroadcastDeviceInterfacePtr, true );
+
+			_win_deviceChangeNotificationHandle = DeviceChangeNotification.RegisterDeviceNotification( ( new WindowInteropHelper( this ) ).Handle, devBroadcastDeviceInterfacePtr, DeviceChangeNotification.DEVICE_NOTIFY_WINDOW_HANDLE );
+
+			Marshal.PtrToStructure( devBroadcastDeviceInterfacePtr, devBroadcastDeviceInterface );
+			Marshal.FreeHGlobal( devBroadcastDeviceInterfacePtr );
+		}
+
+		private void UnregisterDeviceChangeNotification()
+		{
+			_ = DeviceChangeNotification.UnregisterDeviceNotification( _win_deviceChangeNotificationHandle );
+		}
+
+		protected IntPtr WndProc( IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled )
+		{
+			if ( msg == DeviceChangeNotification.WM_DEVICECHANGE )
+			{
+				var nEventType = wParam.ToInt32();
+
+				if ( ( nEventType == DeviceChangeNotification.DBT_DEVICEARRIVAL ) || ( nEventType == DeviceChangeNotification.DBT_DEVICEREMOVECOMPLETE ) )
+				{
+					var broadcastHdr = new DeviceChangeNotification.DEV_BROADCAST_HDR();
+
+					Marshal.PtrToStructure( lParam, broadcastHdr );
+
+					if ( broadcastHdr.dbch_devicetype == DeviceChangeNotification.DBT_DEVTYP_DEVICEINTERFACE )
+					{
+						var devBroadcastDeviceInterface1 = new DeviceChangeNotification.DEV_BROADCAST_DEVICEINTERFACE_1();
+
+						Marshal.PtrToStructure( lParam, devBroadcastDeviceInterface1 );
+
+						string devicePath = new string( devBroadcastDeviceInterface1.dbcc_name );
+
+						int pos = devicePath.IndexOf( (char) 0 );
+
+						if ( pos != -1 )
+						{
+							devicePath = devicePath[ ..pos ];
+						}
+
+						var app = (App) Application.Current;
+
+						if ( nEventType == DeviceChangeNotification.DBT_DEVICEREMOVECOMPLETE )
+						{
+							app.WriteLine( $"Device {devicePath} was removed!" );
+						}
+						else if ( nEventType == DeviceChangeNotification.DBT_DEVICEARRIVAL )
+						{
+							app.WriteLine( $"Device {devicePath} was added!" );
+						}
+
+						_win_inputReinitTimer = 2f;
+					}
+				}
+			}
+
+			return IntPtr.Zero;
 		}
 
 		#endregion
@@ -334,6 +429,16 @@ namespace MarvinsAIRA
 									}
 								} );
 							}
+
+							if ( _win_inputReinitTimer > 0f )
+							{
+								_win_inputReinitTimer = Math.Max( 0f, _win_inputReinitTimer - deltaTime );
+
+								if ( ( _win_inputReinitTimer == 0f ) && app.Settings.ReinitializeWhenDevicesChanged )
+								{
+									app.InitializeInputs( _win_windowHandle );
+								}
+							}
 						}
 					}
 				}
@@ -359,7 +464,7 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Generic text box <---> slider functions
+		#region Generic text box + slider functions
 
 		[GeneratedRegex( "[^0123456789.]" )]
 		private partial Regex NotDecimalNumbersRegex();
@@ -379,7 +484,11 @@ namespace MarvinsAIRA
 		{
 			if ( sender is TextBox textBox )
 			{
-				if ( !DecimalNumbersRegex().IsMatch( e.Text ) || ( e.Text.Contains( '.' ) && textBox.Text.Contains( '.' ) ) )
+				if ( e.Text.Contains( '\r' ) )
+				{
+					Keyboard.ClearFocus();
+				}
+				else if ( !DecimalNumbersRegex().IsMatch( e.Text ) || ( e.Text.Contains( '.' ) && textBox.Text.Contains( '.' ) ) )
 				{
 					e.Handled = true;
 				}
@@ -401,6 +510,8 @@ namespace MarvinsAIRA
 				{
 					slider.Value = value;
 				}
+
+				textBox.GetBindingExpression( TextBox.TextProperty ).UpdateTarget();
 			}
 		}
 
@@ -426,9 +537,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "ForceFeedback_CheckBox_Click called." );
-
 			var checkBox = (CheckBox) sender;
 
 			if ( checkBox.IsChecked == true )
@@ -447,9 +555,6 @@ namespace MarvinsAIRA
 			{
 				var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "FFBDevice_ComboBox_SelectionChanged called." );
-
 				app.InitializeForceFeedback( _win_windowHandle );
 			}
 		}
@@ -458,7 +563,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "ForceFeedbackTest_Button_Click called." );
 
 			_win_sendForceFeedbackTestSignalCounter = 11;
@@ -468,7 +572,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "Record_Button_Click called." );
 
 			if ( !app._irsdk_connected )
@@ -507,8 +610,7 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "PlayButton_Click called." );
+			app.WriteLine( "Play_Button_Click called." );
 
 			if ( !app._irsdk_connected )
 			{
@@ -542,7 +644,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "ResetForceFeedback_Button_Click called." );
 
 			app.Settings.ReinitForceFeedbackButtons = ShowMapButtonsWindow( app.Settings.ReinitForceFeedbackButtons );
@@ -552,7 +653,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "AutoOverallScale_Button_Click called." );
 
 			app.Settings.AutoOverallScaleButtons = ShowMapButtonsWindow( app.Settings.AutoOverallScaleButtons );
@@ -562,7 +662,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "DecreaseOverallScale_Button_Click called." );
 
 			app.Settings.DecreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseOverallScaleButtons );
@@ -572,7 +671,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "IncreaseOverallScale_Button_Click called." );
 
 			app.Settings.IncreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseOverallScaleButtons );
@@ -582,7 +680,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "DecreaseDetailScale_Button_Click called." );
 
 			app.Settings.DecreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseDetailScaleButtons );
@@ -592,7 +689,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "IncreaseDetailScale_Button_Click called." );
 
 			app.Settings.IncreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseDetailScaleButtons );
@@ -604,9 +700,6 @@ namespace MarvinsAIRA
 			{
 				var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "Frequency_Slider_ValueChanged called." );
-
 				app.ScheduleReinitializeForceFeedback();
 			}
 		}
@@ -615,7 +708,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "TogglePrettyGraph_Button_Click called." );
 
 			TogglePrettyGraph();
@@ -687,22 +779,11 @@ namespace MarvinsAIRA
 
 		#region Understeer effect tab
 
-		private void UndersteerEffect_CheckBox_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "UndersteerEffect_CheckBox_Click called." );
-		}
-
 		private void SineWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
-
-				app.WriteLine( "" );
-				app.WriteLine( "SineWaveBuzz_RadioButton_Click called." );
 
 				app.Settings.USEffectStyle = 0;
 			}
@@ -714,9 +795,6 @@ namespace MarvinsAIRA
 			{
 				var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "SawtoothWaveBuzz_RadioButton_Click called." );
-
 				app.Settings.USEffectStyle = 1;
 			}
 		}
@@ -727,9 +805,6 @@ namespace MarvinsAIRA
 			{
 				var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "ConstantForce_RadioButton_Click called." );
-
 				app.Settings.USEffectStyle = 2;
 			}
 		}
@@ -738,7 +813,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "UndersteerEffect_Button_Click called." );
 
 			ShowMapButtonsWindow( app.Settings.UndersteerEffectButtons );
@@ -748,22 +822,11 @@ namespace MarvinsAIRA
 
 		#region LFE to FFB tab
 
-		private void LFEToFFB_CheckBox_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "LFEToFFB_CheckBox_Click called." );
-		}
-
 		private void LFEDevice_ComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
 				var app = (App) Application.Current;
-
-				app.WriteLine( "" );
-				app.WriteLine( "LFEDeviceComboBox_SelectionChanged called." );
 
 				app.InitializeLFE();
 			}
@@ -773,7 +836,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "DecreaseLFEScale_Button_Click called." );
 
 			app.Settings.DecreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseLFEScaleButtons );
@@ -783,7 +845,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "IncreaseLFEScale_Button_Click called." );
 
 			app.Settings.IncreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseLFEScaleButtons );
@@ -793,19 +854,10 @@ namespace MarvinsAIRA
 
 		#region Wind simulator tab
 
-		private void WindSimulator_CheckBox_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "WindSimulator_CheckBox_Click called." );
-		}
-
 		private void Test_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "Test_CheckBox_Click called." );
 
 			if ( sender is CheckBox checkBox )
@@ -845,9 +897,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "TopmostWindow_CheckBox_Click called." );
-
 			var checkBox = (CheckBox) sender;
 
 			Topmost = checkBox.IsChecked == true;
@@ -861,9 +910,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "SaveForEachWheel_CheckBox_Click called." );
-
 			app.UpdateWheelSaveName();
 			app.QueueForSerialization();
 		}
@@ -871,9 +917,6 @@ namespace MarvinsAIRA
 		private void SaveForEachCar_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "SaveForEachCar_CheckBox_Click called." );
 
 			app.UpdateCarSaveName();
 			app.QueueForSerialization();
@@ -883,9 +926,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "SaveForEachTrack_CheckBox_Click called." );
-
 			app.UpdateTrackSaveName();
 			app.QueueForSerialization();
 		}
@@ -893,9 +933,6 @@ namespace MarvinsAIRA
 		private void SaveForEachTrackConfig_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "SaveForEachTrackConfig_CheckBox_Click called." );
 
 			app.UpdateTrackConfigSaveName();
 			app.QueueForSerialization();
@@ -911,9 +948,6 @@ namespace MarvinsAIRA
 			{
 				var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "ClickSoundVolume_Slider_ValueChanged called." );
-
 				app.PlayClick();
 			}
 		}
@@ -928,9 +962,6 @@ namespace MarvinsAIRA
 			{
 				var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "SpeechSynthesizerVolume_Slider_ValueChanged called." );
-
 				app.UpdateVolume();
 
 				app.Say( app.Settings.SayVoiceVolume, app.Settings.SpeechSynthesizerVolume.ToString(), true );
@@ -943,9 +974,6 @@ namespace MarvinsAIRA
 			{
 				var app = (App) Application.Current;
 
-				app.WriteLine( "" );
-				app.WriteLine( "SelectedVoice_ComboBox_SelectionChanged called." );
-
 				app.InitializeVoice();
 
 				app.Say( app.Settings.SayHello, null, true );
@@ -956,23 +984,9 @@ namespace MarvinsAIRA
 
 		#region Settings tab - Wheel tab
 
-		private void SelectedWheelAxis_ComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
-		{
-			if ( _win_initialized )
-			{
-				var app = (App) Application.Current;
-
-				app.WriteLine( "" );
-				app.WriteLine( "SelectedWheelAxis_ComboBox_SelectionChanged called." );
-			}
-		}
-
 		private void SetWheelMinValue_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "SetWheelMinValue_Button_Click called." );
 
 			app.Settings.WheelMinValue = app.Input_CurrentWheelPosition;
 		}
@@ -981,9 +995,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "SetWheelCenterValue_Button_Click called." );
-
 			app.Settings.WheelCenterValue = app.Input_CurrentWheelPosition;
 		}
 
@@ -991,29 +1002,7 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "SetWheelMaxValue_Button_Click called." );
-
 			app.Settings.WheelMaxValue = app.Input_CurrentWheelPosition;
-		}
-
-		private void AutoCenterWheel_CheckBox_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "" );
-			app.WriteLine( "AutoCenterWheel_CheckBox_Click called." );
-		}
-
-		private void AutoCenterWheelStrength_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
-		{
-			if ( _win_initialized )
-			{
-				var app = (App) Application.Current;
-
-				app.WriteLine( "" );
-				app.WriteLine( "AutoCenterWheelStrength_Slider_ValueChanged called." );
-			}
 		}
 
 		#endregion
@@ -1024,7 +1013,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "SeeHelpDocumentation_Click called." );
 
 			string url = "https://herboldracing.com/marvins-awesome-iracing-app-maira/";
@@ -1041,7 +1029,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "GoToIRacingForumThread_Click called." );
 
 			string url = "https://forums.iracing.com/discussion/72467/marvins-awesome-iracing-app";
@@ -1058,7 +1045,6 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
 			app.WriteLine( "SendMarvinYourConsoleLog_Click called." );
 
 			var text = Console_TextBox.Text.Replace( "\r\n", "\r\n\t" );

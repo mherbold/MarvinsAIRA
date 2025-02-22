@@ -1,5 +1,8 @@
 ﻿
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace MarvinsAIRA
@@ -13,6 +16,33 @@ namespace MarvinsAIRA
 		public const float MPS_TO_MPH = 2.23694f;
 		public const float MPS_TO_KPH = 3.6f;
 
+		private static Mutex _mutex = new( true, "MarvinsAIRA Mutex" );
+
+		[DllImport( "user32.dll" )]
+		[return: MarshalAs( UnmanagedType.Bool )]
+		static extern bool SetForegroundWindow( IntPtr hWnd );
+
+		public App()
+		{
+			if ( !_mutex.WaitOne( TimeSpan.Zero, true ) )
+			{
+				var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+				var runningProcesses = Process.GetProcessesByName( assemblyName );
+
+				foreach ( var runningProcess in runningProcesses )
+				{
+					if ( runningProcess.MainWindowHandle != IntPtr.Zero )
+					{
+						SetForegroundWindow( runningProcess.MainWindowHandle );
+					}
+				}
+
+				Environment.Exit( 0 );
+
+				return;
+			}
+		}
+
 		public void Initialize( nint windowHandle )
 		{
 			WriteLine( "" );
@@ -25,7 +55,7 @@ namespace MarvinsAIRA
 				InitializeVoice();
 				InitializeSounds();
 				InitializeInputs( windowHandle );
-				InitializeForceFeedback( windowHandle );
+				InitializeForceFeedback( windowHandle, true );
 				InitializeLFE();
 				InitializeIRacingSDK();
 				InitializeCurrentCar();

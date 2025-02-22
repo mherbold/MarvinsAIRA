@@ -26,7 +26,7 @@ namespace MarvinsAIRA
 		public int Input_CurrentWheelPosition { get => _input_currentWheelPosition; }
 		public int Input_CurrentWheelVelocity { get => _input_currentWheelVelocity; }
 
-		private void InitializeInputs( nint windowHandle )
+		public void InitializeInputs( nint windowHandle )
 		{
 			WriteLine( "" );
 			WriteLine( "InitializeInputs called." );
@@ -122,72 +122,84 @@ namespace MarvinsAIRA
 
 			foreach ( var joystick in _input_joystickList )
 			{
-				joystick.GetCurrentState( ref joystickState );
-
-				foreach ( var mappedButtons in mappedButtonsList )
+				try
 				{
-					if ( mappedButtons.Button2.DeviceInstanceGuid != Guid.Empty )
+					joystick.GetCurrentState( ref joystickState );
+
+					foreach ( var mappedButtons in mappedButtonsList )
 					{
-						if ( mappedButtons.Button1.DeviceInstanceGuid == joystick.Information.InstanceGuid )
+						if ( mappedButtons.Button2.DeviceInstanceGuid != Guid.Empty )
 						{
-							if ( joystickState.Buttons[ mappedButtons.Button1.ButtonNumber ] )
+							if ( mappedButtons.Button1.DeviceInstanceGuid == joystick.Information.InstanceGuid )
 							{
-								mappedButtons.Button1Held = true;
+								if ( joystickState.Buttons[ mappedButtons.Button1.ButtonNumber ] )
+								{
+									mappedButtons.Button1Held = true;
+								}
 							}
 						}
 					}
-				}
 
-				var drivingJoystick = _ffb_drivingJoystick;
+					var drivingJoystick = _ffb_drivingJoystick;
 
-				if ( drivingJoystick != null )
-				{
-					if ( joystick.Information.InstanceGuid == drivingJoystick.Information.InstanceGuid )
+					if ( drivingJoystick != null )
 					{
-						var lastWheelPosition = _input_currentWheelPosition;
-
-						switch ( Settings.SelectedWheelAxis )
+						if ( joystick.Information.InstanceGuid == drivingJoystick.Information.InstanceGuid )
 						{
-							case JoystickOffset.X:
-								_input_currentWheelPosition = joystickState.X;
-								break;
+							var lastWheelPosition = _input_currentWheelPosition;
 
-							case JoystickOffset.Y:
-								_input_currentWheelPosition = joystickState.Y;
-								break;
+							switch ( Settings.SelectedWheelAxis )
+							{
+								case JoystickOffset.X:
+									_input_currentWheelPosition = joystickState.X;
+									break;
 
-							case JoystickOffset.Z:
-								_input_currentWheelPosition = joystickState.Z;
-								break;
+								case JoystickOffset.Y:
+									_input_currentWheelPosition = joystickState.Y;
+									break;
 
-							case JoystickOffset.RotationX:
-								_input_currentWheelPosition = joystickState.RotationX;
-								break;
+								case JoystickOffset.Z:
+									_input_currentWheelPosition = joystickState.Z;
+									break;
 
-							case JoystickOffset.RotationY:
-								_input_currentWheelPosition = joystickState.RotationY;
-								break;
+								case JoystickOffset.RotationX:
+									_input_currentWheelPosition = joystickState.RotationX;
+									break;
 
-							case JoystickOffset.RotationZ:
-								_input_currentWheelPosition = joystickState.RotationZ;
-								break;
+								case JoystickOffset.RotationY:
+									_input_currentWheelPosition = joystickState.RotationY;
+									break;
 
-							case JoystickOffset.Sliders0:
-								_input_currentWheelPosition = joystickState.Sliders[ 0 ];
-								break;
+								case JoystickOffset.RotationZ:
+									_input_currentWheelPosition = joystickState.RotationZ;
+									break;
 
-							case JoystickOffset.Sliders1:
-								_input_currentWheelPosition = joystickState.Sliders[ 1 ];
-								break;
+								case JoystickOffset.Sliders0:
+									_input_currentWheelPosition = joystickState.Sliders[ 0 ];
+									break;
+
+								case JoystickOffset.Sliders1:
+									_input_currentWheelPosition = joystickState.Sliders[ 1 ];
+									break;
+							}
+
+							if ( lastWheelPosition != -1 )
+							{
+								_input_currentWheelVelocity = (int) ( ( _input_currentWheelPosition - lastWheelPosition ) / deltaTime );
+							}
+
+							Settings.WheelAxisValueString = _input_currentWheelPosition.ToString();
 						}
-
-						if ( lastWheelPosition != -1 )
-						{
-							_input_currentWheelVelocity = (int) ( ( _input_currentWheelPosition - lastWheelPosition ) / deltaTime );
-						}
-
-						Settings.WheelAxisValueString = _input_currentWheelPosition.ToString();
 					}
+				}
+				catch ( Exception exception )
+				{
+					WriteLine( "" );
+					WriteLine( $"Exception caught while getting input from {joystick.Information.ProductName}: {exception.Message.Trim()}" );
+
+					_input_joystickList.Remove( joystick );
+
+					return;
 				}
 			}
 
@@ -254,9 +266,14 @@ namespace MarvinsAIRA
 					}
 
 				}
-				catch ( Exception )
+				catch ( Exception exception )
 				{
-					joystick.Acquire();
+					WriteLine( "" );
+					WriteLine( $"Exception caught while getting input from {joystick.Information.ProductName}: {exception.Message.Trim()}" );
+
+					_input_joystickList.Remove( joystick );
+
+					return;
 				}
 			}
 		}
