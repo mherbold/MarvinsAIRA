@@ -476,25 +476,25 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Understeer effect tab
+		#region Steering effects tab
 
-		/* Understeer effect enabled */
+		/* Steering effects enabled */
 
-		private bool _understeerEffectEnabled = false;
+		private bool _steeringEffectsEnabled = false;
 
-		public bool UndersteerEffectEnabled
+		public bool SteeringEffectsEnabled
 		{
-			get => _understeerEffectEnabled;
+			get => _steeringEffectsEnabled;
 
 			set
 			{
-				if ( _understeerEffectEnabled != value )
+				if ( _steeringEffectsEnabled != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"UndersteerEffectEnabled changed - before {_understeerEffectEnabled} now {value}" );
+					app.WriteLine( $"SteeringEffectsEnabled changed - before {_steeringEffectsEnabled} now {value}" );
 
-					_understeerEffectEnabled = value;
+					_steeringEffectsEnabled = value;
 
 					OnPropertyChanged();
 				}
@@ -551,7 +551,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect strength */
 
-		private int _usEffectStrength = 10;
+		private int _usEffectStrength = 0;
 
 		public int USEffectStrength
 		{
@@ -576,7 +576,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usEffectStrengthString = "10%";
+		private string _usEffectStrengthString = "0%";
 
 		public string USEffectStrengthString
 		{
@@ -600,7 +600,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect yaw rate factor (left) */
 
-		private int _usYawRateFactorLeft = 80;
+		private int _usYawRateFactorLeft = 0;
 
 		public int USYawRateFactorLeft
 		{
@@ -625,7 +625,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usYawRateFactorLeftString = "80";
+		private string _usYawRateFactorLeftString = "0";
 
 		public string USYawRateFactorLeftString
 		{
@@ -649,7 +649,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect yaw rate factor (right) */
 
-		private int _usYawRateFactorRight = 80;
+		private int _usYawRateFactorRight = 0;
 
 		public int USYawRateFactorRight
 		{
@@ -674,7 +674,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usYawRateFactorRightString = "80";
+		private string _usYawRateFactorRightString = "0";
 
 		public string USYawRateFactorRightString
 		{
@@ -709,6 +709,220 @@ namespace MarvinsAIRA
 				if ( _understeerEffectButtons != value )
 				{
 					_understeerEffectButtons = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Oversteer effect style */
+
+		public bool OSEffectStyleSineWaveBuzz { get; set; } = true;
+		public bool OSEffectStyleSawtoothWaveBuzz { get; set; } = false;
+		public bool OSEffectStyleConstantForce { get; set; } = false;
+
+		private int _osEffectStyle = 0;
+
+		public int OSEffectStyle
+		{
+			get => _osEffectStyle;
+
+			set
+			{
+				if ( _osEffectStyle != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSEffectStyle changed - before {_osEffectStyle} now {value}" );
+
+					_osEffectStyle = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private bool _osEffectStyleInvert = false;
+
+		public bool OSEffectStyleInvert
+		{
+			get => _osEffectStyleInvert;
+
+			set
+			{
+				if ( _osEffectStyleInvert != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSEffectStyleInvert changed - before {_osEffectStyleInvert} now {value}" );
+
+					_osEffectStyleInvert = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Oversteer effect strength */
+
+		private int _osEffectStrength = 0;
+
+		public int OSEffectStrength
+		{
+			get => _osEffectStrength;
+
+			set
+			{
+				value = Math.Clamp( value, 0, 100 );
+
+				if ( _osEffectStrength != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSEffectStrength changed - before {_osEffectStrength} now {value}" );
+
+					_osEffectStrength = value;
+
+					OnPropertyChanged();
+				}
+
+				OSEffectStrengthString = $"!{_osEffectStrength}%";
+			}
+		}
+
+		private string _osEffectStrengthString = "0%";
+
+		public string OSEffectStrengthString
+		{
+			get => _osEffectStrengthString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _osEffectStrengthString != value )
+					{
+						_osEffectStrengthString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Oversteer effect yaw rate factor (left) */
+
+		private int _osYawRateFactorLeft = 0;
+
+		public int OSYawRateFactorLeft
+		{
+			get => _osYawRateFactorLeft;
+
+			set
+			{
+				value = Math.Clamp( value, 0, 200 );
+
+				if ( _osYawRateFactorLeft != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSYawRateFactorLeft changed - before {_osYawRateFactorLeft} now {value}" );
+
+					_osYawRateFactorLeft = value;
+
+					OnPropertyChanged();
+				}
+
+				OSYawRateFactorLeftString = $"!{_osYawRateFactorLeft}";
+			}
+		}
+
+		private string _osYawRateFactorLeftString = "0";
+
+		public string OSYawRateFactorLeftString
+		{
+			get => _osYawRateFactorLeftString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _osYawRateFactorLeftString != value )
+					{
+						_osYawRateFactorLeftString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Oversteer effect yaw rate factor (right) */
+
+		private int _osYawRateFactorRight = 0;
+
+		public int OSYawRateFactorRight
+		{
+			get => _osYawRateFactorRight;
+
+			set
+			{
+				value = Math.Clamp( value, 0, 200 );
+
+				if ( _osYawRateFactorRight != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSYawRateFactorRight changed - before {_osYawRateFactorRight} now {value}" );
+
+					_osYawRateFactorRight = value;
+
+					OnPropertyChanged();
+				}
+
+				OSYawRateFactorRightString = $"!{_osYawRateFactorRight}";
+			}
+		}
+
+		private string _osYawRateFactorRightString = "0";
+
+		public string OSYawRateFactorRightString
+		{
+			get => _osYawRateFactorRightString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _osYawRateFactorRightString != value )
+					{
+						_osYawRateFactorRightString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Oversteer effect button */
+
+		private MappedButtons _oversteerEffectButtons = new();
+
+		public MappedButtons OversteerEffectButtons
+		{
+			get => _oversteerEffectButtons;
+
+			set
+			{
+				if ( _oversteerEffectButtons != value )
+				{
+					_oversteerEffectButtons = value;
 
 					OnPropertyChanged();
 				}
@@ -867,6 +1081,10 @@ namespace MarvinsAIRA
 			public int USEffectStrength = 0;
 			public int USYawRateFactorLeft = 0;
 			public int USYawRateFactorRight = 0;
+
+			public int OSEffectStrength = 0;
+			public int OSYawRateFactorLeft = 0;
+			public int OSYawRateFactorRight = 0;
 		}
 
 		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
@@ -1584,8 +1802,10 @@ namespace MarvinsAIRA
 		public string _sayScalesReset = "This is the first time you have driven this combination, so we have reset the overall and detail scale.";
 		public string _sayLoadOverallScale = "The overall scale has been restored to :value: percent";
 		public string _sayLoadDetailScale = "The detail scale has been restored to :value: percent.";
-		public string _sayLeftYawRateFactor = "The understeer effect left yaw rate factor has been set to :value:.";
-		public string _sayRightYawRateFactor = "The understeer effect right yaw rate factor has been set to :value:.";
+		public string _sayUSLeftYawRateFactor = "The understeer effect left yaw rate factor has been set to :value:.";
+		public string _sayUSRightYawRateFactor = "The understeer effect right yaw rate factor has been set to :value:.";
+		public string _sayOSLeftYawRateFactor = "The oversteer effect left yaw rate factor has been set to :value:.";
+		public string _sayOSRightYawRateFactor = "The oversteer effect right yaw rate factor has been set to :value:.";
 
 		public string SayHello { get => _sayHello; set { if ( _sayHello != value ) { _sayHello = value; OnPropertyChanged(); } } }
 		public string SayConnected { get => _sayConnected; set { if ( _sayConnected != value ) { _sayConnected = value; OnPropertyChanged(); } } }
@@ -1600,8 +1820,10 @@ namespace MarvinsAIRA
 		public string SayScalesReset { get => _sayScalesReset; set { if ( _sayScalesReset != value ) { _sayScalesReset = value; OnPropertyChanged(); } } }
 		public string SayLoadOverallScale { get => _sayLoadOverallScale; set { if ( _sayLoadOverallScale != value ) { _sayLoadOverallScale = value; OnPropertyChanged(); } } }
 		public string SayLoadDetailScale { get => _sayLoadDetailScale; set { if ( _sayLoadDetailScale != value ) { _sayLoadDetailScale = value; OnPropertyChanged(); } } }
-		public string SayLeftYawRateFactor { get => _sayLeftYawRateFactor; set { if ( _sayLeftYawRateFactor != value ) { _sayLeftYawRateFactor = value; OnPropertyChanged(); } } }
-		public string SayRightYawRateFactor { get => _sayRightYawRateFactor; set { if ( _sayRightYawRateFactor != value ) { _sayRightYawRateFactor = value; OnPropertyChanged(); } } }
+		public string SayUSLeftYawRateFactor { get => _sayUSLeftYawRateFactor; set { if ( _sayUSLeftYawRateFactor != value ) { _sayUSLeftYawRateFactor = value; OnPropertyChanged(); } } }
+		public string SayUSRightYawRateFactor { get => _sayUSRightYawRateFactor; set { if ( _sayUSRightYawRateFactor != value ) { _sayUSRightYawRateFactor = value; OnPropertyChanged(); } } }
+		public string SayOSLeftYawRateFactor { get => _sayOSLeftYawRateFactor; set { if ( _sayOSLeftYawRateFactor != value ) { _sayOSLeftYawRateFactor = value; OnPropertyChanged(); } } }
+		public string SayOSRightYawRateFactor { get => _sayOSRightYawRateFactor; set { if ( _sayOSRightYawRateFactor != value ) { _sayOSRightYawRateFactor = value; OnPropertyChanged(); } } }
 
 		#endregion
 
@@ -1810,7 +2032,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private int _autoCenterWheelStrength = 15;
+		private int _autoCenterWheelStrength = 25;
 
 		public int AutoCenterWheelStrength
 		{
@@ -1835,7 +2057,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _autoCenterWheelStrengthString = "15%";
+		private string _autoCenterWheelStrengthString = "25%";
 
 		public string AutoCenterWheelStrengthString
 		{

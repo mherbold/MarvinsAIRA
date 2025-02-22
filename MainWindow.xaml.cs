@@ -406,9 +406,27 @@ namespace MarvinsAIRA
 
 									YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F2}";
 
+									if ( (string) YawRateFactorInstant_Label.Content  == "-0.00" )
+									{
+										YawRateFactorInstant_Label.Content = "0.00";
+									}
+
 									// Yaw rate factor (average)
 
 									YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F2}";
+
+									if ( (string) YawRateFactorAverage_Label.Content == "-0.00" )
+									{
+										YawRateFactorAverage_Label.Content = "0.00";
+									}
+
+									// Understeer amount
+
+									UndersteerAmount_Label.Content = $"{app.FFB_UndersteerAmount * 100f:F0}%";
+
+									// Oversteer amount
+
+									OversteerAmount_Label.Content = $"{app.FFB_OversteerAmount * 100f:F0}%";
 
 									// Wind status
 
@@ -777,9 +795,9 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Understeer effect tab
+		#region Steering effects tab
 
-		private void SineWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
+		private void USSineWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
@@ -789,7 +807,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void SawtoothWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
+		private void USSawtoothWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
@@ -799,7 +817,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void ConstantForce_RadioButton_Click( object sender, RoutedEventArgs e )
+		private void USConstantForce_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
 			{
@@ -816,6 +834,45 @@ namespace MarvinsAIRA
 			app.WriteLine( "UndersteerEffect_Button_Click called." );
 
 			ShowMapButtonsWindow( app.Settings.UndersteerEffectButtons );
+		}
+
+		private void OSSineWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.Settings.OSEffectStyle = 0;
+			}
+		}
+
+		private void OSSawtoothWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.Settings.OSEffectStyle = 1;
+			}
+		}
+
+		private void OSConstantForce_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.Settings.OSEffectStyle = 2;
+			}
+		}
+
+		private void OversteerEffect_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "OversteerEffect_Button_Click called." );
+
+			ShowMapButtonsWindow( app.Settings.OversteerEffectButtons );
 		}
 
 		#endregion

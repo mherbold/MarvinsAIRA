@@ -72,6 +72,10 @@ namespace MarvinsAIRA
 							forceFeedbackSettings.USYawRateFactorLeft = Settings.USYawRateFactorLeft;
 							forceFeedbackSettings.USYawRateFactorRight = Settings.USYawRateFactorRight;
 
+							forceFeedbackSettings.OSEffectStrength = Settings.OSEffectStrength;
+							forceFeedbackSettings.OSYawRateFactorLeft = Settings.OSYawRateFactorLeft;
+							forceFeedbackSettings.OSYawRateFactorRight = Settings.OSYawRateFactorRight;
+
 							forceFeedbackSettingsFound = true;
 
 							break;
@@ -92,7 +96,11 @@ namespace MarvinsAIRA
 
 							USEffectStrength = Settings.USEffectStrength,
 							USYawRateFactorLeft = Settings.USYawRateFactorLeft,
-							USYawRateFactorRight = Settings.USYawRateFactorRight
+							USYawRateFactorRight = Settings.USYawRateFactorRight,
+
+							OSEffectStrength = Settings.OSEffectStrength,
+							OSYawRateFactorLeft = Settings.OSYawRateFactorLeft,
+							OSYawRateFactorRight = Settings.OSYawRateFactorRight
 						};
 
 						Settings.ForceFeedbackSettingsList.Add( forceFeedbackSettings );

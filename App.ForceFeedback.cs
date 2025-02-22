@@ -49,6 +49,7 @@ namespace MarvinsAIRA
 		private EffectInfo? _ffb_constantForceEffectInfo = null;
 		private EffectParameters? _ffb_constantForceEffectParameters = null;
 		private Effect? _ffb_constantForceEffect = null;
+		private float _ffb_sendStartTimer = 0;
 
 		private bool _ffb_initialized = false;
 		private int _ffb_updatesToSkip = 0;
@@ -98,11 +99,11 @@ namespace MarvinsAIRA
 		private readonly float[] _ffb_yawRateFactorBuffer = new float[ 30 ];
 		private int _ffb_yawRateFactorBufferIndex = 0;
 
-		private float _ffb_lateralForceFactorAverage = 0;
-		private readonly float[] _ffb_lateralForceFactorBuffer = new float[ 30 ];
-		private int _ffb_lateralForceFactorBufferIndex = 0;
-
+		private float _ffb_understeerAmount = 0;
 		private float _ffb_understeerEffectWaveAngle = 0;
+
+		private float _ffb_oversteerAmount = 0;
+		private float _ffb_oversteerEffectWaveAngle = 0;
 
 		private float _ffb_crashProtectionTimer = 0;
 		private float _ffb_crashProtectionScale = 1;
@@ -114,7 +115,8 @@ namespace MarvinsAIRA
 		public int FFB_LastMagnitudeSentToWheel { get => _ffb_lastMagnitudeSentToWheel; }
 		public float FFB_YawRateFactorInstant { get => _ffb_yawRateFactorInstant; }
 		public float FFB_YawRateFactorAverage { get => _ffb_yawRateFactorAverage; }
-		public float FFB_LateralForceFactorAverage { get => _ffb_lateralForceFactorAverage; }
+		public float FFB_UndersteerAmount { get => _ffb_understeerAmount; }
+		public float FFB_OversteerAmount { get => _ffb_oversteerAmount; }
 
 		public void InitializeForceFeedback( nint windowHandle, bool isFirstInitialization = false )
 		{
@@ -367,12 +369,13 @@ namespace MarvinsAIRA
 
 				WriteLine( $"...starting the multimedia timer event (period = {periodInMilliseconds} ms)..." );
 
+				_ffb_sendStartTimer = 0;
+				_ffb_forceFeedbackExceptionThrown = false;
+
 				_ffb_multimediaTimerId = TimeSetEvent( periodInMilliseconds, 0, MultimediaTimerEventCallback, ref userCtx, EVENTTYPE_PERIODIC );
 
 				WriteLine( "...the multimedia timer event has been started..." );
 				WriteLine( "...the force feedback device has been reinitialized." );
-
-				_ffb_forceFeedbackExceptionThrown = false;
 			}
 			catch ( Exception exception )
 			{
@@ -507,13 +510,35 @@ namespace MarvinsAIRA
 					{
 						Settings.USYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
 
-						Say( Settings.SayLeftYawRateFactor, Settings.USYawRateFactorLeft.ToString(), true );
+						Say( Settings.SayUSLeftYawRateFactor, Settings.USYawRateFactorLeft.ToString(), true );
 					}
 					else
 					{
 						Settings.USYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
 
-						Say( Settings.SayRightYawRateFactor, Settings.USYawRateFactorRight.ToString(), true );
+						Say( Settings.SayUSRightYawRateFactor, Settings.USYawRateFactorRight.ToString(), true );
+					}
+				}
+
+
+				buttonPresses = Settings.OversteerEffectButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "" );
+					WriteLine( $"OVERSTEER-EFFECT button pressed!" );
+
+					if ( _irsdk_steeringWheelAngle >= 0 )
+					{
+						Settings.OSYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
+
+						Say( Settings.SayOSLeftYawRateFactor, Settings.OSYawRateFactorLeft.ToString(), true );
+					}
+					else
+					{
+						Settings.OSYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
+
+						Say( Settings.SayOSRightYawRateFactor, Settings.OSYawRateFactorRight.ToString(), true );
 					}
 				}
 
@@ -623,6 +648,10 @@ namespace MarvinsAIRA
 						Settings.USYawRateFactorLeft = forceFeedbackSettings.USYawRateFactorLeft;
 						Settings.USYawRateFactorRight = forceFeedbackSettings.USYawRateFactorRight;
 
+						Settings.OSEffectStrength = forceFeedbackSettings.OSEffectStrength;
+						Settings.OSYawRateFactorLeft = forceFeedbackSettings.OSYawRateFactorLeft;
+						Settings.OSYawRateFactorRight = forceFeedbackSettings.OSYawRateFactorRight;
+
 						forceFeedbackSettingsFound = true;
 
 						Say( Settings.SayLoadOverallScale, Settings.OverallScale.ToString() );
@@ -654,7 +683,9 @@ namespace MarvinsAIRA
 
 				if ( ( leftRange > 0f ) && ( rightRange > 0f ) )
 				{
-					var normalizedRange = leftRange + rightRange;
+					var totalRange = leftRange + rightRange;
+
+					var normalizedWheelVelocity = Input_CurrentWheelVelocity / totalRange; // -1 to 1
 
 					var currentWheelPosition = Math.Clamp( Input_CurrentWheelPosition, Settings.WheelMinValue, Settings.WheelMaxValue );
 
@@ -670,54 +701,69 @@ namespace MarvinsAIRA
 
 					if ( Settings.AutoCenterWheelType == 0 )
 					{
-						var targetWheelVelocity = normalizedRange / 10;
+						var brake = false;
+						var targetNormalizedWheelVelocity = -normalizedPercentage;
 
-						if ( Math.Sign( Input_CurrentWheelVelocity ) == Math.Sign( normalizedPercentage ) )
+						if ( leftPercentage >= 0.015f )
 						{
-							_ffb_centerWheelForce = 0;
-
-							forceMagnitude = Input_CurrentWheelVelocity / 50;
-						}
-						else if ( leftPercentage >= 0.015f )
-						{
-							if ( Input_CurrentWheelVelocity < targetWheelVelocity )
+							if ( normalizedWheelVelocity < -0.01f )
+							{
+								brake = true;
+							}
+							else if ( normalizedWheelVelocity < targetNormalizedWheelVelocity )
 							{
 								_ffb_centerWheelForce -= Settings.AutoCenterWheelStrength * 2;
-
-								forceMagnitude = _ffb_centerWheelForce;
 							}
 							else
 							{
 								_ffb_centerWheelForce += Settings.AutoCenterWheelStrength;
-
-								forceMagnitude = _ffb_centerWheelForce;
 							}
 						}
 						else if ( rightPercentage >= 0.015f )
 						{
-							if ( Input_CurrentWheelVelocity > -targetWheelVelocity )
+							if ( normalizedWheelVelocity > 0.01f )
+							{
+								brake = true;
+							}
+							else if ( normalizedWheelVelocity > targetNormalizedWheelVelocity )
 							{
 								_ffb_centerWheelForce += Settings.AutoCenterWheelStrength * 2;
-
-								forceMagnitude = _ffb_centerWheelForce;
 							}
 							else
 							{
 								_ffb_centerWheelForce -= Settings.AutoCenterWheelStrength;
-
-								forceMagnitude = _ffb_centerWheelForce;
 							}
+						}
+						else
+						{
+							_ffb_centerWheelForce = 0;
+
+							if ( ( normalizedWheelVelocity < -0.01f ) || ( normalizedWheelVelocity > 0.01f ) )
+							{
+								brake = true;
+							}
+						}
+
+						if ( brake )
+						{
+							_ffb_centerWheelForce = 0;
+
+							forceMagnitude = (int) ( normalizedWheelVelocity * DI_FFNOMINALMAX * 0.25f );
+						}
+						else
+						{
+							forceMagnitude = _ffb_centerWheelForce;
 						}
 					}
 					else if ( Settings.AutoCenterWheelType == 1 )
 					{
-						if ( leftPercentage >= 0.05f )
+						if ( leftPercentage >= 0.015f )
 						{
-							forceMagnitude = (int) ( leftPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / -100f );
+							forceMagnitude = (int) -( Math.Pow( leftPercentage, 2.0f ) * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / 100f );
 						}
-						else if ( rightPercentage >= 0.05f )
+						else if ( rightPercentage >= 0.015f )
 						{
-							forceMagnitude = (int) ( rightPercentage * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / 100f );
+							forceMagnitude = (int) ( Math.Pow( rightPercentage, 2.0f ) * DI_FFNOMINALMAX * Settings.AutoCenterWheelStrength / 100f );
 						}
 					}
 
@@ -842,7 +888,7 @@ namespace MarvinsAIRA
 
 			// calculate current instant yaw rate factor
 
-			if ( Math.Abs( _irsdk_yawRate ) > 0.1f )
+			if ( Math.Abs( _irsdk_yawRate ) > 0.01f )
 			{
 				_ffb_yawRateFactorInstant = _irsdk_steeringWheelAngle * _irsdk_speed / _irsdk_yawRate;
 			}
@@ -866,49 +912,56 @@ namespace MarvinsAIRA
 
 			_ffb_yawRateFactorAverage = totalYawRateFactor / _ffb_yawRateFactorBuffer.Length;
 
-			// keep track of average lateral force factor over the last half second
+			// steering effects
 
-			if ( Math.Abs( _irsdk_steeringWheelAngle ) > 0.1f )
-			{
-				var latForceFactor = _irsdk_latAccel / _irsdk_steeringWheelAngle;
+			_ffb_understeerAmount = 0; // 0 = 35% below understeer edge, 1 = right on understeer edge
+			_ffb_oversteerAmount = 0; // 0 = 75% above oversteer edge, 1 = right on oversteer edge
 
-				_ffb_lateralForceFactorBuffer[ _ffb_lateralForceFactorBufferIndex ] = latForceFactor;
-			}
-			else
-			{
-				_ffb_lateralForceFactorBuffer[ _ffb_lateralForceFactorBufferIndex ] = 0;
-			}
-
-			_ffb_lateralForceFactorBufferIndex = ( _ffb_lateralForceFactorBufferIndex + 1 ) % _ffb_lateralForceFactorBuffer.Length;
-
-			var totalLatForceFactor = 0f;
-
-			for ( var i = 0; i < _ffb_lateralForceFactorBuffer.Length; i++ )
-			{
-				totalLatForceFactor += _ffb_lateralForceFactorBuffer[ i ];
-			}
-
-			_ffb_lateralForceFactorAverage = totalLatForceFactor / _ffb_lateralForceFactorBuffer.Length;
-
-			// update the understeer effect
-
-			float understeerAmount = 0; // 0 = 25% below understeer edge, 1 = right on understeer edge
 			float understeerFrequency = 0;
+			float oversteerFrequency = 0;
 
-			var settingYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.USYawRateFactorLeft : Settings.USYawRateFactorRight;
-
-			if ( ( Math.Abs( _irsdk_yawRate ) > 0.1f ) && ( settingYawRateFactor > 0 ) )
+			if ( ( _irsdk_speed > 10f ) && ( Math.Abs( _irsdk_steeringWheelAngle ) > 0.05f ) && ( Math.Abs( _irsdk_yawRate ) > 0.01f ) )
 			{
-				var deltaYawRateFactor = settingYawRateFactor - _ffb_yawRateFactorInstant;
-				var margin = settingYawRateFactor * 0.35f;
+				// update the understeer effect
 
-				understeerAmount = (float) Math.Pow( Math.Clamp( ( margin - deltaYawRateFactor ) / margin, 0f, 1f ), 1.5f );
+				var settingUSYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.USYawRateFactorLeft : Settings.USYawRateFactorRight;
 
-				understeerFrequency = Math.Max( 0.05f, understeerAmount );
-
-				if ( Settings.USEffectStyleInvert )
+				if ( settingUSYawRateFactor > 0 )
 				{
-					understeerAmount = -understeerAmount;
+					var margin = settingUSYawRateFactor * 0.35f;
+
+					var deltaYawRateFactor = settingUSYawRateFactor - _ffb_yawRateFactorInstant;
+
+					_ffb_understeerAmount = (float) Math.Pow( Math.Clamp( ( margin - deltaYawRateFactor ) / margin, 0f, 1f ), 1.5f );
+
+					understeerFrequency = Math.Max( 0.05f, _ffb_understeerAmount );
+
+					if ( Settings.USEffectStyleInvert )
+					{
+						_ffb_understeerAmount = -_ffb_understeerAmount;
+					}
+				}
+
+				// update the oversteer effect
+
+				var settingOSYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.OSYawRateFactorLeft : Settings.OSYawRateFactorRight;
+
+				if ( settingOSYawRateFactor > 0 )
+				{
+					var margin = settingOSYawRateFactor * 0.75f;
+
+					var deltaYawRateFactor = _ffb_yawRateFactorInstant - settingOSYawRateFactor;
+
+					var lateralAccelerationScale = Math.Clamp( ( Math.Abs( _irsdk_latAccel ) - 5f ) / 5f, 0, 1 );
+
+					_ffb_oversteerAmount = (float) Math.Pow( Math.Clamp( ( margin - deltaYawRateFactor ) / margin, 0f, 1f ), 1.5f ) * lateralAccelerationScale;
+
+					oversteerFrequency = Math.Max( 0.05f, _ffb_oversteerAmount );
+
+					if ( Settings.OSEffectStyleInvert )
+					{
+						_ffb_oversteerAmount = -_ffb_oversteerAmount;
+					}
 				}
 			}
 
@@ -940,8 +993,9 @@ namespace MarvinsAIRA
 			// map scales into DI units (detail scale will be the same as the overall scale if detail scale slider is set to 100%)
 
 			var overallScaleToDirectInputUnits = normalizedOverallScaleSetting * newtonMetersToDirectInputUnits;
-			var detailScaleToDirectInputUnits = overallScaleToDirectInputUnits + overallScaleToDirectInputUnits * ( normalizedDetailScaleSetting - 1 );
-			var understeerEffectScaleToDirectInputUnits = (int) ( ( Settings.USEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4 ) );
+			var detailScaleToDirectInputUnits = overallScaleToDirectInputUnits + overallScaleToDirectInputUnits * ( normalizedDetailScaleSetting - 1f );
+			var understeerEffectScaleToDirectInputUnits = (int) ( ( Settings.USEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4f ) );
+			var oversteerEffectScaleToDirectInputUnits = (int) ( ( Settings.OSEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4f ) );
 			var lfeScale = normalizedLFEScaleSetting * DI_FFNOMINALMAX;
 
 			// make a copy of the lfe read index so it doesn't change in the middle of this update (its updated in another thread)
@@ -989,15 +1043,24 @@ namespace MarvinsAIRA
 
 				if ( normalizedDetailScaleSetting >= 1 )
 				{
-					// apply understeer effect to steady state wheel torque
-
 					var steadyStateWheelTorque = currentSteeringWheelTorque * overallScaleToDirectInputUnits;
 
-					if ( Settings.UndersteerEffectEnabled && ( Settings.USEffectStyle == 2 ) )
-					{
-						var wave = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+					// apply understeer effect to steady state wheel torque
 
-						steadyStateWheelTorque += wave * understeerAmount * understeerEffectScaleToDirectInputUnits;
+					if ( Settings.SteeringEffectsEnabled && ( Settings.USEffectStyle == 2 ) )
+					{
+						var direction = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+						steadyStateWheelTorque += direction * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits;
+					}
+
+					// apply oversteer effect to steady state wheel torque
+
+					if ( Settings.SteeringEffectsEnabled && ( Settings.OSEffectStyle == 2 ) )
+					{
+						var direction = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+						steadyStateWheelTorque += direction * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits;
 					}
 
 					// scale the impulse by our detail scale and add it to our running steering wheel torque
@@ -1010,15 +1073,24 @@ namespace MarvinsAIRA
 				}
 				else
 				{
-					// apply understeer effect to steady state wheel torque
-
 					var steadyStateWheelTorque = _ffb_steadyStateWheelTorque;
 
-					if ( Settings.UndersteerEffectEnabled && ( Settings.USEffectStyle == 2 ) )
-					{
-						var wave = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+					// apply understeer effect to steady state wheel torque
 
-						steadyStateWheelTorque += wave * understeerAmount * understeerEffectScaleToDirectInputUnits;
+					if ( Settings.SteeringEffectsEnabled && ( Settings.USEffectStyle == 2 ) )
+					{
+						var direction = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+						steadyStateWheelTorque += direction * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits;
+					}
+
+					// apply oversteer effect to steady state wheel torque
+
+					if ( Settings.SteeringEffectsEnabled && ( Settings.OSEffectStyle == 2 ) )
+					{
+						var direction = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+						steadyStateWheelTorque += direction * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits;
 					}
 
 					// blend between steady state force and original force using detail scale amount
@@ -1047,15 +1119,21 @@ namespace MarvinsAIRA
 
 				_ffb_outputWheelMagnitudeBuffer[ x ] += steeringWheelStopsMagnitude;
 
-				// mix in the sine and sawtooth wave understeer effects
+				// mix in the sine and sawtooth wave understeer and oversteer effects
 
-				_ffb_understeerEffectWaveAngle += understeerFrequency;
-
-				if ( Settings.UndersteerEffectEnabled )
+				if ( Settings.SteeringEffectsEnabled )
 				{
+					_ffb_understeerEffectWaveAngle += understeerFrequency;
+					_ffb_oversteerEffectWaveAngle += oversteerFrequency;
+
 					if ( _ffb_understeerEffectWaveAngle > (float) Math.PI * 2f )
 					{
 						_ffb_understeerEffectWaveAngle -= (float) Math.PI * 2f;
+					}
+
+					if ( _ffb_oversteerEffectWaveAngle > (float) Math.PI * 2f )
+					{
+						_ffb_oversteerEffectWaveAngle -= (float) Math.PI * 2f;
 					}
 
 					if ( processThisFrame )
@@ -1064,13 +1142,26 @@ namespace MarvinsAIRA
 						{
 							var wave = Math.Sin( _ffb_understeerEffectWaveAngle );
 
-							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
 						}
 						else if ( Settings.USEffectStyle == 1 )
 						{
 							var wave = _ffb_understeerEffectWaveAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
 
-							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * understeerAmount * understeerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
+						}
+
+						if ( Settings.OSEffectStyle == 0 )
+						{
+							var wave = Math.Sin( _ffb_oversteerEffectWaveAngle );
+
+							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
+						}
+						else if ( Settings.OSEffectStyle == 1 )
+						{
+							var wave = _ffb_oversteerEffectWaveAngle / ( Math.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+
+							_ffb_outputWheelMagnitudeBuffer[ x ] += (int) ( wave * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
 						}
 					}
 				}
@@ -1227,6 +1318,10 @@ namespace MarvinsAIRA
 
 			var magnitude = (int) InterpolateHermite( m0, m1, m2, m3, t );
 
+			// update send start timer
+
+			app._ffb_sendStartTimer = Math.Max( 0, app._ffb_sendStartTimer - deltaSeconds );
+
 			// update clipped timer
 
 			app._ffb_clippedTimer = Math.Max( 0, app._ffb_clippedTimer - deltaSeconds );
@@ -1283,7 +1378,20 @@ namespace MarvinsAIRA
 
 					try
 					{
-						app._ffb_constantForceEffect.SetParameters( app._ffb_constantForceEffectParameters, EffectParameterFlags.TypeSpecificParameters | EffectParameterFlags.Start );
+						var effectParameterFlags = EffectParameterFlags.TypeSpecificParameters;
+
+						if ( app._ffb_sendStartTimer == 0 )
+						{
+							effectParameterFlags |= EffectParameterFlags.Start;
+
+							app._ffb_sendStartTimer = 30;
+						}
+						else
+						{
+							effectParameterFlags |= EffectParameterFlags.NoRestart;
+						}
+
+						app._ffb_constantForceEffect.SetParameters( app._ffb_constantForceEffectParameters, effectParameterFlags );
 					}
 					catch ( Exception exception )
 					{

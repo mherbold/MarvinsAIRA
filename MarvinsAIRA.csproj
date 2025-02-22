@@ -21,6 +21,7 @@
     <None Remove="click.wav" />
     <None Remove="icon.ico" />
     <None Remove="minus-button.png" />
+    <None Remove="o-button.png" />
     <None Remove="play-button.png" />
     <None Remove="plus-button.png" />
     <None Remove="r-button.png" />
@@ -52,6 +53,7 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="minus-button.png" />
+    <Resource Include="o-button.png" />
     <Resource Include="play-button.png" />
     <Resource Include="plus-button.png" />
     <Resource Include="r-button.png" />

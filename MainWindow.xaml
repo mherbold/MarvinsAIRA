@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.34"
+        Title="Marvin's Awesome iRacing App v0.35"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -149,51 +149,27 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="UndersteerEffect_CheckBox" VerticalAlignment="Center" IsChecked="{Binding UndersteerEffectEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
-                        <Label Content="Understeer Effect" VerticalAlignment="Center" Margin="10,0,0,0" />
+                        <CheckBox VerticalAlignment="Center" IsChecked="{Binding SteeringEffectsEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
+                        <Label Content="Steering Effects" VerticalAlignment="Center" Margin="10,0,0,0" />
                     </StackPanel>
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <Label Content="You must calibrate the YR Factor L and YR Factor R sliders for your car, before you turn on the understeer effect." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                    <Label Content="You must calibrate the YR Factor L and YR Factor R sliders for your car, before you turn on the steering effects feature." FontWeight="DemiBold" HorizontalAlignment="Center" />
                     <Label Content="Please see the website documentation for calibration instructions." FontWeight="DemiBold" HorizontalAlignment="Center" />
-                    <Grid Margin="0,10,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car understeers." />
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <RadioButton x:Name="SineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="FxStyle" Click="SineWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSineWaveBuzz}"/>
-                            <RadioButton x:Name="SawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="FxStyle" Click="SawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSawtoothWaveBuzz}"/>
-                            <RadioButton x:Name="ConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="FxStyle" Click="ConstantForce_RadioButton_Click" IsChecked="{Binding USEffectStyleConstantForce}"/>
-                            <CheckBox x:Name="Invert_CheckBox" Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding USEffectStyleInvert}"/>
-                        </StackPanel>
-                    </Grid>
-                    <Grid Margin="0,5,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the understeer effect will feel." />
-                        <TextBox Grid.Column="1" Text="{Binding USEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USEffectStrength}" TickFrequency="10" />
-                    </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <Grid Margin="0,5,0,0">
+                    <GroupBox Header="Understeer">
+                        <StackPanel>
+                            <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning left." />
-                                <TextBox Grid.Column="1" Text="{Binding USYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorLeft}" TickFrequency="5" />
+                                <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car understeers." />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <RadioButton x:Name="USSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSineWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSineWaveBuzz}"/>
+                                    <RadioButton x:Name="USSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSawtoothWaveBuzz}"/>
+                                    <RadioButton x:Name="USConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USConstantForce_RadioButton_Click" IsChecked="{Binding USEffectStyleConstantForce}"/>
+                                    <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding USEffectStyleInvert}"/>
+                                </StackPanel>
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
@@ -201,15 +177,101 @@
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning right." />
-                                <TextBox Grid.Column="1" Text="{Binding USYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorRight}" TickFrequency="5" />
+                                <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the understeer effect will feel." />
+                                <TextBox Grid.Column="1" Text="{Binding USEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USEffectStrength}" TickFrequency="10" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning left." />
+                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorLeft}" TickFrequency="5" />
+                                    </Grid>
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning right." />
+                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorRight}" TickFrequency="5" />
+                                    </Grid>
+                                </StackPanel>
+                                <Button Grid.Column="1" x:Name="UndersteerEffect_Button" Margin="10,0,0,0" Click="UndersteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/u-button.png"/>
+                                </Button>
                             </Grid>
                         </StackPanel>
-                        <Button Grid.Column="1" x:Name="UndersteerEffect_Button" Margin="10,0,0,0" Click="UndersteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                            <Image Source="/u-button.png"/>
-                        </Button>
-                    </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Oversteer">
+                        <StackPanel>
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car oversteers." />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <RadioButton x:Name="OSSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSineWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSineWaveBuzz}"/>
+                                    <RadioButton x:Name="OSSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSawtoothWaveBuzz}"/>
+                                    <RadioButton x:Name="OSConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSConstantForce_RadioButton_Click" IsChecked="{Binding OSEffectStyleConstantForce}"/>
+                                    <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding OSEffectStyleInvert}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the oversteer effect will feel." />
+                                <TextBox Grid.Column="1" Text="{Binding OSEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OSEffectStrength}" TickFrequency="10" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning left." />
+                                        <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OSYawRateFactorLeft}" TickFrequency="5" />
+                                    </Grid>
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning right." />
+                                        <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OSYawRateFactorRight}" TickFrequency="5" />
+                                    </Grid>
+                                </StackPanel>
+                                <Button Grid.Column="1" x:Name="OversteerEffect_Button" Margin="10,0,0,0" Click="OversteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/o-button.png"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
                 </StackPanel>
             </TabItem>
             <TabItem>
@@ -394,6 +456,8 @@
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition Width="128"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="128"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <Label Content="Steering Angle" HorizontalAlignment="Center" Margin="0,0,0,10"/>
@@ -424,6 +488,12 @@
                             <Label Content="Average" HorizontalAlignment="Center"/>
                             <Label Content="YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="YawRateFactorAverage_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="6">
+                            <Label Content="Understeer" HorizontalAlignment="Center" Margin="0,36,0,5"/>
+                            <Label x:Name="UndersteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            <Label Content="Oversteer" HorizontalAlignment="Center" Margin="0,17,0,5"/>
+                            <Label x:Name="OversteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
