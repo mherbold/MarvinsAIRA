@@ -9,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using YamlDotNet.Core.Tokens;
 
 namespace MarvinsAIRA
 {
