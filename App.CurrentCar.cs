@@ -1,6 +1,7 @@
 ﻿
 using System.Windows;
 using System.Windows.Media;
+using YamlDotNet.Core.Tokens;
 
 namespace MarvinsAIRA
 {
@@ -51,8 +52,8 @@ namespace MarvinsAIRA
 					WriteLine( $"You are driving a {carScreenName}." );
 
 					Say( Settings.SayCarName, carScreenName );
-
-					_car_carChanged = true;
+                    WriteLineToIracingChat($"You are driving a {carScreenName}.", App.ChatBufferDataType.Info);
+                    _car_carChanged = true;
 				}
 
 				_car_currentCarScreenName = carScreenName;

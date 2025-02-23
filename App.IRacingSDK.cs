@@ -1,8 +1,13 @@
 
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 
 using IRSDKSharper;
+
+using WinForms = System.Windows.Forms;
 
 namespace MarvinsAIRA
 {
@@ -46,6 +51,7 @@ namespace MarvinsAIRA
 		public float _irsdk_steeringWheelAngle = 0;
 		public float _irsdk_steeringWheelAngleMax = 0;
 		public int _irsdk_displayUnits = 0;
+		public int _irsdk_playerCarNumber = -1;
 
 		public int _irsdk_tickCountLastFrame = 0;
 		public bool _irsdk_isOnTrackLastFrame = false;
@@ -146,6 +152,8 @@ namespace MarvinsAIRA
 			_irsdk_velocityY = 0;
 			_irsdk_displayUnits = 0;
 
+			_irsdk_playerCarNumber = -1;
+
 			_irsdk_tickCountLastFrame = 0;
 			_irsdk_speedLastFrame = 0;
 			_irsdk_isOnTrackLastFrame = false;
@@ -201,7 +209,7 @@ namespace MarvinsAIRA
 				_irsdk_steeringWheelAngleDatum = _irsdk.Data.TelemetryDataProperties[ "SteeringWheelAngle" ];
 				_irsdk_steeringWheelAngleMaxDatum = _irsdk.Data.TelemetryDataProperties[ "SteeringWheelAngleMax" ];
 				_irsdk_displayUnitsDatum = _irsdk.Data.TelemetryDataProperties[ "DisplayUnits" ];
-
+				
 				_irsdk_telemetryDataInitialized = true;
 			}
 
@@ -226,7 +234,16 @@ namespace MarvinsAIRA
 			_irsdk_steeringWheelAngleMax = _irsdk.Data.GetFloat( _irsdk_steeringWheelAngleMaxDatum );
 			_irsdk_displayUnits = _irsdk.Data.GetInt( _irsdk_displayUnitsDatum );
 
-			var deltaTime = ( _irsdk_tickCount - _irsdk_tickCountLastFrame ) / (float) _irsdk_tickRate;
+			if (_irsdk_playerCarNumber == -1)
+				if (_irsdk.Data.SessionInfo != null)
+				{
+					int tmpidx = _irsdk.Data.SessionInfo.DriverInfo.DriverCarIdx;
+					var _driver = _irsdk.Data.SessionInfo.DriverInfo.Drivers.Find(x => x.CarIdx == tmpidx);
+					if (_driver != null)
+						_irsdk_playerCarNumber = Convert.ToInt32(_driver.CarNumberRaw);
+				}
+
+            var deltaTime = ( _irsdk_tickCount - _irsdk_tickCountLastFrame ) / (float) _irsdk_tickRate;
 
 			if ( deltaTime > 0 )
 			{
@@ -260,5 +277,133 @@ namespace MarvinsAIRA
 		{
 			WriteLine( $"[IRSDK] {message}" );
 		}
-	}
+
+
+        private Process? _iracingProcess;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out IntPtr lpdwProcessId);
+
+		public enum ChatBufferDataType
+		{
+			Overall = 0,
+			Detial = 1,
+			LfeStrenght = 2,
+			LfeEnabled = 3,
+			Clipping = 4,
+			Parked = 5,
+			Frequency = 6,
+			Info = 7
+		}
+
+		private struct ChatBuffer
+		{
+			public string Text;
+			public ChatBufferDataType Id;
+			public DateTime Time;
+			public static implicit operator String(ChatBuffer chatBuffer ) { return chatBuffer.Text; }
+
+		}
+
+        private List<ChatBuffer> _iracingChatBuffer = new List<ChatBuffer>();
+
+		public bool EnableIracingChat { get; set; } = true;
+
+        private string FilterIracingChat(string text)
+        {
+            text = text.Replace("{", " ");
+            text = text.Replace("}", " ");
+
+            text = text.Replace("(", "{(}");
+            text = text.Replace(")", "{)}");
+
+            text = text.Replace("+", "{+}");
+            text = text.Replace("^", "{^}");
+
+            text = text.Replace("%", "{%}");
+            text = text.Replace("~", "{~}");
+
+            text = text.Replace("]", "{]}");
+            text = text.Replace("[", "{[}");
+            return text;
+        }
+
+		public void WriteLineToIracingChat(string text, ChatBufferDataType id)
+        {
+			if (!EnableIracingChat)
+				return;
+
+			if (id != ChatBufferDataType.Info) //if info dont remove anything as info can be a varity of different things
+				_iracingChatBuffer.RemoveAll(x=>x.Id == id); //remove any old information as we dont want to spam chat
+
+			_iracingChatBuffer.Add(new ChatBuffer() { Text = FilterIracingChat(text), Id = id, Time = DateTime.Now }); //add the new information
+
+			CheckIracingChatThreadRuinng();
+        }
+
+
+      
+        
+
+        private bool _IracingChatThreadRuinng = false;
+
+        private void CheckIracingChatThreadRuinng()
+        {
+            if (_IracingChatThreadRuinng)
+                return;
+
+            _IracingChatThreadRuinng = true;
+            new Thread(() =>
+            {
+                while (_IracingChatThreadRuinng)
+				{
+					if (!_irsdk_connected)
+					{
+						_IracingChatThreadRuinng = false;
+						_iracingChatBuffer.Clear();
+						_iracingProcess = null;
+						Thread.Sleep(1000);
+						continue;
+					}
+					if (_iracingChatBuffer.Count > 0 && _irsdk_playerCarNumber != -1)
+					{
+						if  ((DateTime.Now - _iracingChatBuffer[0].Time).TotalSeconds > 60) //if more than 60 seconds the data is old and not usefull anymore
+						{
+							_iracingChatBuffer.RemoveAt(0);
+						}
+						IntPtr activeAppHandle = GetForegroundWindow();
+
+						IntPtr activeAppProcessId;
+						GetWindowThreadProcessId(activeAppHandle, out activeAppProcessId);
+
+						Process currentAppProcess = Process.GetProcessById((int)activeAppProcessId);
+						string currentAppName = currentAppProcess.ProcessName;
+
+						if (!currentAppName.Contains("iRacingSim"))
+						{
+							Thread.Sleep(1000);
+							continue;
+						}
+
+						_irsdk.ChatComand(IRacingSdkEnum.ChatCommandMode.BeginChat, 0);
+						Thread.Sleep(20);
+                        WinForms.SendKeys.SendWait($"/{_irsdk_playerCarNumber} {FilterIracingChat(_iracingChatBuffer[0])}");
+                        Thread.Sleep(10);
+                        WinForms.SendKeys.SendWait("{ENTER}");
+
+                        _iracingChatBuffer.RemoveAt(0);
+
+
+
+					}
+					Thread.Sleep(100);
+				}
+				_IracingChatThreadRuinng = false;
+
+            }).Start();
+        }
+    }
 }

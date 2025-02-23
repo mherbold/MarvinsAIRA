@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using YamlDotNet.Core.Tokens;
 
 namespace MarvinsAIRA
 {
@@ -309,8 +310,11 @@ namespace MarvinsAIRA
 									}
 									else if ( app.FFB_ClippedTimer > 0 )
 									{
-										ForceFeedback_StatusBarItem.Content = "FFB: CLIPPING!";
-										ForceFeedback_StatusBarItem.Foreground = Brushes.Red;
+										if (ForceFeedback_StatusBarItem.Content != "FFB: CLIPPING!")
+											app.WriteLineToIracingChat($"Clipping!%", App.ChatBufferDataType.Clipping);
+                                        ForceFeedback_StatusBarItem.Content = "FFB: CLIPPING!";
+                                        
+                                        ForceFeedback_StatusBarItem.Foreground = Brushes.Red;
 									}
 									else if ( app.Settings.ForceFeedbackEnabled )
 									{
