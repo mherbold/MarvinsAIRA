@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.35"
+        Title="Marvin's Awesome iRacing App v0.36"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -277,7 +277,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="LFEToFFB_CheckBox" VerticalAlignment="Center" IsChecked="{Binding LFEToFFBEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
+                        <CheckBox x:Name="LFEToFFB_CheckBox" VerticalAlignment="Center" IsChecked="{Binding LFEToFFBEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" Click="LFEToFFB_CheckBox_Click" />
                         <Label Content="LFE ⮕ FFB" VerticalAlignment="Center" Margin="10,0,0,0" />
                     </StackPanel>
                 </TabItem.Header>

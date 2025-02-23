@@ -1,7 +1,6 @@
 ﻿
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -12,14 +11,6 @@ namespace MarvinsAIRA
 {
 	public partial class App : Application
 	{
-		private delegate void MultimediaTimerCallback( UInt32 id, UInt32 msg, ref UInt32 userCtx, UInt32 rsv1, UInt32 rsv2 );
-
-		[DllImport( "winmm.dll", SetLastError = true, EntryPoint = "timeSetEvent" )]
-		private static extern UInt32 TimeSetEvent( UInt32 msDelay, UInt32 msResolution, MultimediaTimerCallback callback, ref UInt32 userCtx, UInt32 eventType );
-
-		[DllImport( "winmm.dll", SetLastError = true, EntryPoint = "timeKillEvent" )]
-		private static extern void TimeKillEvent( UInt32 uTimerId );
-
 		public const int DI_FFNOMINALMAX = 10000;
 		public const int DIEB_NOTRIGGER = -1;
 
@@ -248,7 +239,7 @@ namespace MarvinsAIRA
 			{
 				WriteLine( "...killing the multimedia timer event..." );
 
-				TimeKillEvent( _ffb_multimediaTimerId );
+				WinApi.TimeKillEvent( _ffb_multimediaTimerId );
 
 				_ffb_multimediaTimerId = 0;
 
@@ -372,7 +363,7 @@ namespace MarvinsAIRA
 				_ffb_sendStartTimer = 0;
 				_ffb_forceFeedbackExceptionThrown = false;
 
-				_ffb_multimediaTimerId = TimeSetEvent( periodInMilliseconds, 0, MultimediaTimerEventCallback, ref userCtx, EVENTTYPE_PERIODIC );
+				_ffb_multimediaTimerId = WinApi.TimeSetEvent( periodInMilliseconds, 0, MultimediaTimerEventCallback, ref userCtx, EVENTTYPE_PERIODIC );
 
 				WriteLine( "...the multimedia timer event has been started..." );
 				WriteLine( "...the force feedback device has been reinitialized." );
