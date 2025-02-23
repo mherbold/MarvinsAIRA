@@ -279,8 +279,6 @@ namespace MarvinsAIRA
 		}
 
 
-        private Process? _iracingProcess;
-
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
 
@@ -364,7 +362,6 @@ namespace MarvinsAIRA
 					{
 						_IracingChatThreadRuinng = false;
 						_iracingChatBuffer.Clear();
-						_iracingProcess = null;
 						Thread.Sleep(1000);
 						continue;
 					}
