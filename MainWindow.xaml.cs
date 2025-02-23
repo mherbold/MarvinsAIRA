@@ -177,7 +177,7 @@ namespace MarvinsAIRA
 
 			Marshal.StructureToPtr( devBroadcastDeviceInterface, devBroadcastDeviceInterfacePtr, true );
 
-			_win_deviceChangeNotificationHandle = DeviceChangeNotification.RegisterDeviceNotification( ( new WindowInteropHelper( this ) ).Handle, devBroadcastDeviceInterfacePtr, DeviceChangeNotification.DEVICE_NOTIFY_WINDOW_HANDLE );
+			_win_deviceChangeNotificationHandle = WinApi.RegisterDeviceNotification( ( new WindowInteropHelper( this ) ).Handle, devBroadcastDeviceInterfacePtr, DeviceChangeNotification.DEVICE_NOTIFY_WINDOW_HANDLE );
 
 			Marshal.PtrToStructure( devBroadcastDeviceInterfacePtr, devBroadcastDeviceInterface );
 			Marshal.FreeHGlobal( devBroadcastDeviceInterfacePtr );
@@ -185,7 +185,7 @@ namespace MarvinsAIRA
 
 		private void UnregisterDeviceChangeNotification()
 		{
-			_ = DeviceChangeNotification.UnregisterDeviceNotification( _win_deviceChangeNotificationHandle );
+			_ = WinApi.UnregisterDeviceNotification( _win_deviceChangeNotificationHandle );
 		}
 
 		protected IntPtr WndProc( IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled )
@@ -878,6 +878,16 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region LFE to FFB tab
+
+		private void LFEToFFB_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.InitializeLFE();
+			}
+		}
 
 		private void LFEDevice_ComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
 		{

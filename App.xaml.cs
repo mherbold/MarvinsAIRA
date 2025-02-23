@@ -18,10 +18,6 @@ namespace MarvinsAIRA
 
 		private static Mutex _mutex = new( true, "MarvinsAIRA Mutex" );
 
-		[DllImport( "user32.dll" )]
-		[return: MarshalAs( UnmanagedType.Bool )]
-		static extern bool SetForegroundWindow( IntPtr hWnd );
-
 		public App()
 		{
 			if ( !_mutex.WaitOne( TimeSpan.Zero, true ) )
@@ -33,7 +29,7 @@ namespace MarvinsAIRA
 				{
 					if ( runningProcess.MainWindowHandle != IntPtr.Zero )
 					{
-						SetForegroundWindow( runningProcess.MainWindowHandle );
+						WinApi.SetForegroundWindow( runningProcess.MainWindowHandle );
 					}
 				}
 
@@ -41,6 +37,8 @@ namespace MarvinsAIRA
 
 				return;
 			}
+
+			DisableThrottling();
 		}
 
 		public void Initialize( nint windowHandle )
@@ -88,6 +86,30 @@ namespace MarvinsAIRA
 				WriteLine( "Unexpected exception thrown:" );
 				WriteLine( exception.Message.Trim() );
 			}
+		}
+
+		private static int DisableThrottling()
+		{
+			var sz = Marshal.SizeOf( typeof( WinApi.PROCESS_POWER_THROTTLING_STATE ) );
+
+			var pwrInfo = new WinApi.PROCESS_POWER_THROTTLING_STATE()
+			{
+				Version = 1,
+				ControlMask = WinApi.PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION,
+				StateMask = 0
+			};
+
+			var pwrInfoPtr = Marshal.AllocHGlobal( sz );
+
+			Marshal.StructureToPtr( pwrInfo, pwrInfoPtr, false );
+
+			var processHandle = Process.GetCurrentProcess().Handle;
+
+			var result = WinApi.SetProcessInformation( processHandle, WinApi.ProcessPowerThrottling, pwrInfoPtr, (uint) sz );
+
+			Marshal.FreeHGlobal( pwrInfoPtr );
+
+			return result ? 0 : Marshal.GetLastWin32Error();
 		}
 	}
 }

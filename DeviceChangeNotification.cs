@@ -51,15 +51,5 @@ namespace MarvinsAIRA
 		}
 
 		#endregion
-
-		#region DLL Imports
-
-		[DllImport( "user32.dll", CharSet = CharSet.Auto )]
-		public static extern IntPtr RegisterDeviceNotification( IntPtr hRecipient, IntPtr NotificationFilter, uint Flags );
-
-		[DllImport( "user32.dll" )]
-		public static extern uint UnregisterDeviceNotification( IntPtr Handle );
-
-		#endregion
 	}
 }

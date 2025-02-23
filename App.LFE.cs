@@ -18,6 +18,16 @@ namespace MarvinsAIRA
 		private bool _lfe_keepThreadAlive = false;
 		private bool _lfe_threadRunning = false;
 
+		private const int LFE_360HZ_TO_8KHZ_SCALE = 22;
+		private const int LFE_FRAME_SIZE_IN_SAMPLES = FFB_SAMPLES_PER_FRAME * LFE_360HZ_TO_8KHZ_SCALE;
+		private const int LFE_BYTES_PER_SAMPLE = 2;
+		private const int LFE_FRAME_SIZE_IN_BYTES = LFE_FRAME_SIZE_IN_SAMPLES * LFE_BYTES_PER_SAMPLE;
+
+		private const int LFE_CAPTURE_BUFFER_FREQUENCY = 8000;
+		private const int LFE_CAPTURE_BUFFER_BITS_PER_SAMPLE = LFE_BYTES_PER_SAMPLE * 8;
+		private const int LFE_CAPTURE_BUFFER_SAMPLES = 360 * LFE_360HZ_TO_8KHZ_SCALE;
+		private const int LFE_CAPTURE_BUFFER_SIZE_IN_BYTES = LFE_CAPTURE_BUFFER_SAMPLES * LFE_BYTES_PER_SAMPLE;
+
 		public void InitializeLFE()
 		{
 			WriteLine( "" );
@@ -29,6 +39,8 @@ namespace MarvinsAIRA
 			}
 
 			WriteLine( "...enumerating recording devices (for LFE)..." );
+
+			DeviceInformation? selectedDeviceInformation = null;
 
 			var deviceInformationList = DirectSoundCapture.GetDevices();
 
@@ -45,42 +57,65 @@ namespace MarvinsAIRA
 					if ( deviceInformation.DriverGuid == Settings.SelectedLFEDeviceGuid )
 					{
 						WriteLine( "...we found the selected recording device..." );
-						WriteLine( "...we are good to go with this LFE device." );
 
-						_lfe_initialized = true;
-						_lfe_directSoundCapture = new DirectSoundCapture( deviceInformation.DriverGuid );
-
-						var captureBufferDescription = new CaptureBufferDescription
-						{
-							Format = new WaveFormat( 360, 16, 1 ),
-							BufferBytes = 24
-						};
-
-						_lfe_captureBuffer = new CaptureBuffer( _lfe_directSoundCapture, captureBufferDescription );
-
-						var notificationPositionArray = new NotificationPosition[]
-						{
-						new()
-						{
-							Offset = 0,
-							WaitHandle = _lfe_autoResetEvent
-						},
-						new()
-						{
-							Offset = 12,
-							WaitHandle = _lfe_autoResetEvent
-						}
-						};
-
-						_lfe_captureBuffer.SetNotificationPositions( notificationPositionArray );
-						_lfe_captureBuffer.Start( true );
-
-						Task.Run( LFEThread );
+						selectedDeviceInformation = deviceInformation;
 					}
 				}
 			}
 
 			Settings.UpdateLFEDeviceList( lfeDeviceList );
+
+			if ( Settings.LFEToFFBEnabled )
+			{
+				if ( selectedDeviceInformation != null )
+				{
+					_lfe_initialized = true;
+
+					WriteLine( "...initializing direct sound capture..." );
+
+					_lfe_directSoundCapture = new DirectSoundCapture( selectedDeviceInformation.DriverGuid );
+
+					WriteLine( "...direct sound capture initialized..." );
+					WriteLine( "...initializing capture buffer..." );
+
+					var captureBufferDescription = new CaptureBufferDescription
+					{
+						Format = new WaveFormat( LFE_CAPTURE_BUFFER_FREQUENCY, LFE_CAPTURE_BUFFER_BITS_PER_SAMPLE, 1 ),
+						BufferBytes = LFE_CAPTURE_BUFFER_SIZE_IN_BYTES
+					};
+
+					_lfe_captureBuffer = new CaptureBuffer( _lfe_directSoundCapture, captureBufferDescription );
+
+					WriteLine( "...capture buffer initialized..." );
+					WriteLine( "...initializing notification positions..." );
+
+					var notificationPositionArray = new NotificationPosition[ LFE_CAPTURE_BUFFER_SAMPLES / ( FFB_SAMPLES_PER_FRAME * LFE_360HZ_TO_8KHZ_SCALE ) ];
+
+					for ( var i = 0; i < notificationPositionArray.Length; i++ )
+					{
+						notificationPositionArray[ i ] = new()
+						{
+							Offset = i * LFE_FRAME_SIZE_IN_BYTES,
+							WaitHandle = _lfe_autoResetEvent
+						};
+					};
+
+					_lfe_captureBuffer.SetNotificationPositions( notificationPositionArray );
+
+					WriteLine( "...notification positions initialized..." );
+					WriteLine( "...starting capture..." );
+
+					_lfe_captureBuffer.Start( true );
+
+					WriteLine( "...capture started..." );
+
+					WriteLine( "...starting LFE thread..." );
+
+					Task.Run( LFEThread );
+
+					WriteLine( "...LFE thread started..." );
+				}
+			}
 		}
 
 		private void UninitializeLFE()
@@ -88,26 +123,33 @@ namespace MarvinsAIRA
 			WriteLine( "" );
 			WriteLine( "UninitializeLFE called." );
 
-			WriteLine( "...terminating LFE thread..." );
-
-			_lfe_keepThreadAlive = false;
-
-			_lfe_autoResetEvent.Set();
-
-			while ( _lfe_threadRunning )
+			if ( _lfe_threadRunning )
 			{
-				Thread.Sleep( 0 );
+				WriteLine( "...terminating LFE thread..." );
+
+				_lfe_keepThreadAlive = false;
+
+				_lfe_autoResetEvent.Set();
+
+				while ( _lfe_threadRunning )
+				{
+					Thread.Sleep( 0 );
+				}
+
+				WriteLine( "...LFE thread terminated..." );
 			}
 
-			WriteLine( "...LFE thread terminated..." );
-			WriteLine( "...uninitializing capture buffer..." );
+			if ( _lfe_captureBuffer != null )
+			{
+				WriteLine( "...uninitializing capture buffer..." );
 
-			_lfe_captureBuffer?.Stop();
-			_lfe_captureBuffer?.Dispose();
+				_lfe_captureBuffer.Stop();
+				_lfe_captureBuffer.Dispose();
 
-			_lfe_captureBuffer = null;
+				_lfe_captureBuffer = null;
 
-			WriteLine( "...capture buffer uninitialized." );
+				WriteLine( "...capture buffer uninitialized." );
+			}
 
 			for ( var i = 0; i < FFB_SAMPLES_PER_FRAME; i++ )
 			{
@@ -128,7 +170,7 @@ namespace MarvinsAIRA
 			_lfe_keepThreadAlive = true;
 			_lfe_threadRunning = true;
 
-			var byteSpan = new Span<byte>( new byte[ 12 ] );
+			var byteSpan = new Span<byte>( new byte[ LFE_FRAME_SIZE_IN_BYTES ] );
 
 			while ( _lfe_keepThreadAlive )
 			{
@@ -140,17 +182,32 @@ namespace MarvinsAIRA
 					{
 						var currentCapturePosition = _lfe_captureBuffer.CurrentCapturePosition;
 
-						var magnitudeIndex = ( currentCapturePosition >= 12 ) ? 0 : 1;
+						currentCapturePosition = ( currentCapturePosition / LFE_FRAME_SIZE_IN_BYTES ) * LFE_FRAME_SIZE_IN_BYTES;
 
-						var dataStream = _lfe_captureBuffer.Lock( magnitudeIndex * 12, 12, LockFlags.None, out var secondPart );
+						var magnitudeIndex = ( _lfe_magnitudeIndex + 1 ) % 2;
+						
+						var currentReadPosition = ( currentCapturePosition + LFE_CAPTURE_BUFFER_SIZE_IN_BYTES - LFE_FRAME_SIZE_IN_BYTES ) % LFE_CAPTURE_BUFFER_SIZE_IN_BYTES;
+
+						var dataStream = _lfe_captureBuffer.Lock( currentReadPosition, LFE_FRAME_SIZE_IN_BYTES, LockFlags.None, out var secondPart );
 
 						dataStream.Read( byteSpan );
 
 						var shortSpan = MemoryMarshal.Cast<byte, short>( byteSpan );
 
+						var sampleOffset = 0;
+
 						for ( var i = 0; i < FFB_SAMPLES_PER_FRAME; i++ )
 						{
-							_lfe_magnitude[ magnitudeIndex, i ] = shortSpan[ i ] / (float) short.MinValue;
+							var amplitudeSum = 0f;
+
+							for ( var j = 0; j < LFE_360HZ_TO_8KHZ_SCALE; j++ )
+							{
+								amplitudeSum += shortSpan[ sampleOffset ] / (float) short.MinValue;
+
+								sampleOffset++;
+							}
+
+							_lfe_magnitude[ magnitudeIndex, i ] = amplitudeSum / LFE_360HZ_TO_8KHZ_SCALE;
 						}
 
 						_lfe_captureBuffer.Unlock( dataStream, secondPart );
