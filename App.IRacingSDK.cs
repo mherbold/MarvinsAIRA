@@ -370,6 +370,7 @@ namespace MarvinsAIRA
 						if  ((DateTime.Now - _iracingChatBuffer[0].Time).TotalSeconds > 60) //if more than 60 seconds the data is old and not usefull anymore
 						{
 							_iracingChatBuffer.RemoveAt(0);
+							continue;
 						}
 						IntPtr activeAppHandle = GetForegroundWindow();
 
