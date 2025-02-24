@@ -224,7 +224,7 @@ namespace MarvinsAIRA
 					var app = (App) Application.Current;
 
 					app.WriteLine( $"OverallScale changed - before {_overallScale} now {value}" );
-
+					app.WriteLineToIracingChat($"Overall Scale: {value}", App.ChatBufferDataType.Overall);
 					_overallScale = value;
 
 					OnPropertyChanged();
@@ -273,8 +273,8 @@ namespace MarvinsAIRA
 					var app = (App) Application.Current;
 
 					app.WriteLine( $"DetailScale changed - before {_detailScale} now {value}" );
-
-					_detailScale = value;
+                    app.WriteLineToIracingChat($"DetailScale: {value}", App.ChatBufferDataType.Detial);
+                    _detailScale = value;
 
 					OnPropertyChanged();
 				}
@@ -398,8 +398,8 @@ namespace MarvinsAIRA
 					var app = (App) Application.Current;
 
 					app.WriteLine( $"ParkedScale changed - before {_parkedScale} now {value}" );
-
-					_parkedScale = value;
+                    app.WriteLineToIracingChat($"ParkedScale: {value}", App.ChatBufferDataType.Parked);
+                    _parkedScale = value;
 
 					OnPropertyChanged();
 				}
@@ -447,8 +447,8 @@ namespace MarvinsAIRA
 					var app = (App) Application.Current;
 
 					app.WriteLine( $"Frequency changed - before {_frequency} now {value}" );
-
-					_frequency = value;
+                    app.WriteLineToIracingChat($"Frequency: {value}", App.ChatBufferDataType.Frequency);
+                    _frequency = value;
 
 					OnPropertyChanged();
 				}
@@ -948,8 +948,13 @@ namespace MarvinsAIRA
 					var app = (App) Application.Current;
 
 					app.WriteLine( $"LFEToFFBEnabled changed - before {_lfeToFFBEnabled} now {value}" );
-
-					_lfeToFFBEnabled = value;
+					string output = "Enabled";
+                    if ( !value)
+                    {
+						output = "Disabled";
+                    }
+                    app.WriteLineToIracingChat($"LFE: {output}", App.ChatBufferDataType.LfeEnabled);
+                    _lfeToFFBEnabled = value;
 
 					OnPropertyChanged();
 				}
@@ -996,8 +1001,8 @@ namespace MarvinsAIRA
 					var app = (App) Application.Current;
 
 					app.WriteLine( $"LFEScale changed - before {_lfeScale} now {value}" );
-
-					_lfeScale = value;
+                    app.WriteLineToIracingChat($"LFE Strength: {value}", App.ChatBufferDataType.LfeStrenght);
+                    _lfeScale = value;
 
 					OnPropertyChanged();
 				}
