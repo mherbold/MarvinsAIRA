@@ -100,7 +100,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 1, 50 );
+				value = Math.Clamp( value, 2, 50 );
 
 				if ( _wheelMaxForce != value )
 				{
@@ -149,7 +149,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 1, 250 );
+				value = Math.Clamp( value, 2, 50 );
 
 				if ( _targetForce != value )
 				{
@@ -383,7 +383,7 @@ namespace MarvinsAIRA
 
 		/* Parked scale */
 
-		private int _parkedScale = 10;
+		private int _parkedScale = 25;
 
 		public int ParkedScale
 		{
@@ -408,7 +408,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _parkedScaleString = "10%";
+		private string _parkedScaleString = "25%";
 
 		public string ParkedScaleString
 		{
@@ -432,7 +432,7 @@ namespace MarvinsAIRA
 
 		/* Frequency */
 
-		private int _frequency = 14;
+		private int _frequency = 16;
 
 		public int Frequency
 		{
@@ -457,7 +457,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _frequencyString = "250 Hz";
+		private string _frequencyString = "500 Hz";
 
 		public string FrequencyString
 		{
@@ -696,6 +696,104 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Understeer effect tolernce */
+
+		private int _usTolerance = 20;
+
+		public int USTolerance
+		{
+			get => _usTolerance;
+
+			set
+			{
+				value = Math.Clamp( value, 1, 60 );
+
+				if ( _usTolerance != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USTolerance changed - before {_usTolerance} now {value}" );
+
+					_usTolerance = value;
+
+					OnPropertyChanged();
+				}
+
+				USToleranceString = $"!{_usTolerance}°/sec";
+			}
+		}
+
+		private string _usToleranceString = "20°/sec";
+
+		public string USToleranceString
+		{
+			get => _usToleranceString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _usToleranceString != value )
+					{
+						_usToleranceString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Understeer effect curve */
+
+		private float _usCurve = 1.5f;
+
+		public float USCurve
+		{
+			get => _usCurve;
+
+			set
+			{
+				value = Math.Clamp( value, 0.25f, 4f );
+
+				if ( _usCurve != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USCurve changed - before {_usCurve} now {value}" );
+
+					_usCurve = value;
+
+					OnPropertyChanged();
+				}
+
+				USCurveString = $"!{_usCurve:F2}";
+			}
+		}
+
+		private string _usCurveString = "1.5";
+
+		public string USCurveString
+		{
+			get => _usCurveString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _usCurveString != value )
+					{
+						_usCurveString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
 		/* Understeer effect button */
 
 		private MappedButtons _understeerEffectButtons = new();
@@ -910,6 +1008,104 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Oversteer effect tolernce */
+
+		private int _osTolerance = 20;
+
+		public int OSTolerance
+		{
+			get => _osTolerance;
+
+			set
+			{
+				value = Math.Clamp( value, 1, 60 );
+
+				if ( _osTolerance != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSTolerance changed - before {_osTolerance} now {value}" );
+
+					_osTolerance = value;
+
+					OnPropertyChanged();
+				}
+
+				OSToleranceString = $"!{_osTolerance}°/sec";
+			}
+		}
+
+		private string _osToleranceString = "20°/sec";
+
+		public string OSToleranceString
+		{
+			get => _osToleranceString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _osToleranceString != value )
+					{
+						_osToleranceString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Oversteer effect curve */
+
+		private float _osCurve = 1.5f;
+
+		public float OSCurve
+		{
+			get => _osCurve;
+
+			set
+			{
+				value = Math.Clamp( value, 0.25f, 4f );
+
+				if ( _osCurve != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSCurve changed - before {_osCurve} now {value}" );
+
+					_osCurve = value;
+
+					OnPropertyChanged();
+				}
+
+				OSCurveString = $"!{_osCurve:F2}";
+			}
+		}
+
+		private string _osCurveString = "1.5";
+
+		public string OSCurveString
+		{
+			get => _osCurveString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _osCurveString != value )
+					{
+						_osCurveString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
 		/* Oversteer effect button */
 
 		private MappedButtons _oversteerEffectButtons = new();
@@ -1077,17 +1273,24 @@ namespace MarvinsAIRA
 
 			public int OverallScale = 10;
 			public int DetailScale = 100;
+		}
 
-			public int USEffectStrength = 0;
+		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
+
+		/* Per-car steering effects settings */
+
+		public class SteeringEffectsSettings
+		{
+			public string CarName = "";
+
 			public int USYawRateFactorLeft = 0;
 			public int USYawRateFactorRight = 0;
 
-			public int OSEffectStrength = 0;
 			public int OSYawRateFactorLeft = 0;
 			public int OSYawRateFactorRight = 0;
 		}
 
-		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
+		public List<SteeringEffectsSettings> SteeringEffectsSettingsList { get; private set; } = [];
 
 		#endregion
 
@@ -1579,7 +1782,7 @@ namespace MarvinsAIRA
 
 		#region Settings tab - Save file tab
 
-		private bool _saveSettingsPerWheel = true;
+		private bool _saveSettingsPerWheel = false;
 
 		public bool SaveSettingsPerWheel
 		{
@@ -2232,6 +2435,31 @@ namespace MarvinsAIRA
 
 						OnPropertyChanged();
 					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Advanced
+
+		private bool _advanced = false;
+
+		public bool Advanced
+		{
+			get => _advanced;
+
+			set
+			{
+				if ( _advanced != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"Advanced changed - before {_advanced} now {value}" );
+
+					_advanced = value;
+
+					OnPropertyChanged();
 				}
 			}
 		}

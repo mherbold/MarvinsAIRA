@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.36"
+        Title="Marvin's Awesome iRacing App v0.38"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -20,820 +20,970 @@
     <Window.DataContext>
         <local:Settings />
     </Window.DataContext>
-    <StackPanel>
-        <TabControl>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="ForceFeedback_CheckBox" VerticalAlignment="Center" Click="ForceFeedback_CheckBox_Click" IsChecked="{Binding ForceFeedbackEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
-                        <Label Content="Force Feedback" VerticalAlignment="Center" Margin="10,0,0,0" />
-                    </StackPanel>
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
-                            <ComboBox x:Name="FFBDevice_ComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding FFBDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedFFBDeviceGuid}" SelectionChanged="FFBDevice_ComboBox_SelectionChanged" />
-                            <Button Grid.Column="2" x:Name="ForceFeedbackTest_Button" Margin="15,0,0,0" Content="TEST" Click="ForceFeedbackTest_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                            <Button Grid.Column="3" x:Name="Record_Button" Margin="10,0,0,0" Click="Record_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/record-button.png"/>
-                            </Button>
-                            <Button Grid.Column="4" x:Name="Play_Button" Click="Play_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/play-button.png"/>
-                            </Button>
-                            <Button Grid.Column="5" x:Name="ResetForceFeedback_Button" Click="ResetForceFeedback_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/r-button.png"/>
-                            </Button>
-                        </Grid>
-                        <Grid Margin="0,5,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
-                            <TextBox Grid.Column="1" x:Name="WheelMaxForce_TextBox" Text="{Binding WheelMaxForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="50" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding WheelMaxForce}" TickFrequency="2" />
-                            <Label Grid.Column="3" Content="Target" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="This your target overall scale force in Newton-meters." />
-                            <TextBox Grid.Column="4" Text="{Binding TargetForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                            <Slider Grid.Column="5" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="25" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding TargetForce}" TickFrequency="2" />
-                            <Button Grid.Column="6" x:Name="AutoOverallScale_Button" Margin="10,0,0,0" Click="AutoOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/a-button.png"/>
-                            </Button>
-                        </Grid>
-                        <Grid Margin="0,5,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
-                            <TextBox Grid.Column="1" Text="{Binding OverallScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OverallScale}" TickFrequency="5" />
-                            <Button Grid.Column="3" x:Name="DecreaseOverallScale_Button" Margin="10,0,0,0" Click="DecreaseOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/minus-button.png"/>
-                            </Button>
-                            <Button Grid.Column="4" x:Name="IncreaseOverallScale_Button" Click="IncreaseOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/plus-button.png"/>
-                            </Button>
-                        </Grid>
-                        <Grid Margin="0,5,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
-                            <TextBox Grid.Column="1" Text="{Binding DetailScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding DetailScale}" TickFrequency="10" />
-                            <Button Grid.Column="3" x:Name="DecreaseDetailScale_Button" Margin="10,0,0,0" Click="DecreaseDetailScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/minus-button.png"/>
-                            </Button>
-                            <Button Grid.Column="4" x:Name="IncreaseDetailScale_Button" Click="IncreaseDetailScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                <Image Source="/plus-button.png"/>
-                            </Button>
-                        </Grid>
-                        <Grid Margin="0,5,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Parked Scale" VerticalAlignment="Center" ToolTip="This is how much to scale forces while parked (or moving very slow) and 100% means no reduction in forces." />
-                            <TextBox Grid.Column="1" Text="{Binding ParkedScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding ParkedScale}" TickFrequency="2" />
-                        </Grid>
-                        <Grid Margin="0,5,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Frequency" VerticalAlignment="Center" Width="90" />
-                            <TextBox Grid.Column="1" Text="{Binding FrequencyString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
-                            <Slider x:Name="Frequency_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="16" SmallChange="1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding Frequency}" TickFrequency="1" ValueChanged="Frequency_Slider_ValueChanged" />
-                        </Grid>
-                    </StackPanel>
-                    <StackPanel Margin="0,10,0,0">
-                        <Border x:Name="PrettyGraph_Border" BorderThickness="1,1,1,1" BorderBrush="Gray" Visibility="Collapsed">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Image Grid.Row="0" x:Name="WheelForceFeedback_Image" Height="200" Width="978"/>
-                                <Label Grid.Row="0" x:Name="Recording_Label" Content="RECORDING" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FFF32828" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
-                                <Label Grid.Row="0" x:Name="Playback_Label" Content="PLAYBACK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FF67C50D" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
-                                <Label Grid.Row="0" x:Name="SimulatorNotRunning_Label" Content="The iRacing Simulator is Not Running" HorizontalAlignment="Center" VerticalAlignment="Center" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" />
-                            </Grid>
-                        </Border>
-                        <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
-                    </StackPanel>
-                </StackPanel>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox VerticalAlignment="Center" IsChecked="{Binding SteeringEffectsEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
-                        <Label Content="Steering Effects" VerticalAlignment="Center" Margin="10,0,0,0" />
-                    </StackPanel>
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <Label Content="You must calibrate the YR Factor L and YR Factor R sliders for your car, before you turn on the steering effects feature." FontWeight="DemiBold" HorizontalAlignment="Center" />
-                    <Label Content="Please see the website documentation for calibration instructions." FontWeight="DemiBold" HorizontalAlignment="Center" />
-                    <GroupBox Header="Understeer">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0">
+            <TabControl>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="ForceFeedback_CheckBox" VerticalAlignment="Center" Click="ForceFeedback_CheckBox_Click" IsChecked="{Binding ForceFeedbackEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
+                            <Label Content="Force Feedback" VerticalAlignment="Center" Margin="10,0,0,0" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <StackPanel Margin="10,10,10,10">
                         <StackPanel>
-                            <Grid Margin="0,10,0,0">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car understeers." />
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <RadioButton x:Name="USSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSineWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSineWaveBuzz}"/>
-                                    <RadioButton x:Name="USSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSawtoothWaveBuzz}"/>
-                                    <RadioButton x:Name="USConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USConstantForce_RadioButton_Click" IsChecked="{Binding USEffectStyleConstantForce}"/>
-                                    <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding USEffectStyleInvert}"/>
-                                </StackPanel>
+                                <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
+                                <ComboBox x:Name="FFBDevice_ComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding FFBDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedFFBDeviceGuid}" SelectionChanged="FFBDevice_ComboBox_SelectionChanged" />
+                                <Button Grid.Column="2" x:Name="ForceFeedbackTest_Button" Margin="15,0,10,0" Content="TEST" Click="ForceFeedbackTest_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                <Button Grid.Column="3" x:Name="Record_Button" Click="Record_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/record-button.png"/>
+                                </Button>
+                                <Button Grid.Column="4" x:Name="Play_Button" Click="Play_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/play-button.png"/>
+                                </Button>
+                                <Button Grid.Column="5" x:Name="ResetForceFeedback_Button" Click="ResetForceFeedback_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/r-button.png"/>
+                                </Button>
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the understeer effect will feel." />
-                                <TextBox Grid.Column="1" Text="{Binding USEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USEffectStrength}" TickFrequency="10" />
-                            </Grid>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning left." />
-                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorLeft}" TickFrequency="5" />
-                                    </Grid>
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning right." />
-                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding USYawRateFactorRight}" TickFrequency="5" />
-                                    </Grid>
-                                </StackPanel>
-                                <Button Grid.Column="1" x:Name="UndersteerEffect_Button" Margin="10,0,0,0" Click="UndersteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                    <Image Source="/u-button.png"/>
+                                <Label Grid.Column="0" Content="Wheel Max" VerticalAlignment="Center" ToolTip="This is the maximum force your wheel can produce in Newton-meters." />
+                                <TextBox Grid.Column="1" x:Name="WheelMaxForce_TextBox" Text="{Binding WheelMaxForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="50" SmallChange="0.1" LargeChange="1" Value="{Binding WheelMaxForce}" TickFrequency="2" />
+                                <Label Grid.Column="3" x:Name="Target_Label" Width="40" Margin="15,0,0,0" Content="Target" VerticalAlignment="Center" ToolTip="This your target overall scale force in Newton-meters." HorizontalContentAlignment="Right" />
+                                <TextBox Grid.Column="4" x:Name="Target_TextBox" Width="90" Text="{Binding TargetForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="5" x:Name="Target_Slider" Width="300" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="50" SmallChange="0.1" LargeChange="1" Value="{Binding TargetForce}" TickFrequency="2" />
+                                <Button Grid.Column="6" x:Name="AutoOverallScale_Button" Margin="10,0,0,0" Click="AutoOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/a-button.png"/>
                                 </Button>
-                            </Grid>
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Header="Oversteer">
-                        <StackPanel>
-                            <Grid Margin="0,10,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car oversteers." />
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <RadioButton x:Name="OSSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSineWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSineWaveBuzz}"/>
-                                    <RadioButton x:Name="OSSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSawtoothWaveBuzz}"/>
-                                    <RadioButton x:Name="OSConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSConstantForce_RadioButton_Click" IsChecked="{Binding OSEffectStyleConstantForce}"/>
-                                    <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding OSEffectStyleInvert}"/>
-                                </StackPanel>
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the oversteer effect will feel." />
-                                <TextBox Grid.Column="1" Text="{Binding OSEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OSEffectStrength}" TickFrequency="10" />
-                            </Grid>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning left." />
-                                        <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OSYawRateFactorLeft}" TickFrequency="5" />
-                                    </Grid>
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning right." />
-                                        <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding OSYawRateFactorRight}" TickFrequency="5" />
-                                    </Grid>
-                                </StackPanel>
-                                <Button Grid.Column="1" x:Name="OversteerEffect_Button" Margin="10,0,0,0" Click="OversteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                    <Image Source="/o-button.png"/>
+                                <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
+                                <TextBox Grid.Column="1" Text="{Binding OverallScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="250" SmallChange="1" LargeChange="10" Value="{Binding OverallScale}" TickFrequency="5" />
+                                <Button Grid.Column="3" x:Name="DecreaseOverallScale_Button" Margin="10,0,0,0" Click="DecreaseOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/minus-button.png"/>
+                                </Button>
+                                <Button Grid.Column="4" x:Name="IncreaseOverallScale_Button" Click="IncreaseOverallScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/plus-button.png"/>
                                 </Button>
                             </Grid>
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="LFEToFFB_CheckBox" VerticalAlignment="Center" IsChecked="{Binding LFEToFFBEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" Click="LFEToFFB_CheckBox_Click" />
-                        <Label Content="LFE ⮕ FFB" VerticalAlignment="Center" Margin="10,0,0,0" />
-                    </StackPanel>
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <Label Content="You must install and configure the VB-CABLE virtual audio device for this feature to work." FontWeight="DemiBold" HorizontalAlignment="Center" />
-                    <Label Content="Please see the website documentation for detailed instructions." FontWeight="DemiBold" HorizontalAlignment="Center" />
-                    <Grid Margin="0,10,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
-                        <ComboBox x:Name="LFEDevice_ComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding LFEDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedLFEDeviceGuid}" SelectionChanged="LFEDevice_ComboBox_SelectionChanged" />
-                    </Grid>
-                    <Grid Margin="0,5,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="Scale" VerticalAlignment="Center" ToolTip="This is how strongly to add the low frequency effect signal to the force feedback." />
-                        <TextBox Grid.Column="1" Text="{Binding LFEScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding LFEScale}" TickFrequency="5" />
-                        <Button Grid.Column="3" x:Name="DecreaseLEFScale_Button" Margin="10,0,0,0" Click="DecreaseLFEScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                            <Image Source="/minus-button.png"/>
-                        </Button>
-                        <Button Grid.Column="4" x:Name="IncreaseLFEScale_Button" Click="IncreaseLFEScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                            <Image Source="/plus-button.png"/>
-                        </Button>
-                    </Grid>
-                </StackPanel>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="WindSimulator_CheckBox" VerticalAlignment="Center" IsChecked="{Binding WindSimulatorEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
-                        <Label Content="Wind Simulator" VerticalAlignment="Center" Margin="10,0,0,0" />
-                    </StackPanel>
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <GroupBox Header="Car Speed">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBox Text="{Binding CarSpeed1}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="1">
-                                <TextBox Text="{Binding CarSpeed2}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBox Text="{Binding CarSpeed3}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="3">
-                                <TextBox Text="{Binding CarSpeed4}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="4">
-                                <TextBox Text="{Binding CarSpeed5}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="5">
-                                <TextBox Text="{Binding CarSpeed6}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="6">
-                                <TextBox Text="{Binding CarSpeed7}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="7">
-                                <TextBox Text="{Binding CarSpeed8}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
-                    <GroupBox Header="Wind Force">
-                        <Grid Margin="0,5,0,5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <Slider Value="{Binding WindForce1}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString1}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="1">
-                                <Slider Value="{Binding WindForce2}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString2}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <Slider Value="{Binding WindForce3}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString3}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="3">
-                                <Slider Value="{Binding WindForce4}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString4}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="4">
-                                <Slider Value="{Binding WindForce5}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString5}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="5">
-                                <Slider Value="{Binding WindForce6}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString6}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="6">
-                                <Slider Value="{Binding WindForce7}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString7}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="7">
-                                <Slider Value="{Binding WindForce8}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
-                                <TextBox Text="{Binding WindForceString8}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
-                    <GroupBox Header="Test">
-                        <Grid Margin="0,0,0,3">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <CheckBox x:Name="Test_1_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="1">
-                                <CheckBox x:Name="Test_2_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <CheckBox x:Name="Test_3_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="3">
-                                <CheckBox x:Name="Test_4_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="4">
-                                <CheckBox x:Name="Test_5_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="5">
-                                <CheckBox x:Name="Test_6_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="6">
-                                <CheckBox x:Name="Test_7_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="7">
-                                <CheckBox x:Name="Test_8_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
-                </StackPanel>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <Label Content="Skid Pad" VerticalAlignment="Center" />
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <Grid HorizontalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="128"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="128"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="128"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="128"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <Label Content="Steering Angle" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                            <Image x:Name="SteeringWheel_Image" Source="/steering-wheel.png" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" >
-                                <Image.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform/>
-                                        <SkewTransform/>
-                                        <RotateTransform Angle="0"/>
-                                        <TranslateTransform/>
-                                    </TransformGroup>
-                                </Image.RenderTransform>
-                            </Image>
-                            <Label x:Name="SteeringWheel_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <Label Content="Speed" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="Speed_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Yaw Rate" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="YawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Lateral Force" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="LateralForce_Label" Content="0 m⋅s²" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="4">
-                            <Label Content="Instant" HorizontalAlignment="Center" Margin="0,17,0,0"/>
-                            <Label Content="YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="YawRateFactorInstant_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Average" HorizontalAlignment="Center"/>
-                            <Label Content="YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="YawRateFactorAverage_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="6">
-                            <Label Content="Understeer" HorizontalAlignment="Center" Margin="0,36,0,5"/>
-                            <Label x:Name="UndersteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Oversteer" HorizontalAlignment="Center" Margin="0,17,0,5"/>
-                            <Label x:Name="OversteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <Label Content="Settings" VerticalAlignment="Center" />
-                </TabItem.Header>
-                <TabControl TabStripPlacement="Left">
-                    <TabItem Header="Window">
-                        <StackPanel Margin="10,10,10,10">
-                            <StackPanel>
-                                <CheckBox Content="Start Minimized" IsChecked="{Binding StartMinimized}"/>
-                                <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow}" Click="TopmostWindow_CheckBox_Click"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </TabItem>
-                    <TabItem Header="Save File">
-                        <StackPanel Margin="10,10,10,10">
-                            <CheckBox x:Name="SaveForEachWheel_CheckBox" Content="Save separate force feedback settings for each steering wheel device" IsChecked="{Binding SaveSettingsPerWheel}" Click="SaveForEachWheel_CheckBox_Click"/>
-                            <CheckBox x:Name="SaveForEachCar_CheckBox" Content="Save separate force feedback settings for each car" IsChecked="{Binding SaveSettingsPerCar}" Click="SaveForEachCar_CheckBox_Click"/>
-                            <CheckBox x:Name="SaveForEachTrack_CheckBox" Content="Save separate force feedback settings for each track" IsChecked="{Binding SaveSettingsPerTrack}" Click="SaveForEachTrack_CheckBox_Click"/>
-                            <CheckBox x:Name="SaveForEachTrackConfig_CheckBox" Content="Save separate force feedback settings for each track configuration" IsChecked="{Binding SaveSettingsPerTrackConfig}" Click="SaveForEachTrackConfig_CheckBox_Click"/>
-                        </StackPanel>
-                    </TabItem>
-                    <TabItem Header="Audio">
-                        <StackPanel Margin="10,10,10,10">
-                            <Grid>
+                            <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Column="0" Content="Enable Click Sound" IsChecked="{Binding EnableClickSound}" />
-                                <Slider x:Name="ClickSoundVolume_Slider" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="ClickSoundVolume_Slider_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding ClickSoundVolume}"/>
-                                <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center" ToolTip="This is how much detail you want to feel (tire chatter, bumps, etc) and 100% means as-is from iRacing." />
+                                <TextBox Grid.Column="1" Text="{Binding DetailScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="500" SmallChange="1" LargeChange="10" Value="{Binding DetailScale}" TickFrequency="10" />
+                                <Button Grid.Column="3" x:Name="DecreaseDetailScale_Button" Margin="10,0,0,0" Click="DecreaseDetailScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/minus-button.png"/>
+                                </Button>
+                                <Button Grid.Column="4" x:Name="IncreaseDetailScale_Button" Click="IncreaseDetailScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                    <Image Source="/plus-button.png"/>
+                                </Button>
                             </Grid>
-                        </StackPanel>
-                    </TabItem>
-                    <TabItem Header="Voice">
-                        <StackPanel Margin="10,10,10,10">
-                            <Grid>
+                            <Grid Margin="0,5,0,0" x:Name="ParkedScale_Grid">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="300"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Column="0" Content="Enable Voice" MinWidth="0" IsChecked="{Binding EnableSpeechSynthesizer}" />
-                                <Slider x:Name="SpeechSynthesizerVolume_Slider" Grid.Column="1"  Margin="10,0,0,0" ValueChanged="SpeechSynthesizerVolume_Slider_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="10" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume}"/>
-                                <ComboBox Grid.Column="3" x:Name="SelectedVoice_ComboBox" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding VoiceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedVoice}" SelectionChanged="SelectedVoice_ComboBox_SelectionChanged" />
+                                <Label Grid.Column="0" Content="Parked Scale" VerticalAlignment="Center" ToolTip="This is how much to scale forces while parked (or moving very slow) and 100% means no reduction in forces." />
+                                <TextBox Grid.Column="1" Text="{Binding ParkedScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding ParkedScale}" TickFrequency="2" />
                             </Grid>
-                            <ScrollViewer Margin="0,10,0,0" Height="300" Padding="0,0,25,0">
-                                <StackPanel>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Hello" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayHello}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Connected" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayConnected}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Disconnected" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayDisconnected}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Voice Volume" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayVoiceVolume}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Car Name" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayCarName}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Track Name" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayTrackName}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Track Config Name" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayTrackConfigName}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayOverallScale}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayDetailScale}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="LFE Scale" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayLFEScale}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Scales Reset" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayScalesReset}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Load Overall Scale" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayLoadOverallScale}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Load Detail Scale" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayLoadDetailScale}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Left Yaw Rate Factor" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayLeftYawRateFactor}" />
-                                    </Grid>
-                                    <Grid Margin="0,2,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Right Yaw Rate Factor" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Column="1" Text="{Binding SayRightYawRateFactor}" />
-                                    </Grid>
-                                </StackPanel>
-                            </ScrollViewer>
+                            <Grid Margin="0,5,0,0" x:Name="Frequency_Grid">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Frequency" VerticalAlignment="Center" Width="90" />
+                                <TextBox Grid.Column="1" Text="{Binding FrequencyString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
+                                <Slider x:Name="Frequency_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="16" SmallChange="1" LargeChange="1" Value="{Binding Frequency}" TickFrequency="1" ValueChanged="Frequency_Slider_ValueChanged" />
+                            </Grid>
                         </StackPanel>
-                    </TabItem>
-                    <TabItem Header="Devices">
-                        <StackPanel Margin="10,10,10,10">
+                        <StackPanel Margin="0,10,0,0" x:Name="PrettyGraph_StackPanel">
+                            <Border x:Name="PrettyGraph_Border" BorderThickness="1,1,1,1" BorderBrush="Gray" Visibility="Collapsed">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Image Grid.Row="0" x:Name="WheelForceFeedback_Image" Height="200" Width="978"/>
+                                    <Label Grid.Row="0" x:Name="Recording_Label" Content="RECORDING" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FFF32828" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                    <Label Grid.Row="0" x:Name="Playback_Label" Content="PLAYBACK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FF67C50D" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                    <Label Grid.Row="0" x:Name="SimulatorNotRunning_Label" Content="The iRacing Simulator is Not Running" HorizontalAlignment="Center" VerticalAlignment="Center" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" />
+                                    <Label Grid.Row="0" x:Name="Clipping_Label" Content="CLIPPING" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                </Grid>
+                            </Border>
+                            <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+                <TabItem x:Name="SteeringEffects_TabItem">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox VerticalAlignment="Center" IsChecked="{Binding SteeringEffectsEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
+                            <Label Content="Steering Effects" VerticalAlignment="Center" Margin="10,0,0,0" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <StackPanel Margin="10,10,10,10">
+                        <Label Content="You must calibrate the YR Factor L and YR Factor R sliders for your car, before you turn on the steering effects feature." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                        <Label Content="Please see the website documentation for calibration instructions." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                        <GroupBox Header="Understeer">
                             <StackPanel>
-                                <CheckBox Content="Reinitialize when devices are added or removed from the system" IsChecked="{Binding ReinitializeWhenDevicesChanged}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </TabItem>
-                    <TabItem Header="Wheel">
-                        <StackPanel Margin="10,10,10,10">
-                            <GroupBox Header="Calibration">
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car understeers." />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <RadioButton x:Name="USSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSineWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSineWaveBuzz}"/>
+                                        <RadioButton x:Name="USSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSawtoothWaveBuzz}"/>
+                                        <RadioButton x:Name="USConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USConstantForce_RadioButton_Click" IsChecked="{Binding USEffectStyleConstantForce}"/>
+                                        <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding USEffectStyleInvert}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the understeer effect will feel." />
+                                    <TextBox Grid.Column="1" Text="{Binding USEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                    <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding USEffectStrength}" TickFrequency="2" />
+                                </Grid>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="10"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="10"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="10"/>
-                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <Label Content="Axis" VerticalAlignment="Center" HorizontalAlignment="Center" />
                                         <Grid Margin="0,5,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="90"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <ComboBox Grid.Column="0" x:Name="WheelAxis_ComboBox" HorizontalAlignment="Stretch" ItemsSource="{Binding WheelAxisList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedWheelAxis}" />
-                                            <TextBox Grid.Column="1" Text="{Binding WheelAxisValueString, Mode=OneWay}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
+                                            <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning left." />
+                                            <TextBox Grid.Column="1" Text="{Binding USYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding USYawRateFactorLeft}" TickFrequency="2" />
+                                        </Grid>
+                                        <Grid Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="90"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning right." />
+                                            <TextBox Grid.Column="1" Text="{Binding USYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding USYawRateFactorRight}" TickFrequency="2" />
                                         </Grid>
                                     </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <Label Content="Full Left" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                        <Grid Margin="0,5,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" x:Name="SetWheelMinValue_Button" Content="SET" Click="SetWheelMinValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                                            <TextBox Grid.Column="1" Text="{Binding WheelMinValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
-                                        </Grid>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="4">
-                                        <Label Content="Center" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                        <Grid Margin="0,5,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" x:Name="SetWheelCenterValue_Button" Content="SET" Click="SetWheelCenterValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                                            <TextBox Grid.Column="1" Text="{Binding WheelCenterValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
-                                        </Grid>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="6">
-                                        <Label Content="Full Right" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                        <Grid Margin="0,5,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" x:Name="SetWheelMaxValue_Button" Content="SET" Click="SetWheelMaxValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
-                                            <TextBox Grid.Column="1" Text="{Binding WheelMaxValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
-                                        </Grid>
+                                    <Button Grid.Column="1" x:Name="UndersteerEffect_Button" Margin="10,0,0,0" Click="UndersteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                        <Image Source="/u-button.png"/>
+                                    </Button>
+                                </Grid>
+                                <Grid Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Tolerance" VerticalAlignment="Center" ToolTip="This is how early the understeer effect will trigger." />
+                                    <TextBox Grid.Column="1" Text="{Binding USToleranceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                    <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="60" SmallChange="1" LargeChange="10" Value="{Binding USTolerance}" TickFrequency="1" />
+                                </Grid>
+                                <Grid Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Curve" VerticalAlignment="Center" ToolTip="This is the curve to apply to this effect." />
+                                    <TextBox Grid.Column="1" Text="{Binding USCurveString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                    <Slider Grid.Column="2" x:Name="USCurve_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.25" Maximum="4.0" SmallChange="0.25" LargeChange="1" Value="{Binding USCurve}" TickFrequency="0.1" ValueChanged="USCurve_Slider_ValueChanged" />
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Oversteer">
+                            <StackPanel>
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Fx Style" VerticalAlignment="Center" ToolTip="This is the type of effect you want to feel when the car oversteers." />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <RadioButton x:Name="OSSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSineWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSineWaveBuzz}"/>
+                                        <RadioButton x:Name="OSSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSawtoothWaveBuzz}"/>
+                                        <RadioButton x:Name="OSConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSConstantForce_RadioButton_Click" IsChecked="{Binding OSEffectStyleConstantForce}"/>
+                                        <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding OSEffectStyleInvert}"/>
                                     </StackPanel>
                                 </Grid>
-                            </GroupBox>
-                            <GroupBox Header="Auto Centering">
-                                <StackPanel>
-                                    <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Enable Auto Centering" IsChecked="{Binding AutoCenterWheel}" />
-                                    <Grid Margin="0,15,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="160"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Strength" VerticalAlignment="Center" ToolTip="You want to lower this slider until your wheel stops oscillating." />
-                                        <TextBox Grid.Column="1" Text="{Binding AutoCenterWheelStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="1" LargeChange="10" TickPlacement="TopLeft" Value="{Binding AutoCenterWheelStrength}" TickFrequency="5" />
-                                        <Label Grid.Column="3" Content="Type" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="What type of wheel centering effect do you want to use?" />
-                                        <ComboBox Grid.Column="4" x:Name="AutoCenterWheelType_ComboBox" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding AutoCenterWheelTypeList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding AutoCenterWheelType}" />
-                                    </Grid>
+                                <Grid Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Fx Strength" VerticalAlignment="Center" ToolTip="This is how strongly the oversteer effect will feel." />
+                                    <TextBox Grid.Column="1" Text="{Binding OSEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                    <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding OSEffectStrength}" TickFrequency="2" />
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <Grid Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="90"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning left." />
+                                            <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding OSYawRateFactorLeft}" TickFrequency="2" />
+                                        </Grid>
+                                        <Grid Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="90"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning right." />
+                                            <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding OSYawRateFactorRight}" TickFrequency="2" />
+                                        </Grid>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" x:Name="OversteerEffect_Button" Margin="10,0,0,0" Click="OversteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                        <Image Source="/o-button.png"/>
+                                    </Button>
+                                </Grid>
+                                <Grid Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Tolerance" VerticalAlignment="Center" ToolTip="This is how early the oversteer effect will trigger." />
+                                    <TextBox Grid.Column="1" Text="{Binding OSToleranceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                    <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="60" SmallChange="1" LargeChange="10" Value="{Binding OSTolerance}" TickFrequency="1" />
+                                </Grid>
+                                <Grid Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="Curve" VerticalAlignment="Center" ToolTip="This is the curve to apply to this effect." />
+                                    <TextBox Grid.Column="1" Text="{Binding OSCurveString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                    <Slider Grid.Column="2" x:Name="OSCurve_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.25" Maximum="4.0" SmallChange="0.25" LargeChange="1" Value="{Binding OSCurve}" TickFrequency="0.1" ValueChanged="OSCurve_Slider_ValueChanged" />
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </TabItem>
+                <TabItem x:Name="LFEtoFFB_TabItem">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="LFEToFFB_CheckBox" VerticalAlignment="Center" IsChecked="{Binding LFEToFFBEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" Click="LFEToFFB_CheckBox_Click" />
+                            <Label Content="LFE ⮕ FFB" VerticalAlignment="Center" Margin="10,0,0,0" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <StackPanel Margin="10,10,10,10">
+                        <Label Content="You must install and configure the VB-CABLE virtual audio device for this feature to work." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                        <Label Content="Please see the website documentation for detailed instructions." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Device" VerticalAlignment="Center" />
+                            <ComboBox x:Name="LFEDevice_ComboBox" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding LFEDeviceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedLFEDeviceGuid}" SelectionChanged="LFEDevice_ComboBox_SelectionChanged" />
+                        </Grid>
+                        <Grid Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Scale" VerticalAlignment="Center" ToolTip="This is how strongly to add the low frequency effect signal to the force feedback." />
+                            <TextBox Grid.Column="1" Text="{Binding LFEScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding LFEScale}" TickFrequency="5" />
+                            <Button Grid.Column="3" x:Name="DecreaseLEFScale_Button" Margin="10,0,0,0" Click="DecreaseLFEScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                <Image Source="/minus-button.png"/>
+                            </Button>
+                            <Button Grid.Column="4" x:Name="IncreaseLFEScale_Button" Click="IncreaseLFEScale_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                <Image Source="/plus-button.png"/>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+                <TabItem x:Name="WindSimulator_TabItem">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="WindSimulator_CheckBox" VerticalAlignment="Center" IsChecked="{Binding WindSimulatorEnabled}" Content="" MinWidth="0" MinHeight="0" Padding="0,0,0,0" />
+                            <Label Content="Wind Simulator" VerticalAlignment="Center" Margin="10,0,0,0" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <StackPanel Margin="10,10,10,10">
+                        <GroupBox Header="Car Speed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBox Text="{Binding CarSpeed1}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
                                 </StackPanel>
-                            </GroupBox>
-                            <GroupBox Header="Recordings">
-                                <StackPanel>
-                                    <CheckBox x:Name="PlaybackSendToDevice_CheckBox" Content="Send Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}"/>
+                                <StackPanel Grid.Column="1">
+                                    <TextBox Text="{Binding CarSpeed2}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
                                 </StackPanel>
-                            </GroupBox>
-                            <GroupBox Header="Crash Protection">
-                                <StackPanel>
-                                    <CheckBox x:Name="EnableCrashProtection_CheckBox" Content="Enable Crash Protection" IsChecked="{Binding EnableCrashProtection}"/>
+                                <StackPanel Grid.Column="2">
+                                    <TextBox Text="{Binding CarSpeed3}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="3">
+                                    <TextBox Text="{Binding CarSpeed4}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <TextBox Text="{Binding CarSpeed5}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="5">
+                                    <TextBox Text="{Binding CarSpeed6}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="6">
+                                    <TextBox Text="{Binding CarSpeed7}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="7">
+                                    <TextBox Text="{Binding CarSpeed8}" Margin="10,0,10,0" TextAlignment="Center" Padding="0,0,0,0" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Wind Force">
+                            <Grid Margin="0,5,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Slider Value="{Binding WindForce1}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString1}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <Slider Value="{Binding WindForce2}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString2}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Slider Value="{Binding WindForce3}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString3}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="3">
+                                    <Slider Value="{Binding WindForce4}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString4}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <Slider Value="{Binding WindForce5}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString5}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="5">
+                                    <Slider Value="{Binding WindForce6}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString6}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="6">
+                                    <Slider Value="{Binding WindForce7}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString7}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="7">
+                                    <Slider Value="{Binding WindForce8}" Orientation="Vertical" Height="200" HorizontalAlignment="Center" TickPlacement="TopLeft" SmallChange="0.5" Maximum="100" TickFrequency="2" LargeChange="5"/>
+                                    <TextBox Text="{Binding WindForceString8}" Margin="10,10,10,0" TextAlignment="Center" IsReadOnly="True" FontWeight="Medium" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" VerticalContentAlignment="Center" IsTabStop="False" />
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Test">
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <CheckBox x:Name="Test_1_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <CheckBox x:Name="Test_2_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <CheckBox x:Name="Test_3_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="3">
+                                    <CheckBox x:Name="Test_4_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <CheckBox x:Name="Test_5_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="5">
+                                    <CheckBox x:Name="Test_6_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="6">
+                                    <CheckBox x:Name="Test_7_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="7">
+                                    <CheckBox x:Name="Test_8_CheckBox" HorizontalAlignment="Center" Click="Test_CheckBox_Click" Margin="0,0,-88,0" />
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+                    </StackPanel>
+                </TabItem>
+                <TabItem x:Name="SkidPad_TabItem">
+                    <TabItem.Header>
+                        <Label Content="Skid Pad" VerticalAlignment="Center" />
+                    </TabItem.Header>
+                    <StackPanel Margin="10,10,10,10">
+                        <Grid HorizontalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="128"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <Label Content="Steering Angle" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <Image x:Name="SteeringWheel_Image" Source="/steering-wheel.png" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" >
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform Angle="0"/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                                <Label x:Name="SteeringWheel_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <Label Content="Speed" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="Speed_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="X Velocity" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="XVelocity_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Y Velocity" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="YVelocity_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <Label Content="Yaw Rate" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="YawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="YawRateFactorInstant_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Avg. YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="YawRateFactorAverage_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="6">
+                                <Label Content="Expected Yaw Rate" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="OversteerExpectedYawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Difference" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="OversteerYawRateDifference_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Oversteer" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="OversteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="8">
+                                <Label Content="Expected Yaw Rate" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="UndersteerExpectedYawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Difference" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="UndersteerYawRateDifference_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                                <Label Content="Understeer" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <Label x:Name="UndersteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            </StackPanel>
+                        </Grid>
+                        <StackPanel>
+                            <Grid HorizontalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image x:Name="Oversteer_Image" Height="200" Width="400"/>
+                                            <Ellipse x:Name="Oversteer_Ellipse" Width="11" Height="11" Fill="Red" RenderTransformOrigin="0.5,0.5" >
+                                                <Ellipse.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform/>
+                                                        <SkewTransform/>
+                                                        <RotateTransform/>
+                                                        <TranslateTransform X="0" Y="0"/>
+                                                    </TransformGroup>
+                                                </Ellipse.RenderTransform>
+                                            </Ellipse>
+                                        </Grid>
+                                    </Border>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="90"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="G-Force" VerticalAlignment="Center" ToolTip="This is much G-Force your car needs to sustain before it is considered in a crash." />
-                                        <TextBox Grid.Column="1" Text="{Binding GForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" x:Name="GForce_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding GForce}" TickFrequency="0.5" />
-                                        <Label Grid.Column="3" Content="Duration" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="This is how long, in seconds, to reduce forces on your steering wheel." />
-                                        <TextBox Grid.Column="4" Text="{Binding CrashDurationString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="5" x:Name="CrashDuration_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" TickPlacement="TopLeft" Value="{Binding CrashDuration}" TickFrequency="0.5" />
+                                        <Label Grid.Column="0" x:Name="Oversteer_Tolerance_Label" Content="20°/sec Tolerance" Margin="5,0,0,0"/>
+                                        <Label Grid.Column="2" x:Name="Oversteer_YawRateFactor_Label" Content="YRF 45" Margin="0,0,10,0"/>
                                     </Grid>
                                 </StackPanel>
-                            </GroupBox>
+                                <Grid Grid.Column="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="40"/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Content="100%" HorizontalContentAlignment="Center"/>
+                                    <Label Grid.Row="2" Content="0%" HorizontalContentAlignment="Center"/>
+                                </Grid>
+                                <StackPanel Grid.Column="2">
+                                    <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image x:Name="Understeer_Image" Height="200" Width="400"/>
+                                            <Ellipse x:Name="Understeer_Ellipse" Width="11" Height="11" Fill="Red" RenderTransformOrigin="0.5,0.5" >
+                                                <Ellipse.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform/>
+                                                        <SkewTransform/>
+                                                        <RotateTransform/>
+                                                        <TranslateTransform X="0" Y="0"/>
+                                                    </TransformGroup>
+                                                </Ellipse.RenderTransform>
+                                            </Ellipse>
+                                        </Grid>
+                                    </Border>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" x:Name="Understeer_YawRateFactor_Label" Content="YRF 55" Margin="10,0,0,0"/>
+                                        <Label Grid.Column="2" x:Name="Understeer_Tolerance_Label" Content="20°/sec Tolerance" Margin="0,0,5,0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
-                    </TabItem>
-                </TabControl>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <Label Content="Console" VerticalAlignment="Center" />
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <TextBox x:Name="Console_TextBox" Text="" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="320" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-                </StackPanel>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <Label Content="Help" VerticalAlignment="Center" />
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <Button x:Name="SeeHelpDocumentation_Button" HorizontalAlignment="Stretch" Content="See the Documentation" Click="SeeHelpDocumentation_Button_Click" />
-                    <Button x:Name="GoToIracingForumThread_Button" HorizontalAlignment="Stretch" Content="Go to the iRacing Forum Thread" Click="GoToIRacingForumThread_Button_Click" Margin="0,5,0,0" />
-                    <Button x:Name="SendMarvinYourConsoleLog_Button" HorizontalAlignment="Stretch" Content="Send Marvin Your Console Log" Click="SendMarvinYourConsoleLog_Button_Click" Margin="0,5,0,0" />
-                    <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Justify" Margin="0,5,0,0">You must have an iRacing Forums account to use the above button. When you click on the button, your console log will be copied to the Windows clipboard. A browser window will be opened, taking you to the iRacing Forum New Message page. Type in a short description of the problem, and then hit Ctrl+V on a blank line, to paste your console log into the message.</TextBlock>
-                </StackPanel>
-            </TabItem>
-        </TabControl>
-        <StatusBar Padding="10,0,10,0">
-            <StatusBar.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="90" />
-                        </Grid.ColumnDefinitions>
-                    </Grid>
-                </ItemsPanelTemplate>
-            </StatusBar.ItemsPanel>
-            <StatusBarItem Grid.Column="0" x:Name="Connection_StatusBarItem" Content="iRacing Simulator is Not Running" Foreground="Gray"/>
-            <Separator Grid.Column="1" />
-            <StatusBarItem Grid.Column="2" x:Name="CurrentCar_StatusBarItem" Content="No Car" Foreground="Gray"/>
-            <Separator Grid.Column="3" />
-            <StatusBarItem Grid.Column="4" x:Name="CurrentTrack_StatusBarItem" Content="No Track" Foreground="Gray"/>
-            <Separator Grid.Column="5" />
-            <StatusBarItem Grid.Column="6" x:Name="ForceFeedback_StatusBarItem" Content="FFB" Foreground="Gray"/>
-            <Separator Grid.Column="7" />
-            <StatusBarItem Grid.Column="8" x:Name="Wind_StatusBarItem" Content="Wind" Foreground="Gray"/>
-        </StatusBar>
-    </StackPanel>
+                    </StackPanel>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <Label Content="Settings" VerticalAlignment="Center" />
+                    </TabItem.Header>
+                    <TabControl TabStripPlacement="Left">
+                        <TabItem Header="Window">
+                            <StackPanel Margin="10,10,10,10">
+                                <StackPanel>
+                                    <CheckBox Content="Start Minimized" IsChecked="{Binding StartMinimized}"/>
+                                    <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow}" Click="TopmostWindow_CheckBox_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </TabItem>
+                        <TabItem Header="Save File">
+                            <StackPanel Margin="10,10,10,10">
+                                <Label Content="These checkboxes apply only to the overall and detail scale sliders." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                                <CheckBox x:Name="SaveForEachWheel_CheckBox" Content="Save separate force feedback settings for each steering wheel device" IsChecked="{Binding SaveSettingsPerWheel}" Click="SaveForEachWheel_CheckBox_Click"/>
+                                <CheckBox x:Name="SaveForEachCar_CheckBox" Content="Save separate force feedback settings for each car" IsChecked="{Binding SaveSettingsPerCar}" Click="SaveForEachCar_CheckBox_Click"/>
+                                <CheckBox x:Name="SaveForEachTrack_CheckBox" Content="Save separate force feedback settings for each track" IsChecked="{Binding SaveSettingsPerTrack}" Click="SaveForEachTrack_CheckBox_Click"/>
+                                <CheckBox x:Name="SaveForEachTrackConfig_CheckBox" Content="Save separate force feedback settings for each track configuration" IsChecked="{Binding SaveSettingsPerTrackConfig}" Click="SaveForEachTrackConfig_CheckBox_Click"/>
+                            </StackPanel>
+                        </TabItem>
+                        <TabItem Header="Audio">
+                            <StackPanel Margin="10,10,10,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="0" Content="Enable Click Sound" IsChecked="{Binding EnableClickSound}" />
+                                    <Slider x:Name="ClickSoundVolume_Slider" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="ClickSoundVolume_Slider_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding ClickSoundVolume}"/>
+                                    <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </Grid>
+                            </StackPanel>
+                        </TabItem>
+                        <TabItem Header="Voice">
+                            <StackPanel Margin="10,10,10,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="300"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="0" Content="Enable Voice" MinWidth="0" IsChecked="{Binding EnableSpeechSynthesizer}" />
+                                    <Slider x:Name="SpeechSynthesizerVolume_Slider" Grid.Column="1"  Margin="10,0,0,0" ValueChanged="SpeechSynthesizerVolume_Slider_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="10" TickPlacement="Both" Value="{Binding SpeechSynthesizerVolume}"/>
+                                    <ComboBox Grid.Column="3" x:Name="SelectedVoice_ComboBox" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding VoiceList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedVoice}" SelectionChanged="SelectedVoice_ComboBox_SelectionChanged" />
+                                </Grid>
+                                <ScrollViewer Margin="0,10,0,0" Height="300" Padding="0,0,25,0">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Hello" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayHello}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Connected" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayConnected}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Disconnected" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayDisconnected}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Voice Volume" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayVoiceVolume}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Car Name" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayCarName}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Track Name" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayTrackName}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Track Config Name" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayTrackConfigName}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayOverallScale}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayDetailScale}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0" x:Name="SayLFEScale_Grid">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="LFE Scale" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayLFEScale}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Scales Reset" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayScalesReset}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Load Overall Scale" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayLoadOverallScale}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Load Detail Scale" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayLoadDetailScale}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0" x:Name="SayUSLeftYawRateFactor_Grid">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="US Left Yaw Rate Factor" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayUSLeftYawRateFactor}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0" x:Name="SayUSRightYawRateFactor_Grid">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="US Right Yaw Rate Factor" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayUSRightYawRateFactor}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0" x:Name="SayOSLeftYawRateFactor_Grid">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="OS Left Yaw Rate Factor" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayOSLeftYawRateFactor}" />
+                                        </Grid>
+                                        <Grid Margin="0,2,0,0" x:Name="SayOSRightYawRateFactor_Grid">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="OS Right Yaw Rate Factor" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding SayOSRightYawRateFactor}" />
+                                        </Grid>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </TabItem>
+                        <TabItem Header="Devices" x:Name="Settings_Devices_TabItem">
+                            <StackPanel Margin="10,10,10,10">
+                                <StackPanel>
+                                    <CheckBox Content="Reinitialize when devices are added or removed from the system" IsChecked="{Binding ReinitializeWhenDevicesChanged}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </TabItem>
+                        <TabItem Header="Wheel" x:Name="Settings_Wheel_TabItem">
+                            <StackPanel Margin="10,10,10,10">
+                                <GroupBox Header="Calibration">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <Label Content="Axis" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox Grid.Column="0" x:Name="WheelAxis_ComboBox" HorizontalAlignment="Stretch" ItemsSource="{Binding WheelAxisList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SelectedWheelAxis}" />
+                                                <TextBox Grid.Column="1" Text="{Binding WheelAxisValueString, Mode=OneWay}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
+                                            </Grid>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <Label Content="Full Left" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" x:Name="SetWheelMinValue_Button" Content="SET" Click="SetWheelMinValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                                <TextBox Grid.Column="1" Text="{Binding WheelMinValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
+                                            </Grid>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="4">
+                                            <Label Content="Center" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" x:Name="SetWheelCenterValue_Button" Content="SET" Click="SetWheelCenterValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                                <TextBox Grid.Column="1" Text="{Binding WheelCenterValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
+                                            </Grid>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="6">
+                                            <Label Content="Full Right" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" x:Name="SetWheelMaxValue_Button" Content="SET" Click="SetWheelMaxValue_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                                                <TextBox Grid.Column="1" Text="{Binding WheelMaxValueString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </GroupBox>
+                                <GroupBox Header="Auto Centering">
+                                    <StackPanel>
+                                        <CheckBox Grid.Column="0" x:Name="AutoCenterWheel_CheckBox" Content="Enable Auto Centering" IsChecked="{Binding AutoCenterWheel}" />
+                                        <Grid Margin="0,15,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="90"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="160"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Strength" VerticalAlignment="Center" ToolTip="You want to lower this slider until your wheel stops oscillating." />
+                                            <TextBox Grid.Column="1" Text="{Binding AutoCenterWheelStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                            <Slider Grid.Column="2" x:Name="AutoCenterWheelStrength_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding AutoCenterWheelStrength}" TickFrequency="5" />
+                                            <Label Grid.Column="3" Content="Type" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="What type of wheel centering effect do you want to use?" />
+                                            <ComboBox Grid.Column="4" x:Name="AutoCenterWheelType_ComboBox" Margin="10,0,0,0" HorizontalAlignment="Stretch" ItemsSource="{Binding AutoCenterWheelTypeList, Mode=OneWay}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding AutoCenterWheelType}" />
+                                        </Grid>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="Recordings">
+                                    <StackPanel>
+                                        <CheckBox x:Name="PlaybackSendToDevice_CheckBox" Content="Send Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}"/>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="Crash Protection">
+                                    <StackPanel>
+                                        <CheckBox x:Name="EnableCrashProtection_CheckBox" Content="Enable Crash Protection" IsChecked="{Binding EnableCrashProtection}"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="90"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="90"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="G-Force" VerticalAlignment="Center" ToolTip="This is much G-Force your car needs to sustain before it is considered in a crash." />
+                                            <TextBox Grid.Column="1" Text="{Binding GForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                            <Slider Grid.Column="2" x:Name="GForce_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" Value="{Binding GForce}" TickFrequency="0.5" />
+                                            <Label Grid.Column="3" Content="Duration" Margin="20,0,0,0" VerticalAlignment="Center" ToolTip="This is how long, in seconds, to reduce forces on your steering wheel." />
+                                            <TextBox Grid.Column="4" Text="{Binding CrashDurationString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                            <Slider Grid.Column="5" x:Name="CrashDuration_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" Value="{Binding CrashDuration}" TickFrequency="0.5" />
+                                        </Grid>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </TabItem>
+                    </TabControl>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <Label Content="Console" VerticalAlignment="Center" />
+                    </TabItem.Header>
+                    <StackPanel Margin="10,10,10,10">
+                        <TextBox x:Name="Console_TextBox" Text="" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="320" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <Label Content="Help" VerticalAlignment="Center" />
+                    </TabItem.Header>
+                    <StackPanel Margin="10,10,10,10">
+                        <Button x:Name="SeeHelpDocumentation_Button" HorizontalAlignment="Stretch" Content="See the Documentation" Click="SeeHelpDocumentation_Button_Click" />
+                        <Button x:Name="GoToIracingForumThread_Button" HorizontalAlignment="Stretch" Content="Go to the iRacing Forum Thread" Click="GoToIRacingForumThread_Button_Click" Margin="0,5,0,0" />
+                        <Button x:Name="SendMarvinYourConsoleLog_Button" HorizontalAlignment="Stretch" Content="Send Marvin Your Console Log" Click="SendMarvinYourConsoleLog_Button_Click" Margin="0,5,0,0" />
+                        <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Justify" Margin="0,5,0,0">You must have an iRacing Forums account to use the above button. When you click on the button, your console log will be copied to the Windows clipboard. A browser window will be opened, taking you to the iRacing Forum New Message page. Type in a short description of the problem, and then hit Ctrl+V on a blank line, to paste your console log into the message.</TextBlock>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+            <StatusBar Padding="10,0,10,0">
+                <StatusBar.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="90" />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </StatusBar.ItemsPanel>
+                <StatusBarItem Grid.Column="0" x:Name="Connection_StatusBarItem" Content="iRacing Simulator is Not Running" Foreground="Gray"/>
+                <Separator Grid.Column="1" />
+                <StatusBarItem Grid.Column="2" x:Name="CurrentCar_StatusBarItem" Content="No Car" Foreground="Gray"/>
+                <Separator Grid.Column="3" />
+                <StatusBarItem Grid.Column="4" x:Name="CurrentTrack_StatusBarItem" Content="No Track" Foreground="Gray"/>
+            </StatusBar>
+        </StackPanel>
+        <StackPanel Grid.Column="0">
+            <ui:ToggleSwitch x:Name="Advanced_ToggleSwitch" OffContent="Advanced" OnContent="Advanced" HorizontalAlignment="Right" FontSize="14" Width="130" Margin="0,9,0,0" Toggled="Advanced_ToggleSwitch_Toggled" IsOn="{Binding Advanced}" />
+        </StackPanel>
+    </Grid>
 </Window>

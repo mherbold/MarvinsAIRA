@@ -51,8 +51,6 @@ namespace MarvinsAIRA
 					WriteLine( $"You are driving a {carScreenName}." );
 
 					Say( Settings.SayCarName, carScreenName );
-
-					_car_carChanged = true;
 				}
 
 				_car_currentCarScreenName = carScreenName;
@@ -75,7 +73,14 @@ namespace MarvinsAIRA
 
 		public void UpdateCarSaveName()
 		{
+			var oldCarSaveName = _car_carSaveName;
+
 			_car_carSaveName = Settings.SaveSettingsPerCar ? _car_currentCarScreenName : ALL_CARS_SAVE_NAME;
+
+			if ( _car_carSaveName != oldCarSaveName )
+			{
+				_car_carChanged = true;
+			}
 		}
 	}
 }

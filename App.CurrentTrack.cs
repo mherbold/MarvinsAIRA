@@ -54,9 +54,6 @@ namespace MarvinsAIRA
 
 					Say( Settings.SayTrackName, trackDisplayName );
 					Say( Settings.SayTrackConfigName, trackConfigName );
-
-					_track_trackChanged = ( _track_currentTrackDisplayName != trackDisplayName );
-					_track_trackConfigChanged = ( _track_currentTrackConfigName != trackConfigName );
 				}
 
 				_track_currentTrackDisplayName = trackDisplayName;
@@ -74,19 +71,34 @@ namespace MarvinsAIRA
 					if ( mainWindow != null )
 					{
 						mainWindow.CurrentTrack_StatusBarItem.Content = $"{_track_currentTrackDisplayName} ({_track_currentTrackConfigName})";
-						mainWindow.CurrentTrack_StatusBarItem.Foreground = ( _track_currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;					}
+						mainWindow.CurrentTrack_StatusBarItem.Foreground = ( _track_currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;
+					}
 				} );
 			}
 		}
 
 		public void UpdateTrackSaveName()
 		{
+			var oldTrackSaveName = _track_trackSaveName;
+
 			_track_trackSaveName = Settings.SaveSettingsPerTrack ? _track_currentTrackDisplayName : ALL_TRACKS_SAVE_NAME;
+
+			if ( _track_trackSaveName != oldTrackSaveName )
+			{
+				_track_trackChanged = true;
+			}
 		}
 
 		public void UpdateTrackConfigSaveName()
 		{
+			var oldTrackConfigSaveName = _track_trackConfigSaveName;
+
 			_track_trackConfigSaveName = Settings.SaveSettingsPerTrackConfig ? _track_currentTrackConfigName : ALL_TRACK_CONFIGS_SAVE_NAME;
+
+			if ( _track_trackConfigSaveName != oldTrackConfigSaveName )
+			{
+				_track_trackConfigChanged = true;
+			}
 		}
 	}
 }

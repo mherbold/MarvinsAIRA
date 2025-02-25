@@ -57,7 +57,7 @@ namespace MarvinsAIRA
 				{
 					_settings_serializationTimer = 0;
 
-					WriteLine( $"Saving configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}]" );
+					// update per wheel/car/track/track configuration force feedback settings
 
 					var forceFeedbackSettingsFound = false;
 
@@ -67,14 +67,6 @@ namespace MarvinsAIRA
 						{
 							forceFeedbackSettings.OverallScale = Settings.OverallScale;
 							forceFeedbackSettings.DetailScale = Settings.DetailScale;
-
-							forceFeedbackSettings.USEffectStrength = Settings.USEffectStrength;
-							forceFeedbackSettings.USYawRateFactorLeft = Settings.USYawRateFactorLeft;
-							forceFeedbackSettings.USYawRateFactorRight = Settings.USYawRateFactorRight;
-
-							forceFeedbackSettings.OSEffectStrength = Settings.OSEffectStrength;
-							forceFeedbackSettings.OSYawRateFactorLeft = Settings.OSYawRateFactorLeft;
-							forceFeedbackSettings.OSYawRateFactorRight = Settings.OSYawRateFactorRight;
 
 							forceFeedbackSettingsFound = true;
 
@@ -93,22 +85,54 @@ namespace MarvinsAIRA
 
 							OverallScale = Settings.OverallScale,
 							DetailScale = Settings.DetailScale,
-
-							USEffectStrength = Settings.USEffectStrength,
-							USYawRateFactorLeft = Settings.USYawRateFactorLeft,
-							USYawRateFactorRight = Settings.USYawRateFactorRight,
-
-							OSEffectStrength = Settings.OSEffectStrength,
-							OSYawRateFactorLeft = Settings.OSYawRateFactorLeft,
-							OSYawRateFactorRight = Settings.OSYawRateFactorRight
 						};
 
 						Settings.ForceFeedbackSettingsList.Add( forceFeedbackSettings );
 					}
 
+					// update per-car steering effects settings
+
+					var steeringEffectsSettingsFound = false;
+
+					foreach ( var steeringEffectsSettings in Settings.SteeringEffectsSettingsList )
+					{
+						if ( steeringEffectsSettings.CarName == _car_carSaveName )
+						{
+							steeringEffectsSettings.USYawRateFactorLeft = Settings.USYawRateFactorLeft;
+							steeringEffectsSettings.USYawRateFactorRight = Settings.USYawRateFactorRight;
+
+							steeringEffectsSettings.OSYawRateFactorLeft = Settings.OSYawRateFactorLeft;
+							steeringEffectsSettings.OSYawRateFactorRight = Settings.OSYawRateFactorRight;
+
+							steeringEffectsSettingsFound = true;
+
+							break;
+						}
+					}
+
+					if ( !steeringEffectsSettingsFound )
+					{
+						var steeringEffectsSettings = new SteeringEffectsSettings
+						{
+							CarName = _car_carSaveName,
+
+							USYawRateFactorLeft = Settings.USYawRateFactorLeft,
+							USYawRateFactorRight = Settings.USYawRateFactorRight,
+
+							OSYawRateFactorLeft = Settings.OSYawRateFactorLeft,
+							OSYawRateFactorRight = Settings.OSYawRateFactorRight,
+						};
+
+						Settings.SteeringEffectsSettingsList.Add( steeringEffectsSettings );
+					}
+
+					// save the configuration file
+
 					var filePath = Path.Combine( DocumentsFolder, "Settings.xml" );
 
 					Serializer.Save( filePath, _settings );
+
+					WriteLine( "Settings.xml file updated." );
 				}
 			}
 		}

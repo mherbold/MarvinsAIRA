@@ -1,4 +1,5 @@
 ﻿
+using ModernWpf.Controls;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -9,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace MarvinsAIRA
 {
@@ -16,11 +18,23 @@ namespace MarvinsAIRA
 	{
 		#region Properties
 
+		private const int IMAGE_WIDTH = 400;
+		private const int IMAGE_HEIGHT = 200;
+		private const int IMAGE_BYTES_PER_PIXEL = 4;
+		private const int IMAGE_DPI = 96;
+		private const int IMAGE_STRIDE = IMAGE_WIDTH * IMAGE_BYTES_PER_PIXEL;
+
 		private bool _win_initialized = false;
 		private bool _win_updateLoopRunning = false;
 		private bool _win_pauseButtons = false;
 
 		private nint _win_windowHandle = 0;
+
+		private readonly WriteableBitmap _win_oversteerBitmap = new( IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_DPI, IMAGE_DPI, PixelFormats.Bgra32, null );
+		private readonly byte[] _win_oversteerPixels = new byte[ IMAGE_STRIDE * IMAGE_HEIGHT ];
+
+		private readonly WriteableBitmap _win_understeerBitmap = new( IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_DPI, IMAGE_DPI, PixelFormats.Bgra32, null );
+		private readonly byte[] _win_understeerPixels = new byte[ IMAGE_STRIDE * IMAGE_HEIGHT ];
 
 		private readonly System.Timers.Timer _win_timer = new( 100 );
 
@@ -100,6 +114,11 @@ namespace MarvinsAIRA
 
 				app.Initialize( _win_windowHandle );
 
+				Oversteer_Image.Source = _win_oversteerBitmap;
+				Understeer_Image.Source = _win_understeerBitmap;
+
+				UpdateImages();
+
 				app.WriteLine( "" );
 				app.WriteLine( "Starting the update loop..." );
 
@@ -143,6 +162,8 @@ namespace MarvinsAIRA
 
 					WindowState = WindowState.Minimized;
 				}
+
+				Advanced_ToggleSwitch_Toggled( Advanced_ToggleSwitch, new RoutedEventArgs() );
 
 				_win_initialized = true;
 			}
@@ -300,29 +321,6 @@ namespace MarvinsAIRA
 
 								Dispatcher.BeginInvoke( () =>
 								{
-									// Force feedback status
-
-									if ( !app.FFB_Initialized )
-									{
-										ForceFeedback_StatusBarItem.Content = "FFB: Fault";
-										ForceFeedback_StatusBarItem.Foreground = Brushes.Red;
-									}
-									else if ( app.FFB_ClippedTimer > 0 )
-									{
-										ForceFeedback_StatusBarItem.Content = "FFB: CLIPPING!";
-										ForceFeedback_StatusBarItem.Foreground = Brushes.Red;
-									}
-									else if ( app.Settings.ForceFeedbackEnabled )
-									{
-										ForceFeedback_StatusBarItem.Content = $"FFB: {( app.FFB_LastMagnitudeSentToWheel * 100f / App.DI_FFNOMINALMAX ):F0}%";
-										ForceFeedback_StatusBarItem.Foreground = Brushes.ForestGreen;
-									}
-									else
-									{
-										ForceFeedback_StatusBarItem.Content = $"FFB: Off";
-										ForceFeedback_StatusBarItem.Foreground = Brushes.Gray;
-									}
-
 									// Pretty graph
 
 									if ( app._ffb_drawPrettyGraph )
@@ -358,6 +356,17 @@ namespace MarvinsAIRA
 										Playback_Label.Visibility = Visibility.Hidden;
 									}
 
+									// Clipping status
+
+									if ( app.FFB_ClippedTimer > 0 )
+									{
+										Clipping_Label.Visibility = Visibility.Visible;
+									}
+									else
+									{
+										Clipping_Label.Visibility = Visibility.Hidden;
+									}
+
 									// Steering wheel angle
 
 									var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / Math.PI;
@@ -382,6 +391,48 @@ namespace MarvinsAIRA
 										Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_KPH:F0} KPH";
 									}
 
+									// X Velocity
+
+									if ( app._irsdk_displayUnits == 0 )
+									{
+										XVelocity_Label.Content = $"{app._irsdk_velocityX * App.MPS_TO_MPH:F0} MPH";
+
+										if ( (string) XVelocity_Label.Content == "-0 MPH" )
+										{
+											XVelocity_Label.Content = "0 MPH";
+										}
+									}
+									else
+									{
+										XVelocity_Label.Content = $"{app._irsdk_velocityX * App.MPS_TO_KPH:F0} KPH";
+
+										if ( (string) XVelocity_Label.Content == "-0 KPH" )
+										{
+											XVelocity_Label.Content = "0 KPH";
+										}
+									}
+
+									// Y Velocity
+
+									if ( app._irsdk_displayUnits == 0 )
+									{
+										YVelocity_Label.Content = $"{app._irsdk_velocityY * App.MPS_TO_MPH:F0} MPH";
+
+										if ( (string) YVelocity_Label.Content == "-0 MPH" )
+										{
+											YVelocity_Label.Content = "0 MPH";
+										}
+									}
+									else
+									{
+										YVelocity_Label.Content = $"{app._irsdk_velocityY * App.MPS_TO_KPH:F0} KPH";
+
+										if ( (string) YVelocity_Label.Content == "-0 KPH" )
+										{
+											YVelocity_Label.Content = "0 KPH";
+										}
+									}
+
 									// Yaw rate
 
 									var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / Math.PI;
@@ -393,20 +444,11 @@ namespace MarvinsAIRA
 										YawRate_Label.Content = $"0°/sec";
 									}
 
-									// Lateral force
-
-									LateralForce_Label.Content = $"{app._irsdk_latAccel:F0} m⋅s²";
-
-									if ( (string) LateralForce_Label.Content == "-0 m⋅s²" )
-									{
-										LateralForce_Label.Content = $"0 m⋅s²";
-									}
-
 									// Yaw rate factor (instant)
 
 									YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F2}";
 
-									if ( (string) YawRateFactorInstant_Label.Content  == "-0.00" )
+									if ( (string) YawRateFactorInstant_Label.Content == "-0.00" )
 									{
 										YawRateFactorInstant_Label.Content = "0.00";
 									}
@@ -420,31 +462,93 @@ namespace MarvinsAIRA
 										YawRateFactorAverage_Label.Content = "0.00";
 									}
 
-									// Understeer amount
+									// Oversteer expected yaw rate
 
-									UndersteerAmount_Label.Content = $"{app.FFB_UndersteerAmount * 100f:F0}%";
+									var oversteerExpectedYawRateInDegreesPerSecond = app.FFB_OversteerExpectedYawRate * 180f / Math.PI;
+
+									OversteerExpectedYawRate_Label.Content = $"{oversteerExpectedYawRateInDegreesPerSecond:F0}°/sec";
+
+									if ( (string) OversteerExpectedYawRate_Label.Content == "-0°/sec" )
+									{
+										OversteerExpectedYawRate_Label.Content = $"0°/sec";
+									}
+
+									// Oversteer yaw rate difference
+
+									var oversteerYawRateDifferenceInDegreesPerSecond = app.FFB_OversteerYawRateDifference * 180f / Math.PI;
+
+									OversteerYawRateDifference_Label.Content = $"{oversteerYawRateDifferenceInDegreesPerSecond:F0}°/sec";
+
+									if ( (string) OversteerYawRateDifference_Label.Content == "-0°/sec" )
+									{
+										OversteerYawRateDifference_Label.Content = $"0°/sec";
+									}
 
 									// Oversteer amount
 
 									OversteerAmount_Label.Content = $"{app.FFB_OversteerAmount * 100f:F0}%";
 
-									// Wind status
+									// Understeer expected yaw rate
 
-									if ( !app.Wind_Initialized )
+									var understeerExpectedYawRateInDegreesPerSecond = app.FFB_UndersteerExpectedYawRate * 180f / Math.PI;
+
+									UndersteerExpectedYawRate_Label.Content = $"{understeerExpectedYawRateInDegreesPerSecond:F0}°/sec";
+
+									if ( (string) UndersteerExpectedYawRate_Label.Content == "-0°/sec" )
 									{
-										Wind_StatusBarItem.Content = "Wind: Fault";
-										Wind_StatusBarItem.Foreground = Brushes.Red;
+										UndersteerExpectedYawRate_Label.Content = $"0°/sec";
 									}
-									else if ( app.Settings.WindSimulatorEnabled )
+
+									// Understeer yaw rate difference
+
+									var understeerYawRateDifferenceInDegreesPerSecond = app.FFB_UndersteerYawRateDifference * 180f / Math.PI;
+
+									UndersteerYawRateDifference_Label.Content = $"{understeerYawRateDifferenceInDegreesPerSecond:F0}°/sec";
+
+									if ( (string) UndersteerYawRateDifference_Label.Content == "-0°/sec" )
 									{
-										Wind_StatusBarItem.Content = $"Wind: {app.Wind_CurrentMagnitude:F0}%";
-										Wind_StatusBarItem.Foreground = Brushes.ForestGreen;
+										UndersteerYawRateDifference_Label.Content = $"0°/sec";
+									}
+
+									// Understeer amount
+
+									UndersteerAmount_Label.Content = $"{app.FFB_UndersteerAmount * 100f:F0}%";
+
+									// Oversteer graph
+
+									var x = Math.Clamp( oversteerYawRateDifferenceInDegreesPerSecond / app.Settings.OSTolerance, 0, 1 ) * IMAGE_WIDTH;
+									var y = app.FFB_OversteerAmount * IMAGE_HEIGHT;
+
+									Oversteer_Ellipse.RenderTransform = new TranslateTransform( IMAGE_WIDTH / 2 - x, IMAGE_HEIGHT / 2 - y );
+
+									if ( app._irsdk_steeringWheelAngle >= 0 )
+									{
+										Oversteer_YawRateFactor_Label.Content = $"YRF {app.Settings.OSYawRateFactorLeft}";
 									}
 									else
 									{
-										Wind_StatusBarItem.Content = $"Wind: Off";
-										Wind_StatusBarItem.Foreground = Brushes.Gray;
+										Oversteer_YawRateFactor_Label.Content = $"YRF {app.Settings.OSYawRateFactorRight}";
 									}
+
+									Oversteer_Tolerance_Label.Content = $"{app.Settings.OSToleranceString} Tolerance";
+
+									// Understeer graph
+
+									x = Math.Clamp( understeerYawRateDifferenceInDegreesPerSecond / app.Settings.USTolerance, 0, 1 ) * IMAGE_WIDTH;
+									y = app.FFB_UndersteerAmount * IMAGE_HEIGHT;
+
+									Understeer_Ellipse.RenderTransform = new TranslateTransform( x - IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2 - y );
+
+									if ( app._irsdk_steeringWheelAngle >= 0 )
+									{
+										Understeer_YawRateFactor_Label.Content = $"YRF {app.Settings.USYawRateFactorLeft}";
+									}
+									else
+									{
+										Understeer_YawRateFactor_Label.Content = $"YRF {app.Settings.USYawRateFactorRight}";
+									}
+
+									Understeer_Tolerance_Label.Content = $"{app.Settings.USToleranceString} Tolerance";
 								} );
 							}
 
@@ -836,6 +940,11 @@ namespace MarvinsAIRA
 			ShowMapButtonsWindow( app.Settings.UndersteerEffectButtons );
 		}
 
+		private void USCurve_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			UpdateImages();
+		}
+
 		private void OSSineWaveBuzz_RadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			if ( _win_initialized )
@@ -873,6 +982,11 @@ namespace MarvinsAIRA
 			app.WriteLine( "OversteerEffect_Button_Click called." );
 
 			ShowMapButtonsWindow( app.Settings.OversteerEffectButtons );
+		}
+
+		private void OSCurve_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			UpdateImages();
 		}
 
 		#endregion
@@ -1130,6 +1244,41 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Advanced
+
+		private void Advanced_ToggleSwitch_Toggled( object sender, RoutedEventArgs e )
+		{
+			var toggleSwitch = sender as ToggleSwitch;
+
+			if ( toggleSwitch != null )
+			{
+				var visibility = toggleSwitch.IsOn ? Visibility.Visible : Visibility.Collapsed;
+
+				SteeringEffects_TabItem.Visibility = visibility;
+				LFEtoFFB_TabItem.Visibility = visibility;
+				WindSimulator_TabItem.Visibility = visibility;
+				SkidPad_TabItem.Visibility = visibility;
+				Settings_Devices_TabItem.Visibility = visibility;
+				Settings_Wheel_TabItem.Visibility = visibility;
+				Record_Button.Visibility = visibility;
+				Play_Button.Visibility = visibility;
+				Target_Label.Visibility = visibility;
+				Target_TextBox.Visibility = visibility;
+				Target_Slider.Visibility = visibility;
+				AutoOverallScale_Button.Visibility = visibility;
+				ParkedScale_Grid.Visibility = visibility;
+				Frequency_Grid.Visibility = visibility;
+				PrettyGraph_StackPanel.Visibility = visibility;
+				SayLFEScale_Grid.Visibility = visibility;
+				SayUSLeftYawRateFactor_Grid.Visibility = visibility;
+				SayUSRightYawRateFactor_Grid.Visibility = visibility;
+				SayOSLeftYawRateFactor_Grid.Visibility = visibility;
+				SayOSRightYawRateFactor_Grid.Visibility = visibility;
+			}
+		}
+
+		#endregion
+
 		#region Map button window
 
 		private Settings.MappedButtons ShowMapButtonsWindow( Settings.MappedButtons mappedButtons )
@@ -1168,6 +1317,54 @@ namespace MarvinsAIRA
 			_win_pauseButtons = false;
 
 			return mappedButtons;
+		}
+
+		#endregion
+
+		#region Image drawing
+
+		private void UpdateImages()
+		{
+			var app = (App) Application.Current;
+
+			for ( var x = 0; x < IMAGE_WIDTH; x++ )
+			{
+				var usStr = (float) x / IMAGE_WIDTH;
+				var osStr = 1f - usStr;
+
+				var usPct = (float) Math.Pow( usStr, app.Settings.USCurve );
+				var osPct = (float) Math.Pow( osStr, app.Settings.OSCurve );
+
+				var usY0 = (int) ( usPct * IMAGE_HEIGHT ) - 1;
+				var usY1 = usY0 + 2;
+
+				var osY0 = (int) ( osPct * IMAGE_HEIGHT ) - 1;
+				var osY1 = osY0 + 2;
+
+				var c = (byte) 0;
+
+				for ( var y = 0; y < IMAGE_HEIGHT; y++ )
+				{
+					var flippedY = IMAGE_HEIGHT - y - 1;
+
+					c = ( ( y < usY0 ) || ( y > usY1 ) ) ? (byte) 0 : (byte) 255;
+
+					_win_understeerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 0 ] = c;
+					_win_understeerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 1 ] = c;
+					_win_understeerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 2 ] = c;
+					_win_understeerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 3 ] = 255;
+
+					c = ( ( y < osY0 ) || ( y > osY1 ) ) ? (byte) 0 : (byte) 255;
+
+					_win_oversteerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 0 ] = c;
+					_win_oversteerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 1 ] = c;
+					_win_oversteerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 2 ] = c;
+					_win_oversteerPixels[ x * IMAGE_BYTES_PER_PIXEL + flippedY * IMAGE_STRIDE + 3 ] = 255;
+				}
+			}
+
+			_win_understeerBitmap.WritePixels( new Int32Rect( 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT ), _win_understeerPixels, IMAGE_STRIDE, 0, 0 );
+			_win_oversteerBitmap.WritePixels( new Int32Rect( 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT ), _win_oversteerPixels, IMAGE_STRIDE, 0, 0 );
 		}
 
 		#endregion

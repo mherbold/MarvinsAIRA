@@ -87,12 +87,16 @@ namespace MarvinsAIRA
 
 		private float _ffb_yawRateFactorInstant = 0;
 		private float _ffb_yawRateFactorAverage = 0;
-		private readonly float[] _ffb_yawRateFactorBuffer = new float[ 30 ];
+		private readonly float[] _ffb_yawRateFactorBuffer = new float[ 120 ];
 		private int _ffb_yawRateFactorBufferIndex = 0;
 
+		private float _ffb_understeerExpectedYawRate = 0;
+		private float _ffb_understeerYawRateDifference = 0;
 		private float _ffb_understeerAmount = 0;
 		private float _ffb_understeerEffectWaveAngle = 0;
 
+		private float _ffb_oversteerExpectedYawRate = 0;
+		private float _ffb_oversteerYawRateDifference = 0;
 		private float _ffb_oversteerAmount = 0;
 		private float _ffb_oversteerEffectWaveAngle = 0;
 
@@ -106,7 +110,11 @@ namespace MarvinsAIRA
 		public int FFB_LastMagnitudeSentToWheel { get => _ffb_lastMagnitudeSentToWheel; }
 		public float FFB_YawRateFactorInstant { get => _ffb_yawRateFactorInstant; }
 		public float FFB_YawRateFactorAverage { get => _ffb_yawRateFactorAverage; }
+		public float FFB_UndersteerExpectedYawRate { get => _ffb_understeerExpectedYawRate; }
+		public float FFB_UndersteerYawRateDifference { get => _ffb_understeerYawRateDifference; }
 		public float FFB_UndersteerAmount { get => _ffb_understeerAmount; }
+		public float FFB_OversteerExpectedYawRate { get => _ffb_oversteerExpectedYawRate; }
+		public float FFB_OversteerYawRateDifference { get => _ffb_oversteerYawRateDifference; }
 		public float FFB_OversteerAmount { get => _ffb_oversteerAmount; }
 
 		public void InitializeForceFeedback( nint windowHandle, bool isFirstInitialization = false )
@@ -213,11 +221,6 @@ namespace MarvinsAIRA
 					WriteLine( "...we are good to go with this force feedback driving device." );
 
 					_ffb_initialized = true;
-
-					if ( !isFirstInitialization )
-					{
-						_ffb_wheelChanged = true;
-					}
 
 					UpdateWheelSaveName();
 
@@ -614,15 +617,11 @@ namespace MarvinsAIRA
 				}
 			}
 
+			// load force feedback settings if the wheel, car, track, or track configuration has changed
+
 			if ( _ffb_wheelChanged || _car_carChanged || _track_trackChanged || _track_trackConfigChanged )
 			{
-				WriteLine( "" );
-				WriteLine( $"Loading configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}]" );
-
-				_ffb_wheelChanged = false;
-				_car_carChanged = false;
-				_track_trackChanged = false;
-				_track_trackConfigChanged = false;
+				WriteLine( $"Loading force feedback configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}]" );
 
 				_settings_pauseSerialization = true;
 
@@ -634,14 +633,6 @@ namespace MarvinsAIRA
 					{
 						Settings.OverallScale = forceFeedbackSettings.OverallScale;
 						Settings.DetailScale = forceFeedbackSettings.DetailScale;
-
-						Settings.USEffectStrength = forceFeedbackSettings.USEffectStrength;
-						Settings.USYawRateFactorLeft = forceFeedbackSettings.USYawRateFactorLeft;
-						Settings.USYawRateFactorRight = forceFeedbackSettings.USYawRateFactorRight;
-
-						Settings.OSEffectStrength = forceFeedbackSettings.OSEffectStrength;
-						Settings.OSYawRateFactorLeft = forceFeedbackSettings.OSYawRateFactorLeft;
-						Settings.OSYawRateFactorRight = forceFeedbackSettings.OSYawRateFactorRight;
 
 						forceFeedbackSettingsFound = true;
 
@@ -657,17 +648,61 @@ namespace MarvinsAIRA
 					Settings.OverallScale = 10;
 					Settings.DetailScale = 100;
 
-					Settings.USEffectStrength = 0;
-					Settings.USYawRateFactorLeft = 0;
-					Settings.USYawRateFactorRight = 0;
-
 					Say( Settings.SayScalesReset );
 				}
 
 				_settings_pauseSerialization = false;
 			}
 
-			if ( !_irsdk_isOnTrack && Settings.AutoCenterWheel && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
+			// load yaw rate factors if the car has changed
+
+			if ( _car_carChanged )
+			{
+				WriteLine( "" );
+				WriteLine( $"Loading steering effects configuration [{_car_carSaveName}]" );
+
+				_settings_pauseSerialization = true;
+
+				var steeringEffectsSettingsFound = false;
+
+				foreach ( var steeringEffectsSettings in Settings.SteeringEffectsSettingsList )
+				{
+					if ( steeringEffectsSettings.CarName == _car_carSaveName )
+					{
+						Settings.USYawRateFactorLeft = steeringEffectsSettings.USYawRateFactorLeft;
+						Settings.USYawRateFactorRight = steeringEffectsSettings.USYawRateFactorRight;
+
+						Settings.OSYawRateFactorLeft = steeringEffectsSettings.OSYawRateFactorLeft;
+						Settings.OSYawRateFactorRight = steeringEffectsSettings.OSYawRateFactorRight;
+
+						steeringEffectsSettingsFound = true;
+
+						break;
+					}
+				}
+
+				if ( !steeringEffectsSettingsFound )
+				{
+					Settings.USYawRateFactorLeft = 0;
+					Settings.USYawRateFactorRight = 0;
+
+					Settings.OSYawRateFactorLeft = 0;
+					Settings.OSYawRateFactorRight = 0;
+				}
+
+				_settings_pauseSerialization = false;
+			}
+
+			// reset changed things
+
+			_ffb_wheelChanged = false;
+			_car_carChanged = false;
+			_track_trackChanged = false;
+			_track_trackConfigChanged = false;
+
+			// auto-center wheel feature
+
+			if ( Settings.AutoCenterWheel && !_irsdk_isOnTrack && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
 			{
 				var leftRange = (float) ( Settings.WheelCenterValue - Settings.WheelMinValue );
 				var rightRange = (float) ( Settings.WheelMaxValue - Settings.WheelCenterValue );
@@ -779,6 +814,8 @@ namespace MarvinsAIRA
 
 		public void UpdateWheelSaveName()
 		{
+			var oldWheelSaveName = _ffb_wheelSaveName;
+
 			_ffb_wheelSaveName = ALL_WHEELS_SAVE_NAME;
 
 			if ( Settings.SaveSettingsPerWheel )
@@ -787,6 +824,11 @@ namespace MarvinsAIRA
 				{
 					_ffb_wheelSaveName = _ffb_drivingJoystick.Information.ProductName;
 				}
+			}
+
+			if ( _ffb_wheelSaveName != oldWheelSaveName )
+			{
+				_ffb_wheelChanged = true;
 			}
 		}
 
@@ -866,7 +908,7 @@ namespace MarvinsAIRA
 				}
 			}
 
-			if ( _ffb_crashProtectionTimer > 0 )
+			if ( _ffb_crashProtectionTimer > 0f )
 			{
 				_ffb_crashProtectionTimer -= 1f / _irsdk_tickRate;
 
@@ -879,16 +921,16 @@ namespace MarvinsAIRA
 
 			// calculate current instant yaw rate factor
 
-			if ( Math.Abs( _irsdk_yawRate ) > 0.01f )
+			if ( ( Math.Abs( _irsdk_yawRate ) > 0.0175f ) && ( _irsdk_velocityX > 0f ) )
 			{
 				_ffb_yawRateFactorInstant = _irsdk_steeringWheelAngle * _irsdk_speed / _irsdk_yawRate;
 			}
 			else
 			{
-				_ffb_yawRateFactorInstant = 0;
+				_ffb_yawRateFactorInstant = 0f;
 			}
 
-			// keep track of average yaw rate factor over the last half second
+			// keep track of average yaw rate factor over the last two seconds
 
 			_ffb_yawRateFactorBuffer[ _ffb_yawRateFactorBufferIndex ] = _ffb_yawRateFactorInstant;
 
@@ -905,55 +947,82 @@ namespace MarvinsAIRA
 
 			// steering effects
 
-			_ffb_understeerAmount = 0; // 0 = 35% below understeer edge, 1 = right on understeer edge
-			_ffb_oversteerAmount = 0; // 0 = 75% above oversteer edge, 1 = right on oversteer edge
+			_ffb_understeerAmount = 0f;
+			_ffb_oversteerAmount = 0f;
 
-			float understeerFrequency = 0;
-			float oversteerFrequency = 0;
+			var understeerFrequency = 0f;
+			var oversteerFrequency = 0f;
 
-			if ( ( _irsdk_speed > 10f ) && ( Math.Abs( _irsdk_steeringWheelAngle ) > 0.05f ) && ( Math.Abs( _irsdk_yawRate ) > 0.01f ) )
+			if ( _ffb_yawRateFactorInstant > 0f )
 			{
-				// update the understeer effect
-
-				var settingUSYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.USYawRateFactorLeft : Settings.USYawRateFactorRight;
-
-				if ( settingUSYawRateFactor > 0 )
+				if ( _irsdk_steeringWheelAngle >= 0f )
 				{
-					var margin = settingUSYawRateFactor * 0.35f;
+					// calculate the understeer expected yaw rate and difference
 
-					var deltaYawRateFactor = settingUSYawRateFactor - _ffb_yawRateFactorInstant;
+					_ffb_understeerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.USYawRateFactorLeft;
 
-					_ffb_understeerAmount = (float) Math.Pow( Math.Clamp( ( margin - deltaYawRateFactor ) / margin, 0f, 1f ), 1.5f );
+					_ffb_understeerYawRateDifference = _ffb_understeerExpectedYawRate - _irsdk_yawRate;
 
-					understeerFrequency = Math.Max( 0.05f, _ffb_understeerAmount );
+					// calculate the oversteer expected yaw rate and difference
 
-					if ( Settings.USEffectStyleInvert )
-					{
-						_ffb_understeerAmount = -_ffb_understeerAmount;
-					}
+					_ffb_oversteerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.OSYawRateFactorLeft;
+
+					_ffb_oversteerYawRateDifference = _irsdk_yawRate - _ffb_oversteerExpectedYawRate;
+				}
+				else
+				{
+					// calculate understeer the expected yaw rate and difference
+
+					_ffb_understeerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.USYawRateFactorRight;
+
+					_ffb_understeerYawRateDifference = _irsdk_yawRate - _ffb_understeerExpectedYawRate;
+
+					// calculate the oversteer expected yaw rate and difference
+
+					_ffb_oversteerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.OSYawRateFactorRight;
+
+					_ffb_oversteerYawRateDifference = _ffb_oversteerExpectedYawRate - _irsdk_yawRate;
 				}
 
-				// update the oversteer effect
+				// understeer effect
 
-				var settingOSYawRateFactor = ( _irsdk_steeringWheelAngle >= 0 ) ? Settings.OSYawRateFactorLeft : Settings.OSYawRateFactorRight;
+				var scaledUndersteerYawRateDifference = (float) ( _ffb_understeerYawRateDifference / ( Settings.USTolerance * Math.PI / 180f ) );
 
-				if ( settingOSYawRateFactor > 0 )
+				var understeerAmount = Math.Clamp( scaledUndersteerYawRateDifference, 0f, 1f );
+
+				understeerFrequency = Math.Max( 0.25f, understeerAmount );
+
+				_ffb_understeerAmount = (float) Math.Pow( understeerAmount, Settings.USCurve );
+
+				// oversteer effect
+
+				var scaledOversteerYawRateDifference = (float) ( _ffb_oversteerYawRateDifference / ( Settings.OSTolerance * Math.PI / 180f ) );
+
+				var oversteerAmount = Math.Clamp( scaledOversteerYawRateDifference, 0f, 1f );
+
+				oversteerFrequency = Math.Max( 0.25f, oversteerAmount );
+
+				_ffb_oversteerAmount = (float) Math.Pow( oversteerAmount, Settings.OSCurve );
+
+				// invert the effects if the user wants them inverted
+
+				if ( Settings.USEffectStyleInvert )
 				{
-					var margin = settingOSYawRateFactor * 0.75f;
-
-					var deltaYawRateFactor = _ffb_yawRateFactorInstant - settingOSYawRateFactor;
-
-					var lateralAccelerationScale = Math.Clamp( ( Math.Abs( _irsdk_latAccel ) - 5f ) / 5f, 0, 1 );
-
-					_ffb_oversteerAmount = (float) Math.Pow( Math.Clamp( ( margin - deltaYawRateFactor ) / margin, 0f, 1f ), 1.5f ) * lateralAccelerationScale;
-
-					oversteerFrequency = Math.Max( 0.05f, _ffb_oversteerAmount );
-
-					if ( Settings.OSEffectStyleInvert )
-					{
-						_ffb_oversteerAmount = -_ffb_oversteerAmount;
-					}
+					_ffb_understeerAmount = -_ffb_understeerAmount;
 				}
+
+				if ( Settings.OSEffectStyleInvert )
+				{
+					_ffb_oversteerAmount = -_ffb_oversteerAmount;
+				}
+			}
+			else
+			{
+				_ffb_understeerExpectedYawRate = 0f;
+				_ffb_understeerYawRateDifference = 0f;
+
+				_ffb_oversteerExpectedYawRate = 0f;
+				_ffb_oversteerYawRateDifference = 0f;
 			}
 
 			// we want to reduce forces while the car is moving very slow or parked
@@ -985,8 +1054,8 @@ namespace MarvinsAIRA
 
 			var overallScaleToDirectInputUnits = normalizedOverallScaleSetting * newtonMetersToDirectInputUnits;
 			var detailScaleToDirectInputUnits = overallScaleToDirectInputUnits + overallScaleToDirectInputUnits * ( normalizedDetailScaleSetting - 1f );
-			var understeerEffectScaleToDirectInputUnits = (int) ( ( Settings.USEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4f ) );
-			var oversteerEffectScaleToDirectInputUnits = (int) ( ( Settings.OSEffectStrength / 100f ) * ( DI_FFNOMINALMAX / 4f ) );
+			var understeerEffectScaleToDirectInputUnits = (int) ( ( Settings.USEffectStrength / 100f ) * DI_FFNOMINALMAX );
+			var oversteerEffectScaleToDirectInputUnits = (int) ( ( Settings.OSEffectStrength / 100f ) * DI_FFNOMINALMAX );
 			var lfeScale = normalizedLFEScaleSetting * DI_FFNOMINALMAX;
 
 			// make a copy of the lfe read index so it doesn't change in the middle of this update (its updated in another thread)
