@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 
@@ -73,7 +74,7 @@ namespace MarvinsAIRA
 
 		/* Reset force feedback */
 
-		public MappedButtons _reinitForceFeedbackButtons = new();
+		private MappedButtons _reinitForceFeedbackButtons = new();
 
 		public MappedButtons ReinitForceFeedbackButtons
 		{
@@ -190,7 +191,7 @@ namespace MarvinsAIRA
 
 		/* Auto overall scale */
 
-		public MappedButtons _autoOverallScaleButtons = new();
+		private MappedButtons _autoOverallScaleButtons = new();
 
 		public MappedButtons AutoOverallScaleButtons
 		{
@@ -1873,7 +1874,7 @@ namespace MarvinsAIRA
 
 		/* Enable click sound */
 
-		private bool _enableClickSound = true;
+		private bool _enableClickSound = false;
 
 		public bool EnableClickSound
 		{
@@ -1923,7 +1924,7 @@ namespace MarvinsAIRA
 
 		/* Enable speech synthesizer */
 
-		private bool _enableSpeechSynthesizer = true;
+		private bool _enableSpeechSynthesizer = false;
 
 		public bool EnableSpeechSynthesizer
 		{
@@ -1992,23 +1993,23 @@ namespace MarvinsAIRA
 
 		/* Various translations */
 
-		public string _sayHello = "Hello!";
-		public string _sayConnected = "We are connected to the iRacing simulator.";
-		public string _sayDisconnected = "We have been disconnected from the iRacing simulator.";
-		public string _sayVoiceVolume = "My voice is now at :value: percent.";
-		public string _sayCarName = "You are driving a :value:.";
-		public string _sayTrackName = "You are racing at :value:.";
-		public string _sayTrackConfigName = ":value:.";
-		public string _sayOverallScale = "The overall scale is now :value: percent.";
-		public string _sayDetailScale = "The detail scale is now :value: percent.";
-		public string _sayLFEScale = "The LFE scale is now :value: percent.";
-		public string _sayScalesReset = "This is the first time you have driven this combination, so we have reset the overall and detail scale.";
-		public string _sayLoadOverallScale = "The overall scale has been restored to :value: percent";
-		public string _sayLoadDetailScale = "The detail scale has been restored to :value: percent.";
-		public string _sayUSLeftYawRateFactor = "The understeer effect left yaw rate factor has been set to :value:.";
-		public string _sayUSRightYawRateFactor = "The understeer effect right yaw rate factor has been set to :value:.";
-		public string _sayOSLeftYawRateFactor = "The oversteer effect left yaw rate factor has been set to :value:.";
-		public string _sayOSRightYawRateFactor = "The oversteer effect right yaw rate factor has been set to :value:.";
+		private string _sayHello = "Hello!";
+		private string _sayConnected = "We are connected to the iRacing simulator.";
+		private string _sayDisconnected = "We have been disconnected from the iRacing simulator.";
+		private string _sayVoiceVolume = "My voice is now at :value: percent.";
+		private string _sayCarName = "You are driving a :value:.";
+		private string _sayTrackName = "You are racing at :value:.";
+		private string _sayTrackConfigName = ":value:.";
+		private string _sayOverallScale = "The overall scale is now :value: percent.";
+		private string _sayDetailScale = "The detail scale is now :value: percent.";
+		private string _sayLFEScale = "The LFE scale is now :value: percent.";
+		private string _sayScalesReset = "This is the first time you have driven this combination, so we have reset the overall and detail scale.";
+		private string _sayLoadOverallScale = "The overall scale has been restored to :value: percent";
+		private string _sayLoadDetailScale = "The detail scale has been restored to :value: percent.";
+		private string _sayUSLeftYawRateFactor = "The understeer effect left yaw rate factor has been set to :value:.";
+		private string _sayUSRightYawRateFactor = "The understeer effect right yaw rate factor has been set to :value:.";
+		private string _sayOSLeftYawRateFactor = "The oversteer effect left yaw rate factor has been set to :value:.";
+		private string _sayOSRightYawRateFactor = "The oversteer effect right yaw rate factor has been set to :value:.";
 
 		public string SayHello { get => _sayHello; set { if ( _sayHello != value ) { _sayHello = value; OnPropertyChanged(); } } }
 		public string SayConnected { get => _sayConnected; set { if ( _sayConnected != value ) { _sayConnected = value; OnPropertyChanged(); } } }
@@ -2058,6 +2059,27 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region Settings tab - Wheel tab
+
+		private bool _autoCenterWheel = true;
+
+		public bool AutoCenterWheel
+		{
+			get => _autoCenterWheel;
+
+			set
+			{
+				if ( _autoCenterWheel != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"AutoCenterWheel changed - before {_autoCenterWheel} now {value}" );
+
+					_autoCenterWheel = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		private JoystickOffset _selectedWheelAxis = JoystickOffset.X;
 
@@ -2214,27 +2236,6 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private bool _autoCenterWheel = true;
-
-		public bool AutoCenterWheel
-		{
-			get => _autoCenterWheel;
-
-			set
-			{
-				if ( _autoCenterWheel != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"AutoCenterWheel changed - before {_autoCenterWheel} now {value}" );
-
-					_autoCenterWheel = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
 		private int _autoCenterWheelStrength = 25;
 
 		public int AutoCenterWheelStrength
@@ -2282,7 +2283,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private int _autoCenterWheelType = 1;
+		private int _autoCenterWheelType = 0;
 
 		public int AutoCenterWheelType
 		{
@@ -2303,23 +2304,117 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private bool _playbackSendToDevice = true;
+		private bool _enableSoftLock = true;
 
-		public bool PlaybackSendToDevice
+		public bool EnableSoftLock
 		{
-			get => _playbackSendToDevice;
+			get => _enableSoftLock;
 
 			set
 			{
-				if ( _playbackSendToDevice != value )
+				if ( _enableSoftLock != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"PlaybackSendToDevice changed - before {_playbackSendToDevice} now {value}" );
+					app.WriteLine( $"EnableSoftLock changed - before {_enableSoftLock} now {value}" );
 
-					_playbackSendToDevice = value;
+					_enableSoftLock = value;
 
 					OnPropertyChanged();
+				}
+			}
+		}
+
+		private int _softLockStrength = 35;
+
+		public int SoftLockStrength
+		{
+			get => _softLockStrength;
+
+			set
+			{
+				value = Math.Clamp( value, 0, 100 );
+
+				if ( _softLockStrength != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SoftLockStrength changed - before {_softLockStrength} now {value}" );
+
+					_softLockStrength = value;
+
+					OnPropertyChanged();
+				}
+
+				SoftLockStrengthString = $"!{_softLockStrength}%";
+			}
+		}
+
+		private string _softLockStrengthString = "35%";
+
+		public string SoftLockStrengthString
+		{
+			get => _softLockStrengthString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _softLockStrengthString != value )
+					{
+						_softLockStrengthString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		private int _softLockMargin = 20;
+
+		public int SoftLockMargin
+		{
+			get => _softLockMargin;
+
+			set
+			{
+				value = Math.Clamp( value, 1, 90 );
+
+				if ( _softLockMargin != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SoftLockMargin changed - before {_softLockMargin} now {value}" );
+
+					_softLockMargin = value;
+
+					OnPropertyChanged();
+				}
+
+				SoftLockMarginString = $"!{_softLockMargin}°";
+			}
+		}
+
+		private string _softLockMarginString = "20°";
+
+		public string SoftLockMarginString
+		{
+			get => _softLockMarginString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _softLockMarginString != value )
+					{
+						_softLockMarginString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -2435,6 +2530,27 @@ namespace MarvinsAIRA
 
 						OnPropertyChanged();
 					}
+				}
+			}
+		}
+
+		private bool _playbackSendToDevice = true;
+
+		public bool PlaybackSendToDevice
+		{
+			get => _playbackSendToDevice;
+
+			set
+			{
+				if ( _playbackSendToDevice != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PlaybackSendToDevice changed - before {_playbackSendToDevice} now {value}" );
+
+					_playbackSendToDevice = value;
+
+					OnPropertyChanged();
 				}
 			}
 		}
