@@ -68,6 +68,9 @@
       <PackagePath>\</PackagePath>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Update="LogitechSteeringWheelEnginesWrapper.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="vJoyInterfaceWrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -1,5 +1,4 @@
 ﻿
-using ModernWpf.Controls;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -12,13 +11,15 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
+using ModernWpf.Controls;
+
 namespace MarvinsAIRA
 {
 	public partial class MainWindow : Window
 	{
 		#region Properties
 
-		private const int IMAGE_WIDTH = 400;
+		private const int IMAGE_WIDTH = 360;
 		private const int IMAGE_HEIGHT = 200;
 		private const int IMAGE_BYTES_PER_PIXEL = 4;
 		private const int IMAGE_DPI = 96;
@@ -298,6 +299,10 @@ namespace MarvinsAIRA
 
 							app.UpdateForceFeedback( deltaTime, !_win_pauseButtons, _win_windowHandle );
 							app.UpdateWindSimulator();
+							app.UpdateSpotter( deltaTime );
+							app.UpdateLogitech();
+
+							// test signal
 
 							if ( _win_sendForceFeedbackTestSignalCounter > 0 )
 							{
@@ -312,6 +317,8 @@ namespace MarvinsAIRA
 
 								_win_sendForceFeedbackTestSignalCounter--;
 							}
+
+							// gui
 
 							_win_guiUpdateTimer -= deltaTime;
 
@@ -551,6 +558,8 @@ namespace MarvinsAIRA
 									Understeer_Tolerance_Label.Content = $"{app.Settings.USToleranceString} Tolerance";
 								} );
 							}
+
+							// usb device changes
 
 							if ( _win_inputReinitTimer > 0f )
 							{
@@ -1248,18 +1257,22 @@ namespace MarvinsAIRA
 
 		private void Advanced_ToggleSwitch_Toggled( object sender, RoutedEventArgs e )
 		{
-			var toggleSwitch = sender as ToggleSwitch;
-
-			if ( toggleSwitch != null )
+			if ( sender is ToggleSwitch toggleSwitch )
 			{
 				var visibility = toggleSwitch.IsOn ? Visibility.Visible : Visibility.Collapsed;
+
+				// tabs items
 
 				SteeringEffects_TabItem.Visibility = visibility;
 				LFEtoFFB_TabItem.Visibility = visibility;
 				WindSimulator_TabItem.Visibility = visibility;
+				Spotter_TabItem.Visibility = visibility;
 				SkidPad_TabItem.Visibility = visibility;
 				Settings_Devices_TabItem.Visibility = visibility;
 				Settings_Wheel_TabItem.Visibility = visibility;
+
+				// force feedback tab
+
 				Record_Button.Visibility = visibility;
 				Play_Button.Visibility = visibility;
 				Target_Label.Visibility = visibility;
@@ -1269,11 +1282,12 @@ namespace MarvinsAIRA
 				ParkedScale_Grid.Visibility = visibility;
 				Frequency_Grid.Visibility = visibility;
 				PrettyGraph_StackPanel.Visibility = visibility;
-				SayLFEScale_Grid.Visibility = visibility;
-				SayUSLeftYawRateFactor_Grid.Visibility = visibility;
-				SayUSRightYawRateFactor_Grid.Visibility = visibility;
-				SayOSLeftYawRateFactor_Grid.Visibility = visibility;
-				SayOSRightYawRateFactor_Grid.Visibility = visibility;
+
+				// settings voice tab
+
+				Settings_Voice_SayLFEScale_Grid.Visibility = visibility;
+				Settings_Voice_SteeringEffects_GroupBox.Visibility = visibility;
+				Settings_Voice_Spotter_GroupBox.Visibility = visibility;
 			}
 		}
 

@@ -1731,6 +1731,82 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Spotter tab
+
+		/* Spotter enabled */
+
+		private bool _spotterEnabled = false;
+
+		public bool SpotterEnabled
+		{
+			get => _spotterEnabled;
+
+			set
+			{
+				if ( _spotterEnabled != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SpotterEnabled changed - before {_spotterEnabled} now {value}" );
+
+					_spotterEnabled = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* callout frequency */
+
+		private int _spotterCalloutFrequency = 20;
+
+		public int SpotterCalloutFrequency
+		{
+			get => _spotterCalloutFrequency;
+
+			set
+			{
+				value = Math.Clamp( value, 1, 60 );
+
+				if ( _spotterCalloutFrequency != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SpotterCalloutFrequency changed - before {_spotterCalloutFrequency} now {value}" );
+
+					_spotterCalloutFrequency = value;
+
+					OnPropertyChanged();
+				}
+
+				SpotterCalloutFrequencyString = $"!{_spotterCalloutFrequency}/min";
+			}
+		}
+
+		private string _spotterCalloutFrequencyString = "20/min";
+
+		public string SpotterCalloutFrequencyString
+		{
+			get => _spotterCalloutFrequencyString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _spotterCalloutFrequencyString != value )
+					{
+						_spotterCalloutFrequencyString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		#endregion
+
 		#region Settings tab - Window tab
 
 		/* Start minimized */
@@ -2010,6 +2086,12 @@ namespace MarvinsAIRA
 		private string _sayUSRightYawRateFactor = "The understeer effect right yaw rate factor has been set to :value:.";
 		private string _sayOSLeftYawRateFactor = "The oversteer effect left yaw rate factor has been set to :value:.";
 		private string _sayOSRightYawRateFactor = "The oversteer effect right yaw rate factor has been set to :value:.";
+		private string _sayClear = "Clear!";
+		private string _sayCarLeft = "Car left.";
+		private string _sayCarRight = "Car right.";
+		private string _sayTwoCarsLeft = "Two left!";
+		private string _sayTwoCarsRight = "Two right!";
+		private string _sayThreeWide = "Three wide!";
 
 		public string SayHello { get => _sayHello; set { if ( _sayHello != value ) { _sayHello = value; OnPropertyChanged(); } } }
 		public string SayConnected { get => _sayConnected; set { if ( _sayConnected != value ) { _sayConnected = value; OnPropertyChanged(); } } }
@@ -2028,6 +2110,12 @@ namespace MarvinsAIRA
 		public string SayUSRightYawRateFactor { get => _sayUSRightYawRateFactor; set { if ( _sayUSRightYawRateFactor != value ) { _sayUSRightYawRateFactor = value; OnPropertyChanged(); } } }
 		public string SayOSLeftYawRateFactor { get => _sayOSLeftYawRateFactor; set { if ( _sayOSLeftYawRateFactor != value ) { _sayOSLeftYawRateFactor = value; OnPropertyChanged(); } } }
 		public string SayOSRightYawRateFactor { get => _sayOSRightYawRateFactor; set { if ( _sayOSRightYawRateFactor != value ) { _sayOSRightYawRateFactor = value; OnPropertyChanged(); } } }
+		public string SayClear { get => _sayClear; set { if ( _sayClear != value ) { _sayClear = value; OnPropertyChanged(); } } }
+		public string SayCarLeft { get => _sayCarLeft; set { if ( _sayCarLeft != value ) { _sayCarLeft = value; OnPropertyChanged(); } } }
+		public string SayCarRight { get => _sayCarRight; set { if ( _sayCarRight != value ) { _sayCarRight = value; OnPropertyChanged(); } } }
+		public string SayTwoCarsLeft { get => _sayTwoCarsLeft; set { if ( _sayTwoCarsLeft != value ) { _sayTwoCarsLeft = value; OnPropertyChanged(); } } }
+		public string SayTwoCarsRight { get => _sayTwoCarsRight; set { if ( _sayTwoCarsRight != value ) { _sayTwoCarsRight = value; OnPropertyChanged(); } } }
+		public string SayThreeWide { get => _sayThreeWide; set { if ( _sayThreeWide != value ) { _sayThreeWide = value; OnPropertyChanged(); } } }
 
 		#endregion
 
@@ -2549,6 +2637,34 @@ namespace MarvinsAIRA
 					app.WriteLine( $"PlaybackSendToDevice changed - before {_playbackSendToDevice} now {value}" );
 
 					_playbackSendToDevice = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region Settings tab - Logitech tab
+
+
+		/* Control RPM lights */
+
+		private bool _controlRPMLights = true;
+
+		public bool ControlRPMLights
+		{
+			get => _controlRPMLights;
+
+			set
+			{
+				if ( _controlRPMLights != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ControlRPMLights changed - before {_controlRPMLights} now {value}" );
+
+					_controlRPMLights = value;
 
 					OnPropertyChanged();
 				}
