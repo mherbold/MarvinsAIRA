@@ -32,6 +32,8 @@ namespace MarvinsAIRA
 			WriteLine( "InitializeInputs called." );
 			WriteLine( "...initializing DirectInput (all devices)..." );
 
+			_input_joystickList.Clear();
+
 			var directInput = new DirectInput();
 
 			SerializableDictionary<Guid, string> ffbDeviceList = [];
@@ -46,33 +48,51 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"...we found the {joystickDeviceInstance.ProductName} device..." );
 
-					var hasForceFeedback = joystickDeviceInstance.ForceFeedbackDriverGuid != Guid.Empty;
+					var deviceAlreadyAdded = false;
 
-					if ( hasForceFeedback )
+					foreach ( var otherJoystick in _input_joystickList )
 					{
-						ffbDeviceList.Add( joystickDeviceInstance.InstanceGuid, joystickDeviceInstance.ProductName );
+						if ( otherJoystick.Information.InstanceGuid == joystickDeviceInstance.InstanceGuid )
+						{
+							deviceAlreadyAdded = true;
+							break;
+						}
 					}
 
-					WriteLine( $"...this devices identifies as Type: {joystickDeviceInstance.Type}, Subtype: {joystickDeviceInstance.Subtype}, Has FF: {hasForceFeedback}..." );
+					if ( deviceAlreadyAdded )
+					{
+						WriteLine( $"...this joystick has the same instance GUID as another we've seen already, so skipping this one..." );
+					}
+					else
+					{
+						var hasForceFeedback = joystickDeviceInstance.ForceFeedbackDriverGuid != Guid.Empty;
 
-					WriteLine( $"...creating joystick type interface..." );
+						if ( hasForceFeedback )
+						{
+							ffbDeviceList.Add( joystickDeviceInstance.InstanceGuid, joystickDeviceInstance.ProductName );
+						}
 
-					var joystick = new Joystick( directInput, joystickDeviceInstance.InstanceGuid );
+						WriteLine( $"...this devices identifies as Type: {joystickDeviceInstance.Type}, Subtype: {joystickDeviceInstance.Subtype}, Has FF: {hasForceFeedback}..." );
 
-					joystick.Properties.BufferSize = 128;
+						WriteLine( $"...creating joystick type interface..." );
 
-					WriteLine( $"...setting the cooperative level (non-exclusive background) on this device..." );
+						var joystick = new Joystick( directInput, joystickDeviceInstance.InstanceGuid );
 
-					joystick.SetCooperativeLevel( windowHandle, CooperativeLevel.NonExclusive | CooperativeLevel.Background );
+						joystick.Properties.BufferSize = 128;
 
-					WriteLine( $"...cooperative level was set..." );
-					WriteLine( $"...acquiring this device..." );
+						WriteLine( $"...setting the cooperative level (non-exclusive background) on this device..." );
 
-					joystick.Acquire();
+						joystick.SetCooperativeLevel( windowHandle, CooperativeLevel.NonExclusive | CooperativeLevel.Background );
 
-					WriteLine( $"...device was acquired..." );
+						WriteLine( $"...cooperative level was set..." );
+						WriteLine( $"...acquiring this device..." );
 
-					_input_joystickList.Add( joystick );
+						joystick.Acquire();
+
+						WriteLine( $"...device was acquired..." );
+
+						_input_joystickList.Add( joystick );
+					}
 				}
 			}
 

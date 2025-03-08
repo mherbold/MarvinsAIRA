@@ -1287,7 +1287,8 @@ namespace MarvinsAIRA
 
 				Settings_Voice_SayLFEScale_Grid.Visibility = visibility;
 				Settings_Voice_SteeringEffects_GroupBox.Visibility = visibility;
-				Settings_Voice_Spotter_GroupBox.Visibility = visibility;
+				Settings_Voice_SpotterCarLeftRight_GroupBox.Visibility = visibility;
+				Settings_Voice_SpotterSessionFlags_GroupBox.Visibility = visibility;
 			}
 		}
 

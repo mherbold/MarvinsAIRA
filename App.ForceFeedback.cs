@@ -627,8 +627,15 @@ namespace MarvinsAIRA
 
 				var forceFeedbackSettingsFound = false;
 
+				Settings.ForceFeedbackSettings? defaultForceFeedbackSettings = null;
+
 				foreach ( var forceFeedbackSettings in Settings.ForceFeedbackSettingsList )
 				{
+					if ( ( forceFeedbackSettings.WheelName == ALL_WHEELS_SAVE_NAME ) && ( forceFeedbackSettings.CarName == ALL_CARS_SAVE_NAME ) && ( forceFeedbackSettings.TrackName == ALL_TRACKS_SAVE_NAME ) && ( forceFeedbackSettings.TrackConfigName == ALL_TRACK_CONFIGS_SAVE_NAME ) )
+					{
+						defaultForceFeedbackSettings = forceFeedbackSettings;
+					}
+
 					if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _car_carSaveName ) && ( forceFeedbackSettings.TrackName == _track_trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _track_trackConfigSaveName ) )
 					{
 						Settings.OverallScale = forceFeedbackSettings.OverallScale;
@@ -645,10 +652,20 @@ namespace MarvinsAIRA
 
 				if ( !forceFeedbackSettingsFound )
 				{
-					Settings.OverallScale = 10;
-					Settings.DetailScale = 100;
+					if ( defaultForceFeedbackSettings != null )
+					{
+						Settings.OverallScale = defaultForceFeedbackSettings.OverallScale;
+						Settings.DetailScale = defaultForceFeedbackSettings.DetailScale;
 
-					Say( Settings.SayScalesReset );
+						Say( Settings.SayScalesReset );
+					}
+					else
+					{
+						Settings.OverallScale = 10;
+						Settings.DetailScale = 100;
+
+						Say( Settings.SayScalesReset );
+					}
 				}
 
 				_settings_pauseSerialization = false;
@@ -669,11 +686,15 @@ namespace MarvinsAIRA
 				{
 					if ( steeringEffectsSettings.CarName == _car_carSaveName )
 					{
+						Settings.SteeringEffectsEnabled = steeringEffectsSettings.SteeringEffectsEnabled;
+
 						Settings.USYawRateFactorLeft = steeringEffectsSettings.USYawRateFactorLeft;
 						Settings.USYawRateFactorRight = steeringEffectsSettings.USYawRateFactorRight;
+						Settings.USTolerance = steeringEffectsSettings.USTolerance;
 
 						Settings.OSYawRateFactorLeft = steeringEffectsSettings.OSYawRateFactorLeft;
 						Settings.OSYawRateFactorRight = steeringEffectsSettings.OSYawRateFactorRight;
+						Settings.OSTolerance = steeringEffectsSettings.OSTolerance;
 
 						steeringEffectsSettingsFound = true;
 
@@ -683,11 +704,15 @@ namespace MarvinsAIRA
 
 				if ( !steeringEffectsSettingsFound )
 				{
+					Settings.SteeringEffectsEnabled = false;
+
 					Settings.USYawRateFactorLeft = 0;
 					Settings.USYawRateFactorRight = 0;
+					Settings.USTolerance = 20;
 
 					Settings.OSYawRateFactorLeft = 0;
 					Settings.OSYawRateFactorRight = 0;
+					Settings.OSTolerance = 20;
 				}
 
 				_settings_pauseSerialization = false;

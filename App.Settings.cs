@@ -98,11 +98,15 @@ namespace MarvinsAIRA
 					{
 						if ( steeringEffectsSettings.CarName == _car_carSaveName )
 						{
+							steeringEffectsSettings.SteeringEffectsEnabled = Settings.SteeringEffectsEnabled;
+
 							steeringEffectsSettings.USYawRateFactorLeft = Settings.USYawRateFactorLeft;
 							steeringEffectsSettings.USYawRateFactorRight = Settings.USYawRateFactorRight;
+							steeringEffectsSettings.USTolerance = Settings.USTolerance;
 
 							steeringEffectsSettings.OSYawRateFactorLeft = Settings.OSYawRateFactorLeft;
 							steeringEffectsSettings.OSYawRateFactorRight = Settings.OSYawRateFactorRight;
+							steeringEffectsSettings.OSTolerance = Settings.OSTolerance;
 
 							steeringEffectsSettingsFound = true;
 
@@ -116,11 +120,15 @@ namespace MarvinsAIRA
 						{
 							CarName = _car_carSaveName,
 
+							SteeringEffectsEnabled = Settings.SteeringEffectsEnabled,
+
 							USYawRateFactorLeft = Settings.USYawRateFactorLeft,
 							USYawRateFactorRight = Settings.USYawRateFactorRight,
+							USTolerance = Settings.USTolerance,
 
 							OSYawRateFactorLeft = Settings.OSYawRateFactorLeft,
 							OSYawRateFactorRight = Settings.OSYawRateFactorRight,
+							OSTolerance = Settings.OSTolerance
 						};
 
 						Settings.SteeringEffectsSettingsList.Add( steeringEffectsSettings );

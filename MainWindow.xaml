@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.40"
+        Title="Marvin's Awesome iRacing App v0.41"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -853,7 +853,7 @@
                                             </Grid>
                                         </StackPanel>
                                     </GroupBox>
-                                    <GroupBox Header="Spotter" x:Name="Settings_Voice_Spotter_GroupBox">
+                                    <GroupBox Header="Spotter - Car Left Right" x:Name="Settings_Voice_SpotterCarLeftRight_GroupBox">
                                         <StackPanel>
                                             <Grid Margin="0,2,0,0">
                                                 <Grid.ColumnDefinitions>
@@ -902,6 +902,210 @@
                                                 </Grid.ColumnDefinitions>
                                                 <Label Grid.Column="0" Content="Three Wide" VerticalAlignment="Center"/>
                                                 <TextBox Grid.Column="1" Text="{Binding SayThreeWide}" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </GroupBox>
+                                    <GroupBox Header="Spotter - Session Flags" x:Name="Settings_Voice_SpotterSessionFlags_GroupBox">
+                                        <StackPanel>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Checkered Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayCheckeredFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="White Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayWhiteFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Green Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayGreenFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Yellow Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayYellowFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Red Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayRedFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Blue Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayBlueFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Debris Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayDebrisFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Crossed Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayCrossedFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Yellow Waving Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayYellowWavingFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="One Lap To Green Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayOneLapToGreenFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Green Held Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayGreenHeldFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Ten To Go Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayTenToGoFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Five To Go Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayFiveToGoFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Random Waving Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayRandomWavingFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Caution Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayCautionFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Caution Waving Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayCautionWavingFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Black Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayBlackFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Disqualify Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayDisqualifyFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Servicible Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayServicibleFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Furled Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayFurledFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Repair Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayRepairFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Start Hidden Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayStartHiddenFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Start Ready Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayStartReadyFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Start Set Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayStartSetFlag}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="Start Go Flag" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayStartGoFlag}" />
                                             </Grid>
                                         </StackPanel>
                                     </GroupBox>
