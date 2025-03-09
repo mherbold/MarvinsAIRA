@@ -77,12 +77,12 @@ namespace MarvinsAIRA
 			{
 				switch ( carLeftRight )
 				{
-					case IRacingSdkEnum.CarLeftRight.Clear: Say( Settings.SayClear, null, true ); break;
-					case IRacingSdkEnum.CarLeftRight.CarLeft: Say( Settings.SayCarLeft, null, true ); break;
-					case IRacingSdkEnum.CarLeftRight.CarRight: Say( Settings.SayCarRight, null, true ); break;
-					case IRacingSdkEnum.CarLeftRight.TwoCarsLeft: Say( Settings.SayTwoCarsLeft, null, true ); break;
-					case IRacingSdkEnum.CarLeftRight.TwoCarsRight: Say( Settings.SayTwoCarsRight, null, true ); break;
-					case IRacingSdkEnum.CarLeftRight.CarLeftRight: Say( Settings.SayThreeWide, null, true ); break;
+					case IRacingSdkEnum.CarLeftRight.Clear: Say( Settings.SayClear, null, true, false ); break;
+					case IRacingSdkEnum.CarLeftRight.CarLeft: Say( Settings.SayCarLeft, null, true, false ); break;
+					case IRacingSdkEnum.CarLeftRight.CarRight: Say( Settings.SayCarRight, null, true, false ); break;
+					case IRacingSdkEnum.CarLeftRight.TwoCarsLeft: Say( Settings.SayTwoCarsLeft, null, true, false ); break;
+					case IRacingSdkEnum.CarLeftRight.TwoCarsRight: Say( Settings.SayTwoCarsRight, null, true, false ); break;
+					case IRacingSdkEnum.CarLeftRight.CarLeftRight: Say( Settings.SayThreeWide, null, true, false ); break;
 				}
 
 				_spotter_calloutTimer = 60.0f / Settings.SpotterCalloutFrequency;
@@ -99,31 +99,31 @@ namespace MarvinsAIRA
 				{
 					switch ( flag )
 					{
-						case IRacingSdkEnum.Flags.Checkered: Say( Settings.SayCheckeredFlag ); break;
-						case IRacingSdkEnum.Flags.White: Say( Settings.SayWhiteFlag ); break;
-						case IRacingSdkEnum.Flags.Green: Say( Settings.SayGreenFlag ); break;
-						case IRacingSdkEnum.Flags.Yellow: Say( Settings.SayYellowFlag ); break;
-						case IRacingSdkEnum.Flags.Red: Say( Settings.SayRedFlag ); break;
-						case IRacingSdkEnum.Flags.Blue: Say( Settings.SayBlueFlag ); break;
-						case IRacingSdkEnum.Flags.Debris: Say( Settings.SayDebrisFlag ); break;
-						case IRacingSdkEnum.Flags.Crossed: Say( Settings.SayCrossedFlag ); break;
-						case IRacingSdkEnum.Flags.YellowWaving: Say( Settings.SayYellowWavingFlag ); break;
-						case IRacingSdkEnum.Flags.OneLapToGreen: Say( Settings.SayOneLapToGreenFlag ); break;
-						case IRacingSdkEnum.Flags.GreenHeld: Say( Settings.SayGreenHeldFlag ); break;
-						case IRacingSdkEnum.Flags.TenToGo: Say( Settings.SayTenToGoFlag ); break;
-						case IRacingSdkEnum.Flags.FiveToGo: Say( Settings.SayFiveToGoFlag ); break;
-						case IRacingSdkEnum.Flags.RandomWaving: Say( Settings.SayRandomWavingFlag ); break;
-						case IRacingSdkEnum.Flags.Caution: Say( Settings.SayCautionFlag ); break;
-						case IRacingSdkEnum.Flags.CautionWaving: Say( Settings.SayCautionWavingFlag ); break;
-						case IRacingSdkEnum.Flags.Black: Say( Settings.SayBlackFlag ); break;
-						case IRacingSdkEnum.Flags.Disqualify: Say( Settings.SayDisqualifyFlag ); break;
-						case IRacingSdkEnum.Flags.Servicible: Say( Settings.SayServicibleFlag ); break;
-						case IRacingSdkEnum.Flags.Furled: Say( Settings.SayFurledFlag ); break;
-						case IRacingSdkEnum.Flags.Repair: Say( Settings.SayRepairFlag ); break;
-						case IRacingSdkEnum.Flags.StartHidden: Say( Settings.SayStartHiddenFlag ); break;
-						case IRacingSdkEnum.Flags.StartReady: Say( Settings.SayStartReadyFlag ); break;
-						case IRacingSdkEnum.Flags.StartSet: Say( Settings.SayStartSetFlag ); break;
-						case IRacingSdkEnum.Flags.StartGo: Say( Settings.SayStartGoFlag ); break;
+						case IRacingSdkEnum.Flags.Checkered: Say( Settings.SayCheckeredFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.White: Say( Settings.SayWhiteFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Green: Say( Settings.SayGreenFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Yellow: Say( Settings.SayYellowFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Red: Say( Settings.SayRedFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Blue: Say( Settings.SayBlueFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Debris: Say( Settings.SayDebrisFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Crossed: Say( Settings.SayCrossedFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.YellowWaving: Say( Settings.SayYellowWavingFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.OneLapToGreen: Say( Settings.SayOneLapToGreenFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.GreenHeld: Say( Settings.SayGreenHeldFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.TenToGo: Say( Settings.SayTenToGoFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.FiveToGo: Say( Settings.SayFiveToGoFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.RandomWaving: Say( Settings.SayRandomWavingFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Caution: Say( Settings.SayCautionFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.CautionWaving: Say( Settings.SayCautionWavingFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Black: Say( Settings.SayBlackFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Disqualify: Say( Settings.SayDisqualifyFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Servicible: Say( Settings.SayServicibleFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Furled: Say( Settings.SayFurledFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.Repair: Say( Settings.SayRepairFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.StartHidden: Say( Settings.SayStartHiddenFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.StartReady: Say( Settings.SayStartReadyFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.StartSet: Say( Settings.SayStartSetFlag, null, false, false ); break;
+						case IRacingSdkEnum.Flags.StartGo: Say( Settings.SayStartGoFlag, null, false, false ); break;
 					}
 				}
 			}

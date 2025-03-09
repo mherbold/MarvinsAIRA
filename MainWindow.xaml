@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.41"
+        Title="Marvin's Awesome iRacing App v0.42"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -1249,6 +1249,13 @@
                         <StackPanel Margin="10,10,10,10">
                             <StackPanel>
                                 <CheckBox Content="Control RPM lights on Logitech steering wheels" IsChecked="{Binding ControlRPMLights}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </TabItem>
+                    <TabItem Header="Chat" x:Name="Settings_Chat_TabItem">
+                        <StackPanel Margin="10,10,10,10">
+                            <StackPanel>
+                                <CheckBox Content="Enable sending informational messages to the iRacing chat window" IsChecked="{Binding EnableChat}"/>
                             </StackPanel>
                         </StackPanel>
                     </TabItem>

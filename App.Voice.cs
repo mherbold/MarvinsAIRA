@@ -72,25 +72,37 @@ namespace MarvinsAIRA
 			UpdateVolume();
 		}
 
-		public void Say( string text, string? value = null, bool interrupt = false )
+		public void Say( string message, string? value = null, bool interrupt = false, bool alsoAddToChatQueue = true )
 		{
-			if ( text != string.Empty )
+			if ( Settings.EnableSpeechSynthesizer && ( _voice_speechSynthesizer != null ) )
 			{
-				if ( Settings.EnableSpeechSynthesizer && ( _voice_speechSynthesizer != null ) )
+				if ( value != null )
 				{
-					if ( value != null )
+					if ( value == "" )
 					{
-						text = text.Replace( ":value:", value );
+						return;
 					}
 
-					if ( interrupt )
-					{
-						_voice_speechSynthesizer.Pause();
-						_voice_speechSynthesizer.SpeakAsyncCancelAll();
-						_voice_speechSynthesizer.Resume();
-					}
+					message = message.Replace( ":value:", value );
+				}
 
-					_voice_speechSynthesizer.SpeakAsync( text );
+				if ( message == string.Empty )
+				{
+					return;
+				}
+
+				if ( interrupt )
+				{
+					_voice_speechSynthesizer.Pause();
+					_voice_speechSynthesizer.SpeakAsyncCancelAll();
+					_voice_speechSynthesizer.Resume();
+				}
+
+				_voice_speechSynthesizer.SpeakAsync( message );
+
+				if ( alsoAddToChatQueue )
+				{
+					Chat( message );
 				}
 			}
 		}

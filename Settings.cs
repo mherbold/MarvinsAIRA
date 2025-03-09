@@ -2120,7 +2120,7 @@ namespace MarvinsAIRA
 		private string _sayStartHiddenFlag = "";
 		private string _sayStartReadyFlag = "Get ready!";
 		private string _sayStartSetFlag = "";
-		private string _sayStartGoFlag = "Go! Go! Go!";
+		private string _sayStartGoFlag = "Go Go Go!";
 
 		public string SayHello { get => _sayHello; set { if ( _sayHello != value ) { _sayHello = value; OnPropertyChanged(); } } }
 		public string SayConnected { get => _sayConnected; set { if ( _sayConnected != value ) { _sayConnected = value; OnPropertyChanged(); } } }
@@ -2719,6 +2719,31 @@ namespace MarvinsAIRA
 					app.WriteLine( $"ControlRPMLights changed - before {_controlRPMLights} now {value}" );
 
 					_controlRPMLights = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region Settings tab - Chat
+
+		private bool _enableChat = false;
+
+		public bool EnableChat
+		{
+			get => _enableChat;
+
+			set
+			{
+				if ( _enableChat != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableChat changed - before {_enableChat} now {value}" );
+
+					_enableChat = value;
 
 					OnPropertyChanged();
 				}

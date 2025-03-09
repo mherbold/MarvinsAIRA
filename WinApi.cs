@@ -36,5 +36,12 @@ namespace MarvinsAIRA
 
 		[DllImport( "user32.dll" )]
 		public static extern uint UnregisterDeviceNotification( IntPtr Handle );
+
+		[DllImport( "user32.dll", SetLastError = true )]
+		public static extern IntPtr FindWindow( string? lpClassName, string lpWindowName );
+
+		[return: MarshalAs( UnmanagedType.Bool )]
+		[DllImport( "user32.dll", SetLastError = true, CharSet = CharSet.Auto )]
+		public static extern bool PostMessage( IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam );
 	}
 }

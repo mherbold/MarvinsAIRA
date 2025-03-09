@@ -301,6 +301,7 @@ namespace MarvinsAIRA
 							app.UpdateWindSimulator();
 							app.UpdateSpotter( deltaTime );
 							app.UpdateLogitech();
+							app.ProcessChatMessageQueue();
 
 							// test signal
 
@@ -583,7 +584,7 @@ namespace MarvinsAIRA
 			_win_updateLoopRunning = false;
 		}
 
-		private string GetRecordingIndexAsTime()
+		private static string GetRecordingIndexAsTime()
 		{
 			var app = (App) Application.Current;
 
@@ -1154,7 +1155,7 @@ namespace MarvinsAIRA
 
 				app.UpdateVolume();
 
-				app.Say( app.Settings.SayVoiceVolume, app.Settings.SpeechSynthesizerVolume.ToString(), true );
+				app.Say( app.Settings.SayVoiceVolume, app.Settings.SpeechSynthesizerVolume.ToString(), true, false );
 			}
 		}
 
@@ -1166,7 +1167,7 @@ namespace MarvinsAIRA
 
 				app.InitializeVoice();
 
-				app.Say( app.Settings.SayHello, null, true );
+				app.Say( app.Settings.SayHello, null, true, false );
 			}
 		}
 
