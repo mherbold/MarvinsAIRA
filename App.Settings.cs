@@ -100,13 +100,13 @@ namespace MarvinsAIRA
 						{
 							steeringEffectsSettings.SteeringEffectsEnabled = Settings.SteeringEffectsEnabled;
 
-							steeringEffectsSettings.USYawRateFactorLeft = Settings.USYawRateFactorLeft;
-							steeringEffectsSettings.USYawRateFactorRight = Settings.USYawRateFactorRight;
-							steeringEffectsSettings.USTolerance = Settings.USTolerance;
+							steeringEffectsSettings.USStartYawRateFactorLeft = Settings.USStartYawRateFactorLeft;
+							steeringEffectsSettings.USEndYawRateFactorLeft = Settings.USEndYawRateFactorLeft;
+							steeringEffectsSettings.USStartYawRateFactorRight = Settings.USStartYawRateFactorRight;
+							steeringEffectsSettings.USEndYawRateFactorRight = Settings.USEndYawRateFactorRight;
 
-							steeringEffectsSettings.OSYawRateFactorLeft = Settings.OSYawRateFactorLeft;
-							steeringEffectsSettings.OSYawRateFactorRight = Settings.OSYawRateFactorRight;
-							steeringEffectsSettings.OSTolerance = Settings.OSTolerance;
+							steeringEffectsSettings.OSStartYawRateFactorLeft = Settings.OSStartYVelocity;
+							steeringEffectsSettings.OSEndYawRateFactorLeft = Settings.OSEndYVelocity;
 
 							steeringEffectsSettingsFound = true;
 
@@ -122,13 +122,13 @@ namespace MarvinsAIRA
 
 							SteeringEffectsEnabled = Settings.SteeringEffectsEnabled,
 
-							USYawRateFactorLeft = Settings.USYawRateFactorLeft,
-							USYawRateFactorRight = Settings.USYawRateFactorRight,
-							USTolerance = Settings.USTolerance,
+							USStartYawRateFactorLeft = Settings.USStartYawRateFactorLeft,
+							USEndYawRateFactorLeft = Settings.USEndYawRateFactorLeft,
+							USStartYawRateFactorRight = Settings.USStartYawRateFactorRight,
+							USEndYawRateFactorRight = Settings.USEndYawRateFactorRight,
 
-							OSYawRateFactorLeft = Settings.OSYawRateFactorLeft,
-							OSYawRateFactorRight = Settings.OSYawRateFactorRight,
-							OSTolerance = Settings.OSTolerance
+							OSStartYawRateFactorLeft = Settings.OSStartYVelocity,
+							OSEndYawRateFactorLeft = Settings.OSEndYVelocity,
 						};
 
 						Settings.SteeringEffectsSettingsList.Add( steeringEffectsSettings );

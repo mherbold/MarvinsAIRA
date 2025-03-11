@@ -90,14 +90,12 @@ namespace MarvinsAIRA
 		private readonly float[] _ffb_yawRateFactorBuffer = new float[ 120 ];
 		private int _ffb_yawRateFactorBufferIndex = 0;
 
-		private float _ffb_understeerExpectedYawRate = 0;
-		private float _ffb_understeerYawRateDifference = 0;
 		private float _ffb_understeerAmount = 0;
+		private float _ffb_understeerAmountLinear = 0;
 		private float _ffb_understeerEffectWaveAngle = 0;
 
-		private float _ffb_oversteerExpectedYawRate = 0;
-		private float _ffb_oversteerYawRateDifference = 0;
 		private float _ffb_oversteerAmount = 0;
+		private float _ffb_oversteerAmountLinear = 0;
 		private float _ffb_oversteerEffectWaveAngle = 0;
 
 		private float _ffb_crashProtectionTimer = 0;
@@ -110,12 +108,10 @@ namespace MarvinsAIRA
 		public int FFB_LastMagnitudeSentToWheel { get => _ffb_lastMagnitudeSentToWheel; }
 		public float FFB_YawRateFactorInstant { get => _ffb_yawRateFactorInstant; }
 		public float FFB_YawRateFactorAverage { get => _ffb_yawRateFactorAverage; }
-		public float FFB_UndersteerExpectedYawRate { get => _ffb_understeerExpectedYawRate; }
-		public float FFB_UndersteerYawRateDifference { get => _ffb_understeerYawRateDifference; }
 		public float FFB_UndersteerAmount { get => _ffb_understeerAmount; }
-		public float FFB_OversteerExpectedYawRate { get => _ffb_oversteerExpectedYawRate; }
-		public float FFB_OversteerYawRateDifference { get => _ffb_oversteerYawRateDifference; }
+		public float FFB_UndersteerAmountLinear { get => _ffb_understeerAmountLinear; }
 		public float FFB_OversteerAmount { get => _ffb_oversteerAmount; }
+		public float FFB_OversteerAmountLinear { get => _ffb_oversteerAmountLinear; }
 
 		public void InitializeForceFeedback( nint windowHandle, bool isFirstInitialization = false )
 		{
@@ -502,15 +498,11 @@ namespace MarvinsAIRA
 
 					if ( _irsdk_steeringWheelAngle >= 0 )
 					{
-						Settings.USYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
-
-						Say( Settings.SayUSLeftYawRateFactor, Settings.USYawRateFactorLeft.ToString(), true );
+						Settings.USStartYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
 					}
 					else
 					{
-						Settings.USYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
-
-						Say( Settings.SayUSRightYawRateFactor, Settings.USYawRateFactorRight.ToString(), true );
+						Settings.USStartYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
 					}
 				}
 
@@ -522,18 +514,8 @@ namespace MarvinsAIRA
 					WriteLine( "" );
 					WriteLine( $"OVERSTEER-EFFECT button pressed!" );
 
-					if ( _irsdk_steeringWheelAngle >= 0 )
-					{
-						Settings.OSYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
-
-						Say( Settings.SayOSLeftYawRateFactor, Settings.OSYawRateFactorLeft.ToString(), true );
-					}
-					else
-					{
-						Settings.OSYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
-
-						Say( Settings.SayOSRightYawRateFactor, Settings.OSYawRateFactorRight.ToString(), true );
-					}
+					Settings.OSStartYVelocity = (int) Math.Abs( _irsdk_velocityY );
+					Settings.OSEndYVelocity = Settings.OSStartYVelocity + 10;
 				}
 
 				buttonPresses = Settings.DecreaseLFEScaleButtons.ClickCount;
@@ -688,13 +670,13 @@ namespace MarvinsAIRA
 					{
 						Settings.SteeringEffectsEnabled = steeringEffectsSettings.SteeringEffectsEnabled;
 
-						Settings.USYawRateFactorLeft = steeringEffectsSettings.USYawRateFactorLeft;
-						Settings.USYawRateFactorRight = steeringEffectsSettings.USYawRateFactorRight;
-						Settings.USTolerance = steeringEffectsSettings.USTolerance;
+						Settings.USStartYawRateFactorLeft = steeringEffectsSettings.USStartYawRateFactorLeft;
+						Settings.USEndYawRateFactorLeft = steeringEffectsSettings.USEndYawRateFactorLeft;
+						Settings.USStartYawRateFactorRight = steeringEffectsSettings.USStartYawRateFactorRight;
+						Settings.USEndYawRateFactorRight = steeringEffectsSettings.USEndYawRateFactorRight;
 
-						Settings.OSYawRateFactorLeft = steeringEffectsSettings.OSYawRateFactorLeft;
-						Settings.OSYawRateFactorRight = steeringEffectsSettings.OSYawRateFactorRight;
-						Settings.OSTolerance = steeringEffectsSettings.OSTolerance;
+						Settings.OSStartYVelocity = steeringEffectsSettings.OSStartYawRateFactorLeft;
+						Settings.OSEndYVelocity = steeringEffectsSettings.OSEndYawRateFactorLeft;
 
 						steeringEffectsSettingsFound = true;
 
@@ -706,13 +688,13 @@ namespace MarvinsAIRA
 				{
 					Settings.SteeringEffectsEnabled = false;
 
-					Settings.USYawRateFactorLeft = 0;
-					Settings.USYawRateFactorRight = 0;
-					Settings.USTolerance = 20;
+					Settings.USStartYawRateFactorLeft = 0;
+					Settings.USEndYawRateFactorLeft = 0;
+					Settings.USStartYawRateFactorRight = 0;
+					Settings.USEndYawRateFactorRight = 0;
 
-					Settings.OSYawRateFactorLeft = 0;
-					Settings.OSYawRateFactorRight = 0;
-					Settings.OSTolerance = 20;
+					Settings.OSStartYVelocity = 0;
+					Settings.OSEndYVelocity = 0;
 				}
 
 				_settings_pauseSerialization = false;
@@ -948,7 +930,7 @@ namespace MarvinsAIRA
 
 			// calculate current instant yaw rate factor
 
-			if ( ( Math.Abs( _irsdk_yawRate ) > 0.0175f ) && ( _irsdk_velocityX > 0f ) )
+			if ( ( Math.Abs( _irsdk_yawRate ) >= 5f * 0.0175f ) && ( _irsdk_velocityX > 0f ) )
 			{
 				_ffb_yawRateFactorInstant = _irsdk_steeringWheelAngle * _irsdk_speed / _irsdk_yawRate;
 			}
@@ -975,61 +957,42 @@ namespace MarvinsAIRA
 			// steering effects
 
 			_ffb_understeerAmount = 0f;
+			_ffb_understeerAmountLinear = 0f;
+
 			_ffb_oversteerAmount = 0f;
+			_ffb_oversteerAmountLinear = 0;
 
 			var understeerFrequency = 0f;
 			var oversteerFrequency = 0f;
 
 			if ( _ffb_yawRateFactorInstant > 0f )
 			{
+				// calculate understeer amount
+
 				if ( _irsdk_steeringWheelAngle >= 0f )
 				{
-					// calculate the understeer expected yaw rate and difference
-
-					_ffb_understeerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.USYawRateFactorLeft;
-
-					_ffb_understeerYawRateDifference = _ffb_understeerExpectedYawRate - _irsdk_yawRate;
-
-					// calculate the oversteer expected yaw rate and difference
-
-					_ffb_oversteerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.OSYawRateFactorLeft;
-
-					_ffb_oversteerYawRateDifference = _irsdk_yawRate - _ffb_oversteerExpectedYawRate;
+					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorLeft ) / (float) ( Settings.USEndYawRateFactorLeft - Settings.USStartYawRateFactorLeft ), 0f, 1f );
 				}
 				else
 				{
-					// calculate understeer the expected yaw rate and difference
-
-					_ffb_understeerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.USYawRateFactorRight;
-
-					_ffb_understeerYawRateDifference = _irsdk_yawRate - _ffb_understeerExpectedYawRate;
-
-					// calculate the oversteer expected yaw rate and difference
-
-					_ffb_oversteerExpectedYawRate = _irsdk_steeringWheelAngle * _irsdk_speed / Settings.OSYawRateFactorRight;
-
-					_ffb_oversteerYawRateDifference = _ffb_oversteerExpectedYawRate - _irsdk_yawRate;
+					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorRight ) / (float) ( Settings.USEndYawRateFactorRight - Settings.USStartYawRateFactorRight ), 0f, 1f );
 				}
+
+				// calculate oversteer amount
+
+				_ffb_oversteerAmountLinear = Math.Clamp( ( Math.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / (float) ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
 
 				// understeer effect
 
-				var scaledUndersteerYawRateDifference = (float) ( _ffb_understeerYawRateDifference / ( Settings.USTolerance * Math.PI / 180f ) );
+				understeerFrequency = Math.Max( 0.25f, _ffb_understeerAmountLinear );
 
-				var understeerAmount = Math.Clamp( scaledUndersteerYawRateDifference, 0f, 1f );
-
-				understeerFrequency = Math.Max( 0.25f, understeerAmount );
-
-				_ffb_understeerAmount = (float) Math.Pow( understeerAmount, Settings.USCurve );
+				_ffb_understeerAmount = (float) Math.Pow( _ffb_understeerAmountLinear, Settings.USCurve );
 
 				// oversteer effect
 
-				var scaledOversteerYawRateDifference = (float) ( _ffb_oversteerYawRateDifference / ( Settings.OSTolerance * Math.PI / 180f ) );
+				oversteerFrequency = Math.Max( 0.25f, _ffb_oversteerAmountLinear );
 
-				var oversteerAmount = Math.Clamp( scaledOversteerYawRateDifference, 0f, 1f );
-
-				oversteerFrequency = Math.Max( 0.25f, oversteerAmount );
-
-				_ffb_oversteerAmount = (float) Math.Pow( oversteerAmount, Settings.OSCurve );
+				_ffb_oversteerAmount = (float) Math.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
 
 				// invert the effects if the user wants them inverted
 
@@ -1042,14 +1005,6 @@ namespace MarvinsAIRA
 				{
 					_ffb_oversteerAmount = -_ffb_oversteerAmount;
 				}
-			}
-			else
-			{
-				_ffb_understeerExpectedYawRate = 0f;
-				_ffb_understeerYawRateDifference = 0f;
-
-				_ffb_oversteerExpectedYawRate = 0f;
-				_ffb_oversteerYawRateDifference = 0f;
 			}
 
 			// we want to reduce forces while the car is moving very slow or parked

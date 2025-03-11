@@ -401,44 +401,20 @@ namespace MarvinsAIRA
 
 									// X Velocity
 
-									if ( app._irsdk_displayUnits == 0 )
-									{
-										XVelocity_Label.Content = $"{app._irsdk_velocityX * App.MPS_TO_MPH:F0} MPH";
+									XVelocity_Label.Content = $"{app._irsdk_velocityX:F0} m/s";
 
-										if ( (string) XVelocity_Label.Content == "-0 MPH" )
-										{
-											XVelocity_Label.Content = "0 MPH";
-										}
-									}
-									else
+									if ( (string) XVelocity_Label.Content == "-0 m/s" )
 									{
-										XVelocity_Label.Content = $"{app._irsdk_velocityX * App.MPS_TO_KPH:F0} KPH";
-
-										if ( (string) XVelocity_Label.Content == "-0 KPH" )
-										{
-											XVelocity_Label.Content = "0 KPH";
-										}
+										XVelocity_Label.Content = "0 m/s";
 									}
 
 									// Y Velocity
 
-									if ( app._irsdk_displayUnits == 0 )
-									{
-										YVelocity_Label.Content = $"{app._irsdk_velocityY * App.MPS_TO_MPH:F0} MPH";
+									YVelocity_Label.Content = $"{app._irsdk_velocityY:F0} m/s";
 
-										if ( (string) YVelocity_Label.Content == "-0 MPH" )
-										{
-											YVelocity_Label.Content = "0 MPH";
-										}
-									}
-									else
+									if ( (string) YVelocity_Label.Content == "-0 m/s" )
 									{
-										YVelocity_Label.Content = $"{app._irsdk_velocityY * App.MPS_TO_KPH:F0} KPH";
-
-										if ( (string) YVelocity_Label.Content == "-0 KPH" )
-										{
-											YVelocity_Label.Content = "0 KPH";
-										}
+										YVelocity_Label.Content = "0 m/s";
 									}
 
 									// Yaw rate
@@ -470,93 +446,58 @@ namespace MarvinsAIRA
 										YawRateFactorAverage_Label.Content = "0.00";
 									}
 
-									// Oversteer expected yaw rate
-
-									var oversteerExpectedYawRateInDegreesPerSecond = app.FFB_OversteerExpectedYawRate * 180f / Math.PI;
-
-									OversteerExpectedYawRate_Label.Content = $"{oversteerExpectedYawRateInDegreesPerSecond:F0}°/sec";
-
-									if ( (string) OversteerExpectedYawRate_Label.Content == "-0°/sec" )
-									{
-										OversteerExpectedYawRate_Label.Content = $"0°/sec";
-									}
-
-									// Oversteer yaw rate difference
-
-									var oversteerYawRateDifferenceInDegreesPerSecond = app.FFB_OversteerYawRateDifference * 180f / Math.PI;
-
-									OversteerYawRateDifference_Label.Content = $"{oversteerYawRateDifferenceInDegreesPerSecond:F0}°/sec";
-
-									if ( (string) OversteerYawRateDifference_Label.Content == "-0°/sec" )
-									{
-										OversteerYawRateDifference_Label.Content = $"0°/sec";
-									}
-
 									// Oversteer amount
 
-									OversteerAmount_Label.Content = $"{app.FFB_OversteerAmount * 100f:F0}%";
+									var oversteerAmount = Math.Abs( app.FFB_OversteerAmount );
 
-									// Understeer expected yaw rate
-
-									var understeerExpectedYawRateInDegreesPerSecond = app.FFB_UndersteerExpectedYawRate * 180f / Math.PI;
-
-									UndersteerExpectedYawRate_Label.Content = $"{understeerExpectedYawRateInDegreesPerSecond:F0}°/sec";
-
-									if ( (string) UndersteerExpectedYawRate_Label.Content == "-0°/sec" )
-									{
-										UndersteerExpectedYawRate_Label.Content = $"0°/sec";
-									}
-
-									// Understeer yaw rate difference
-
-									var understeerYawRateDifferenceInDegreesPerSecond = app.FFB_UndersteerYawRateDifference * 180f / Math.PI;
-
-									UndersteerYawRateDifference_Label.Content = $"{understeerYawRateDifferenceInDegreesPerSecond:F0}°/sec";
-
-									if ( (string) UndersteerYawRateDifference_Label.Content == "-0°/sec" )
-									{
-										UndersteerYawRateDifference_Label.Content = $"0°/sec";
-									}
+									OversteerAmount_Label.Content = $"{oversteerAmount * 100f:F0}%";
 
 									// Understeer amount
 
-									UndersteerAmount_Label.Content = $"{app.FFB_UndersteerAmount * 100f:F0}%";
+									var understeerAmount = Math.Abs( app.FFB_UndersteerAmount );
+
+									UndersteerAmount_Label.Content = $"{understeerAmount * 100f:F0}%";
 
 									// Oversteer graph
 
-									var x = Math.Clamp( oversteerYawRateDifferenceInDegreesPerSecond / app.Settings.OSTolerance, 0, 1 ) * IMAGE_WIDTH;
-									var y = app.FFB_OversteerAmount * IMAGE_HEIGHT;
+									float osRange = app.Settings.OSEndYVelocity - app.Settings.OSStartYVelocity;
 
-									Oversteer_Ellipse.RenderTransform = new TranslateTransform( IMAGE_WIDTH / 2 - x, IMAGE_HEIGHT / 2 - y );
+									var x = app.FFB_OversteerAmountLinear * IMAGE_WIDTH;
+									var y = oversteerAmount * IMAGE_HEIGHT;
 
-									if ( app._irsdk_steeringWheelAngle >= 0 )
-									{
-										Oversteer_YawRateFactor_Label.Content = $"YRF {app.Settings.OSYawRateFactorLeft}";
-									}
-									else
-									{
-										Oversteer_YawRateFactor_Label.Content = $"YRF {app.Settings.OSYawRateFactorRight}";
-									}
+									Oversteer_Ellipse.RenderTransform = new TranslateTransform( IMAGE_WIDTH / 2f - x, IMAGE_HEIGHT / 2f - y );
 
-									Oversteer_Tolerance_Label.Content = $"{app.Settings.OSToleranceString} Tolerance";
+									Oversteer_StartYVelocity_Label.Content = $"{app.Settings.OSStartYVelocity} m/s";
+									Oversteer_EndYVelocity_Label.Content = $"{app.Settings.OSEndYVelocity} m/s";
 
 									// Understeer graph
 
-									x = Math.Clamp( understeerYawRateDifferenceInDegreesPerSecond / app.Settings.USTolerance, 0, 1 ) * IMAGE_WIDTH;
-									y = app.FFB_UndersteerAmount * IMAGE_HEIGHT;
-
-									Understeer_Ellipse.RenderTransform = new TranslateTransform( x - IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2 - y );
+									float usRange = 0f;
 
 									if ( app._irsdk_steeringWheelAngle >= 0 )
 									{
-										Understeer_YawRateFactor_Label.Content = $"YRF {app.Settings.USYawRateFactorLeft}";
+										usRange = app.Settings.USStartYawRateFactorLeft - app.Settings.USEndYawRateFactorLeft;
 									}
 									else
 									{
-										Understeer_YawRateFactor_Label.Content = $"YRF {app.Settings.USYawRateFactorRight}";
+										usRange = app.Settings.USEndYawRateFactorRight - app.Settings.USStartYawRateFactorRight;
 									}
 
-									Understeer_Tolerance_Label.Content = $"{app.Settings.USToleranceString} Tolerance";
+									x = app.FFB_UndersteerAmountLinear * IMAGE_WIDTH;
+									y = understeerAmount * IMAGE_HEIGHT;
+
+									Understeer_Ellipse.RenderTransform = new TranslateTransform( x - IMAGE_WIDTH / 2f, IMAGE_HEIGHT / 2f - y );
+
+									if ( app._irsdk_steeringWheelAngle >= 0 )
+									{
+										Understeer_StartYawRateFactor_Label.Content = $"YRF {app.Settings.USStartYawRateFactorLeft}";
+										Understeer_EndYawRateFactor_Label.Content = $"YRF {app.Settings.USEndYawRateFactorLeft}";
+									}
+									else
+									{
+										Understeer_StartYawRateFactor_Label.Content = $"YRF {app.Settings.USStartYawRateFactorRight}";
+										Understeer_EndYawRateFactor_Label.Content = $"YRF {app.Settings.USEndYawRateFactorRight}";
+									}
 								} );
 							}
 

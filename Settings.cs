@@ -599,38 +599,38 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Understeer effect yaw rate factor (left) */
+		/* Understeer effect yaw rate factor (start left) */
 
-		private int _usYawRateFactorLeft = 0;
+		private int _usStartYawRateFactorLeft = 0;
 
-		public int USYawRateFactorLeft
+		public int USStartYawRateFactorLeft
 		{
-			get => _usYawRateFactorLeft;
+			get => _usStartYawRateFactorLeft;
 
 			set
 			{
 				value = Math.Clamp( value, 0, 200 );
 
-				if ( _usYawRateFactorLeft != value )
+				if ( _usStartYawRateFactorLeft != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"USYawRateFactorLeft changed - before {_usYawRateFactorLeft} now {value}" );
+					app.WriteLine( $"USStartYawRateFactorLeft changed - before {_usStartYawRateFactorLeft} now {value}" );
 
-					_usYawRateFactorLeft = value;
+					_usStartYawRateFactorLeft = value;
 
 					OnPropertyChanged();
 				}
 
-				USYawRateFactorLeftString = $"!{_usYawRateFactorLeft}";
+				USStartYawRateFactorLeftString = $"!{_usStartYawRateFactorLeft}";
 			}
 		}
 
-		private string _usYawRateFactorLeftString = "0";
+		private string _usStartYawRateFactorLeftString = "0";
 
-		public string USYawRateFactorLeftString
+		public string USStartYawRateFactorLeftString
 		{
-			get => _usYawRateFactorLeftString;
+			get => _usStartYawRateFactorLeftString;
 
 			set
 			{
@@ -638,9 +638,9 @@ namespace MarvinsAIRA
 				{
 					value = value[ 1.. ];
 
-					if ( _usYawRateFactorLeftString != value )
+					if ( _usStartYawRateFactorLeftString != value )
 					{
-						_usYawRateFactorLeftString = value;
+						_usStartYawRateFactorLeftString = value;
 
 						OnPropertyChanged();
 					}
@@ -648,38 +648,38 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Understeer effect yaw rate factor (right) */
+		/* Understeer effect yaw rate factor (end left) */
 
-		private int _usYawRateFactorRight = 0;
+		private int _usEndYawRateFactorLeft = 0;
 
-		public int USYawRateFactorRight
+		public int USEndYawRateFactorLeft
 		{
-			get => _usYawRateFactorRight;
+			get => _usEndYawRateFactorLeft;
 
 			set
 			{
 				value = Math.Clamp( value, 0, 200 );
 
-				if ( _usYawRateFactorRight != value )
+				if ( _usEndYawRateFactorLeft != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"USYawRateFactorRight changed - before {_usYawRateFactorRight} now {value}" );
+					app.WriteLine( $"USEndYawRateFactorLeft changed - before {_usEndYawRateFactorLeft} now {value}" );
 
-					_usYawRateFactorRight = value;
+					_usEndYawRateFactorLeft = value;
 
 					OnPropertyChanged();
 				}
 
-				USYawRateFactorRightString = $"!{_usYawRateFactorRight}";
+				USEndYawRateFactorLeftString = $"!{_usEndYawRateFactorLeft}";
 			}
 		}
 
-		private string _usYawRateFactorRightString = "0";
+		private string _usEndYawRateFactorLeftString = "0";
 
-		public string USYawRateFactorRightString
+		public string USEndYawRateFactorLeftString
 		{
-			get => _usYawRateFactorRightString;
+			get => _usEndYawRateFactorLeftString;
 
 			set
 			{
@@ -687,9 +687,9 @@ namespace MarvinsAIRA
 				{
 					value = value[ 1.. ];
 
-					if ( _usYawRateFactorRightString != value )
+					if ( _usEndYawRateFactorLeftString != value )
 					{
-						_usYawRateFactorRightString = value;
+						_usEndYawRateFactorLeftString = value;
 
 						OnPropertyChanged();
 					}
@@ -697,38 +697,38 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Understeer effect tolernce */
+		/* Understeer effect yaw rate factor (start right) */
 
-		private int _usTolerance = 20;
+		private int _usStartYawRateFactorRight = 0;
 
-		public int USTolerance
+		public int USStartYawRateFactorRight
 		{
-			get => _usTolerance;
+			get => _usStartYawRateFactorRight;
 
 			set
 			{
-				value = Math.Clamp( value, 1, 60 );
+				value = Math.Clamp( value, 0, 200 );
 
-				if ( _usTolerance != value )
+				if ( _usStartYawRateFactorRight != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"USTolerance changed - before {_usTolerance} now {value}" );
+					app.WriteLine( $"USStartYawRateFactorRight changed - before {_usStartYawRateFactorRight} now {value}" );
 
-					_usTolerance = value;
+					_usStartYawRateFactorRight = value;
 
 					OnPropertyChanged();
 				}
 
-				USToleranceString = $"!{_usTolerance}°/sec";
+				USStartYawRateFactorRightString = $"!{_usStartYawRateFactorRight}";
 			}
 		}
 
-		private string _usToleranceString = "20°/sec";
+		private string _usStartYawRateFactorRightString = "0";
 
-		public string USToleranceString
+		public string USStartYawRateFactorRightString
 		{
-			get => _usToleranceString;
+			get => _usStartYawRateFactorRightString;
 
 			set
 			{
@@ -736,9 +736,58 @@ namespace MarvinsAIRA
 				{
 					value = value[ 1.. ];
 
-					if ( _usToleranceString != value )
+					if ( _usStartYawRateFactorRightString != value )
 					{
-						_usToleranceString = value;
+						_usStartYawRateFactorRightString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Understeer effect yaw rate factor (end right) */
+
+		private int _usEndYawRateFactorRight = 0;
+
+		public int USEndYawRateFactorRight
+		{
+			get => _usEndYawRateFactorRight;
+
+			set
+			{
+				value = Math.Clamp( value, 0, 200 );
+
+				if ( _usEndYawRateFactorRight != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"USEndYawRateFactorRight changed - before {_usEndYawRateFactorRight} now {value}" );
+
+					_usEndYawRateFactorRight = value;
+
+					OnPropertyChanged();
+				}
+
+				USEndYawRateFactorRightString = $"!{_usEndYawRateFactorRight}";
+			}
+		}
+
+		private string _usEndYawRateFactorRightString = "0";
+
+		public string USEndYawRateFactorRightString
+		{
+			get => _usEndYawRateFactorRightString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _usEndYawRateFactorRightString != value )
+					{
+						_usEndYawRateFactorRightString = value;
 
 						OnPropertyChanged();
 					}
@@ -911,38 +960,38 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Oversteer effect yaw rate factor (left) */
+		/* Oversteer effect y velocity (start) */
 
-		private int _osYawRateFactorLeft = 0;
+		private int _osStartYVelocity = 0;
 
-		public int OSYawRateFactorLeft
+		public int OSStartYVelocity
 		{
-			get => _osYawRateFactorLeft;
+			get => _osStartYVelocity;
 
 			set
 			{
-				value = Math.Clamp( value, 0, 200 );
+				value = Math.Clamp( value, 0, 50 );
 
-				if ( _osYawRateFactorLeft != value )
+				if ( _osStartYVelocity != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"OSYawRateFactorLeft changed - before {_osYawRateFactorLeft} now {value}" );
+					app.WriteLine( $"OSStartYVelocity changed - before {_osStartYVelocity} now {value}" );
 
-					_osYawRateFactorLeft = value;
+					_osStartYVelocity = value;
 
 					OnPropertyChanged();
 				}
 
-				OSYawRateFactorLeftString = $"!{_osYawRateFactorLeft}";
+				OSStartYVelocityString = $"!{_osStartYVelocity}";
 			}
 		}
 
-		private string _osYawRateFactorLeftString = "0";
+		private string _osStartYVelocityString = "0";
 
-		public string OSYawRateFactorLeftString
+		public string OSStartYVelocityString
 		{
-			get => _osYawRateFactorLeftString;
+			get => _osStartYVelocityString;
 
 			set
 			{
@@ -950,9 +999,9 @@ namespace MarvinsAIRA
 				{
 					value = value[ 1.. ];
 
-					if ( _osYawRateFactorLeftString != value )
+					if ( _osStartYVelocityString != value )
 					{
-						_osYawRateFactorLeftString = value;
+						_osStartYVelocityString = value;
 
 						OnPropertyChanged();
 					}
@@ -960,38 +1009,38 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Oversteer effect yaw rate factor (right) */
+		/* Oversteer effect y velocity (end) */
 
-		private int _osYawRateFactorRight = 0;
+		private int _osEndYVelocity = 0;
 
-		public int OSYawRateFactorRight
+		public int OSEndYVelocity
 		{
-			get => _osYawRateFactorRight;
+			get => _osEndYVelocity;
 
 			set
 			{
-				value = Math.Clamp( value, 0, 200 );
+				value = Math.Clamp( value, 0, 50 );
 
-				if ( _osYawRateFactorRight != value )
+				if ( _osEndYVelocity != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"OSYawRateFactorRight changed - before {_osYawRateFactorRight} now {value}" );
+					app.WriteLine( $"OSEndYVelocity changed - before {_osEndYVelocity} now {value}" );
 
-					_osYawRateFactorRight = value;
+					_osEndYVelocity = value;
 
 					OnPropertyChanged();
 				}
 
-				OSYawRateFactorRightString = $"!{_osYawRateFactorRight}";
+				OSEndYVelocityString = $"!{_osEndYVelocity}";
 			}
 		}
 
-		private string _osYawRateFactorRightString = "0";
+		private string _osEndYVelocityString = "0";
 
-		public string OSYawRateFactorRightString
+		public string OSEndYVelocityString
 		{
-			get => _osYawRateFactorRightString;
+			get => _osEndYVelocityString;
 
 			set
 			{
@@ -999,58 +1048,9 @@ namespace MarvinsAIRA
 				{
 					value = value[ 1.. ];
 
-					if ( _osYawRateFactorRightString != value )
+					if ( _osEndYVelocityString != value )
 					{
-						_osYawRateFactorRightString = value;
-
-						OnPropertyChanged();
-					}
-				}
-			}
-		}
-
-		/* Oversteer effect tolernce */
-
-		private int _osTolerance = 20;
-
-		public int OSTolerance
-		{
-			get => _osTolerance;
-
-			set
-			{
-				value = Math.Clamp( value, 1, 60 );
-
-				if ( _osTolerance != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"OSTolerance changed - before {_osTolerance} now {value}" );
-
-					_osTolerance = value;
-
-					OnPropertyChanged();
-				}
-
-				OSToleranceString = $"!{_osTolerance}°/sec";
-			}
-		}
-
-		private string _osToleranceString = "20°/sec";
-
-		public string OSToleranceString
-		{
-			get => _osToleranceString;
-
-			set
-			{
-				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
-				{
-					value = value[ 1.. ];
-
-					if ( _osToleranceString != value )
-					{
-						_osToleranceString = value;
+						_osEndYVelocityString = value;
 
 						OnPropertyChanged();
 					}
@@ -1149,13 +1149,15 @@ namespace MarvinsAIRA
 
 			public bool SteeringEffectsEnabled = false;
 
-			public int USYawRateFactorLeft = 0;
-			public int USYawRateFactorRight = 0;
-			public int USTolerance = 20;
+			public int USStartYawRateFactorLeft = 0;
+			public int USEndYawRateFactorLeft = 0;
+			public int USStartYawRateFactorRight = 0;
+			public int USEndYawRateFactorRight = 0;
 
-			public int OSYawRateFactorLeft = 0;
-			public int OSYawRateFactorRight = 0;
-			public int OSTolerance = 20;
+			public int OSStartYawRateFactorLeft = 0;
+			public int OSEndYawRateFactorLeft = 0;
+			public int OSStartYawRateFactorRight = 0;
+			public int OSEndYawRateFactorRight = 0;
 		}
 
 		public List<SteeringEffectsSettings> SteeringEffectsSettingsList { get; private set; } = [];
@@ -2086,10 +2088,6 @@ namespace MarvinsAIRA
 		private string _sayScalesReset = "This is the first time you have driven this combination, so we have reset the overall and detail scale.";
 		private string _sayLoadOverallScale = "The overall scale has been restored to :value: percent";
 		private string _sayLoadDetailScale = "The detail scale has been restored to :value: percent.";
-		private string _sayUSLeftYawRateFactor = "The understeer effect left yaw rate factor has been set to :value:.";
-		private string _sayUSRightYawRateFactor = "The understeer effect right yaw rate factor has been set to :value:.";
-		private string _sayOSLeftYawRateFactor = "The oversteer effect left yaw rate factor has been set to :value:.";
-		private string _sayOSRightYawRateFactor = "The oversteer effect right yaw rate factor has been set to :value:.";
 		private string _sayClear = "Clear!";
 		private string _sayCarLeft = "Car left.";
 		private string _sayCarRight = "Car right.";
@@ -2135,10 +2133,6 @@ namespace MarvinsAIRA
 		public string SayScalesReset { get => _sayScalesReset; set { if ( _sayScalesReset != value ) { _sayScalesReset = value; OnPropertyChanged(); } } }
 		public string SayLoadOverallScale { get => _sayLoadOverallScale; set { if ( _sayLoadOverallScale != value ) { _sayLoadOverallScale = value; OnPropertyChanged(); } } }
 		public string SayLoadDetailScale { get => _sayLoadDetailScale; set { if ( _sayLoadDetailScale != value ) { _sayLoadDetailScale = value; OnPropertyChanged(); } } }
-		public string SayUSLeftYawRateFactor { get => _sayUSLeftYawRateFactor; set { if ( _sayUSLeftYawRateFactor != value ) { _sayUSLeftYawRateFactor = value; OnPropertyChanged(); } } }
-		public string SayUSRightYawRateFactor { get => _sayUSRightYawRateFactor; set { if ( _sayUSRightYawRateFactor != value ) { _sayUSRightYawRateFactor = value; OnPropertyChanged(); } } }
-		public string SayOSLeftYawRateFactor { get => _sayOSLeftYawRateFactor; set { if ( _sayOSLeftYawRateFactor != value ) { _sayOSLeftYawRateFactor = value; OnPropertyChanged(); } } }
-		public string SayOSRightYawRateFactor { get => _sayOSRightYawRateFactor; set { if ( _sayOSRightYawRateFactor != value ) { _sayOSRightYawRateFactor = value; OnPropertyChanged(); } } }
 		public string SayClear { get => _sayClear; set { if ( _sayClear != value ) { _sayClear = value; OnPropertyChanged(); } } }
 		public string SayCarLeft { get => _sayCarLeft; set { if ( _sayCarLeft != value ) { _sayCarLeft = value; OnPropertyChanged(); } } }
 		public string SayCarRight { get => _sayCarRight; set { if ( _sayCarRight != value ) { _sayCarRight = value; OnPropertyChanged(); } } }

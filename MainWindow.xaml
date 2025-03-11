@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.42"
+        Title="Marvin's Awesome iRacing App v0.43"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -17,9 +18,11 @@
         Icon="/icon.ico"
         WindowStartupLocation="CenterScreen"
         ui:WindowHelper.UseModernWindowStyle="True">
+
     <Window.DataContext>
         <local:Settings />
     </Window.DataContext>
+
     <StackPanel Grid.Column="0">
         <TabControl>
             <TabItem>
@@ -191,37 +194,31 @@
                                     <Grid Margin="0,5,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="49"/>
+                                            <ColumnDefinition Width="41"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning left." />
-                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding USYawRateFactorLeft}" />
+                                        <TextBox Grid.Column="1" Text="{Binding USStartYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                        <TextBox Grid.Column="2" Text="{Binding USEndYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                        <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="200" VerticalAlignment="Center" HigherValue="{Binding USEndYawRateFactorLeft}" LowerValue="{Binding USStartYawRateFactorLeft}" />
                                     </Grid>
                                     <Grid Margin="0,5,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="49"/>
+                                            <ColumnDefinition Width="41"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning right." />
-                                        <TextBox Grid.Column="1" Text="{Binding USYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding USYawRateFactorRight}" />
+                                        <TextBox Grid.Column="1" Text="{Binding USStartYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                        <TextBox Grid.Column="2" Text="{Binding USEndYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                        <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="200" VerticalAlignment="Center" HigherValue="{Binding USEndYawRateFactorRight}" LowerValue="{Binding USStartYawRateFactorRight}" />
                                     </Grid>
                                 </StackPanel>
                                 <Button Grid.Column="1" x:Name="UndersteerEffect_Button" Margin="10,0,0,0" Click="UndersteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                     <Image Source="/u-button.png"/>
                                 </Button>
-                            </Grid>
-                            <Grid Margin="0,5,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Tolerance" VerticalAlignment="Center" ToolTip="This is how early the understeer effect will trigger." />
-                                <TextBox Grid.Column="1" Text="{Binding USToleranceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="60" SmallChange="1" LargeChange="10" Value="{Binding USTolerance}" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
@@ -269,37 +266,19 @@
                                     <Grid Margin="0,5,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="49"/>
+                                            <ColumnDefinition Width="41"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning left." />
-                                        <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding OSYawRateFactorLeft}" />
-                                    </Grid>
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the oversteer effect yaw rate factor when turning right." />
-                                        <TextBox Grid.Column="1" Text="{Binding OSYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                        <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="200" SmallChange="1" LargeChange="10" Value="{Binding OSYawRateFactorRight}" />
+                                        <Label Grid.Column="0" Content="Y Velocity" VerticalAlignment="Center" ToolTip="This is the oversteer effect Y velocity." />
+                                        <TextBox Grid.Column="1" Text="{Binding OSStartYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                        <TextBox Grid.Column="2" Text="{Binding OSEndYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                        <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="50" VerticalAlignment="Center" HigherValue="{Binding OSEndYVelocity}" LowerValue="{Binding OSStartYVelocity}" />
                                     </Grid>
                                 </StackPanel>
                                 <Button Grid.Column="1" x:Name="OversteerEffect_Button" Margin="10,0,0,0" Click="OversteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                     <Image Source="/o-button.png"/>
                                 </Button>
-                            </Grid>
-                            <Grid Margin="0,5,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Tolerance" VerticalAlignment="Center" ToolTip="This is how early the oversteer effect will trigger." />
-                                <TextBox Grid.Column="1" Text="{Binding OSToleranceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="60" SmallChange="1" LargeChange="10" Value="{Binding OSTolerance}" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
@@ -517,6 +496,10 @@
                             <ColumnDefinition Width="128"/>
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition Width="128"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="128"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <Label Content="Steering Angle" HorizontalAlignment="Center" Margin="0,0,0,10"/>
@@ -535,117 +518,100 @@
                         <StackPanel Grid.Column="2">
                             <Label Content="Speed" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="Speed_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
                             <Label Content="X Velocity" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="XVelocity_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
                             <Label Content="Y Velocity" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="YVelocity_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
                         </StackPanel>
-                        <StackPanel Grid.Column="4">
+                        <StackPanel Grid.Column="6">
                             <Label Content="Yaw Rate" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="YawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="8">
                             <Label Content="YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="YawRateFactorInstant_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
                             <Label Content="Avg. YR Factor" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="YawRateFactorAverage_Label" Content="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
                         </StackPanel>
                     </Grid>
-                    <Grid>
+                    <Grid HorizontalAlignment="Center" Margin="0,10,0,0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,10,0,0">
-                            <Label Content="Expected YR" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="OversteerExpectedYawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Difference" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="OversteerYawRateDifference_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Oversteer" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="OversteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                        </StackPanel>
-                        <Grid Grid.Column="1" HorizontalAlignment="Center">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="45"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Image x:Name="Oversteer_Image" Height="200" Width="360"/>
-                                        <Ellipse x:Name="Oversteer_Ellipse" Width="11" Height="11" Fill="Red" RenderTransformOrigin="0.5,0.5" >
-                                            <Ellipse.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform/>
-                                                    <SkewTransform/>
-                                                    <RotateTransform/>
-                                                    <TranslateTransform X="0" Y="0"/>
-                                                </TransformGroup>
-                                            </Ellipse.RenderTransform>
-                                        </Ellipse>
-                                        <Label Content="Oversteer" FontSize="24" HorizontalAlignment="Center" Margin="0,5,0,0" Foreground="Gray"/>
-                                    </Grid>
-                                </Border>
+                        <StackPanel Grid.Column="0">
+                            <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Label Grid.Column="0" x:Name="Oversteer_Tolerance_Label" Content="20°/sec Tolerance" Margin="5,0,0,0"/>
-                                    <Label Grid.Column="2" x:Name="Oversteer_YawRateFactor_Label" Content="YRF 45" Margin="0,0,10,0"/>
+                                    <Image x:Name="Oversteer_Image" Height="200" Width="360"/>
+                                    <Ellipse x:Name="Oversteer_Ellipse" Width="11" Height="11" Fill="Red" RenderTransformOrigin="0.5,0.5" >
+                                        <Ellipse.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform/>
+                                                <SkewTransform/>
+                                                <RotateTransform/>
+                                                <TranslateTransform X="0" Y="0"/>
+                                            </TransformGroup>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+                                    <Label Content="Oversteer" FontSize="24" HorizontalAlignment="Center" Foreground="Gray"/>
+                                    <Label x:Name="OversteerAmount_Label" Content="0%" FontSize="24" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,30,0,0" />
                                 </Grid>
-                            </StackPanel>
-                            <Grid Grid.Column="1">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="40"/>
-                                </Grid.RowDefinitions>
-                                <Label Grid.Row="0" Content="100%" HorizontalContentAlignment="Center"/>
-                                <Label Grid.Row="2" Content="0%" HorizontalContentAlignment="Center"/>
+                            </Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" x:Name="Oversteer_EndYVelocity_Label" Content="0 m/s" Margin="5,0,0,0"/>
+                                <Label Grid.Column="2" x:Name="Oversteer_StartYVelocity_Label" Content="0 m/s" Margin="0,0,10,0"/>
                             </Grid>
-                            <StackPanel Grid.Column="2">
-                                <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Image x:Name="Understeer_Image" Height="200" Width="360"/>
-                                        <Ellipse x:Name="Understeer_Ellipse" Width="11" Height="11" Fill="Red" RenderTransformOrigin="0.5,0.5" >
-                                            <Ellipse.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform/>
-                                                    <SkewTransform/>
-                                                    <RotateTransform/>
-                                                    <TranslateTransform X="0" Y="0"/>
-                                                </TransformGroup>
-                                            </Ellipse.RenderTransform>
-                                        </Ellipse>
-                                        <Label Content="Understeer" FontSize="24" HorizontalAlignment="Center" Margin="0,5,0,0" Foreground="Gray"/>
-                                    </Grid>
-                                </Border>
+                        </StackPanel>
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="40"/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Content="100%" HorizontalContentAlignment="Center"/>
+                            <Label Grid.Row="2" Content="0%" HorizontalContentAlignment="Center"/>
+                        </Grid>
+                        <StackPanel Grid.Column="2">
+                            <Border BorderThickness="1,1,1,1" BorderBrush="Gray">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Label Grid.Column="0" x:Name="Understeer_YawRateFactor_Label" Content="YRF 55" Margin="10,0,0,0"/>
-                                    <Label Grid.Column="2" x:Name="Understeer_Tolerance_Label" Content="20°/sec Tolerance" Margin="0,0,5,0"/>
+                                    <Image x:Name="Understeer_Image" Height="200" Width="360"/>
+                                    <Ellipse x:Name="Understeer_Ellipse" Width="11" Height="11" Fill="Red" RenderTransformOrigin="0.5,0.5" >
+                                        <Ellipse.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform/>
+                                                <SkewTransform/>
+                                                <RotateTransform/>
+                                                <TranslateTransform X="0" Y="0"/>
+                                            </TransformGroup>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+                                    <Label Content="Understeer" FontSize="24" HorizontalAlignment="Center" Foreground="Gray"/>
+                                    <Label x:Name="UndersteerAmount_Label" FontSize="24" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,30,0,0" />
                                 </Grid>
-                            </StackPanel>
-                        </Grid>
-                        <StackPanel Grid.Column="2" Margin="0,10,0,0">
-                            <Label Content="Expected YR" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="UndersteerExpectedYawRate_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Difference" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="UndersteerYawRateDifference_Label" Content="0°" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
-                            <Label Content="Understeer" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="UndersteerAmount_Label" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            </Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" x:Name="Understeer_StartYawRateFactor_Label" Content="YRF" Margin="10,0,0,0"/>
+                                <Label Grid.Column="2" x:Name="Understeer_EndYawRateFactor_Label" Content="YRF" Margin="0,0,5,0"/>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
