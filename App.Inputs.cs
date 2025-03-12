@@ -236,7 +236,7 @@ namespace MarvinsAIRA
 						{
 							foreach ( var joystickUpdate in joystickUpdateArray )
 							{
-								if ( ( joystickUpdate.Offset >= JoystickOffset.Buttons0 ) && ( joystickUpdate.Offset <= JoystickOffset.Buttons127 ) )
+								if ( ( joystickUpdate.Offset >= JoystickOffset.Buttons0 ) & ( joystickUpdate.Offset <= JoystickOffset.Buttons127 ) || (joystickUpdate.Offset >= JoystickOffset.PointOfViewControllers0) & (joystickUpdate.Offset <= JoystickOffset.PointOfViewControllers3) )
 								{
 									if ( joystickUpdate.Value != 0 )
 									{
