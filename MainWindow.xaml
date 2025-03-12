@@ -7,7 +7,7 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.43"
+        Title="Marvin's Awesome iRacing App v0.44"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -257,28 +257,17 @@
                                 <TextBox Grid.Column="1" Text="{Binding OSEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                                 <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding OSEffectStrength}" />
                             </Grid>
-                            <Grid>
+                            <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="49"/>
+                                    <ColumnDefinition Width="41"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="49"/>
-                                            <ColumnDefinition Width="41"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Y Velocity" VerticalAlignment="Center" ToolTip="This is the oversteer effect Y velocity." />
-                                        <TextBox Grid.Column="1" Text="{Binding OSStartYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
-                                        <TextBox Grid.Column="2" Text="{Binding OSEndYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
-                                        <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="50" VerticalAlignment="Center" HigherValue="{Binding OSEndYVelocity}" LowerValue="{Binding OSStartYVelocity}" />
-                                    </Grid>
-                                </StackPanel>
-                                <Button Grid.Column="1" x:Name="OversteerEffect_Button" Margin="10,0,0,0" Click="OversteerEffect_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
-                                    <Image Source="/o-button.png"/>
-                                </Button>
+                                <Label Grid.Column="0" Content="Y Velocity" VerticalAlignment="Center" ToolTip="This is the oversteer effect Y velocity." />
+                                <TextBox Grid.Column="1" Text="{Binding OSStartYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                <TextBox Grid.Column="2" Text="{Binding OSEndYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
+                                <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="30" VerticalAlignment="Center" HigherValue="{Binding OSEndYVelocity}" LowerValue="{Binding OSStartYVelocity}" Step="0.1" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
@@ -560,7 +549,7 @@
                                         </Ellipse.RenderTransform>
                                     </Ellipse>
                                     <Label Content="Oversteer" FontSize="24" HorizontalAlignment="Center" Foreground="Gray"/>
-                                    <Label x:Name="OversteerAmount_Label" Content="0%" FontSize="24" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,30,0,0" />
+                                    <Label x:Name="OversteerAmount_Label" Content="0%" FontSize="24" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,30,0,0" Foreground="#FF8CCCC2" />
                                 </Grid>
                             </Border>
                             <Grid>
@@ -600,7 +589,7 @@
                                         </Ellipse.RenderTransform>
                                     </Ellipse>
                                     <Label Content="Understeer" FontSize="24" HorizontalAlignment="Center" Foreground="Gray"/>
-                                    <Label x:Name="UndersteerAmount_Label" FontSize="24" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,30,0,0" />
+                                    <Label x:Name="UndersteerAmount_Label" FontSize="24" Content="0%" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,30,0,0" Foreground="#FF8CCCC2" />
                                 </Grid>
                             </Border>
                             <Grid>
@@ -781,41 +770,13 @@
                                                 <Label Grid.Column="0" Content="Load Detail Scale" VerticalAlignment="Center"/>
                                                 <TextBox Grid.Column="1" Text="{Binding SayLoadDetailScale}" />
                                             </Grid>
-                                        </StackPanel>
-                                    </GroupBox>
-                                    <GroupBox Header="Steering Effects" x:Name="Settings_Voice_SteeringEffects_GroupBox">
-                                        <StackPanel>
                                             <Grid Margin="0,2,0,0">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="180"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Grid.Column="0" Content="US Left Yaw Rate Factor" VerticalAlignment="Center"/>
-                                                <TextBox Grid.Column="1" Text="{Binding SayUSLeftYawRateFactor}" />
-                                            </Grid>
-                                            <Grid Margin="0,2,0,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Grid.Column="0" Content="US Right Yaw Rate Factor" VerticalAlignment="Center"/>
-                                                <TextBox Grid.Column="1" Text="{Binding SayUSRightYawRateFactor}" />
-                                            </Grid>
-                                            <Grid Margin="0,2,0,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Grid.Column="0" Content="OS Left Yaw Rate Factor" VerticalAlignment="Center"/>
-                                                <TextBox Grid.Column="1" Text="{Binding SayOSLeftYawRateFactor}" />
-                                            </Grid>
-                                            <Grid Margin="0,2,0,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="180"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Grid.Column="0" Content="OS Right Yaw Rate Factor" VerticalAlignment="Center"/>
-                                                <TextBox Grid.Column="1" Text="{Binding SayOSRightYawRateFactor}" />
+                                                <Label Grid.Column="0" Content="Clipping" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayClipping}" />
                                             </Grid>
                                         </StackPanel>
                                     </GroupBox>

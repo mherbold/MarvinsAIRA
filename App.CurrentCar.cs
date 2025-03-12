@@ -16,8 +16,7 @@ namespace MarvinsAIRA
 
 		private void InitializeCurrentCar()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeCurrentCar called." );
+			WriteLine( "InitializeCurrentCar called.", true );
 
 			UpdateCurrentCar();
 		}
@@ -42,13 +41,11 @@ namespace MarvinsAIRA
 			{
 				if ( carScreenName == NO_CAR_SCREEN_NAME )
 				{
-					WriteLine( "" );
-					WriteLine( $"You are no longer driving a car." );
+					WriteLine( $"You are no longer driving a car.", true );
 				}
 				else
 				{
-					WriteLine( "" );
-					WriteLine( $"You are driving a {carScreenName}." );
+					WriteLine( $"You are driving a {carScreenName}.", true );
 
 					Say( Settings.SayCarName, carScreenName );
 				}

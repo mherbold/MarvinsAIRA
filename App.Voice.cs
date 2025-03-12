@@ -10,8 +10,7 @@ namespace MarvinsAIRA
 
 		public void InitializeVoice()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeVoice called." );
+			WriteLine( "InitializeVoice called.", true );
 
 			if ( _voice_speechSynthesizer != null )
 			{
@@ -74,23 +73,23 @@ namespace MarvinsAIRA
 
 		public void Say( string message, string? value = null, bool interrupt = false, bool alsoAddToChatQueue = true )
 		{
-			if ( Settings.EnableSpeechSynthesizer && ( _voice_speechSynthesizer != null ) )
+			if ( value != null )
 			{
-				if ( value != null )
-				{
-					if ( value == "" )
-					{
-						return;
-					}
-
-					message = message.Replace( ":value:", value );
-				}
-
-				if ( message == string.Empty )
+				if ( value == string.Empty )
 				{
 					return;
 				}
 
+				message = message.Replace( ":value:", value );
+			}
+
+			if ( message == string.Empty )
+			{
+				return;
+			}
+
+			if ( Settings.EnableSpeechSynthesizer && ( _voice_speechSynthesizer != null ) )
+			{
 				if ( interrupt )
 				{
 					_voice_speechSynthesizer.Pause();
@@ -99,11 +98,11 @@ namespace MarvinsAIRA
 				}
 
 				_voice_speechSynthesizer.SpeakAsync( message );
+			}
 
-				if ( alsoAddToChatQueue )
-				{
-					Chat( message );
-				}
+			if ( alsoAddToChatQueue )
+			{
+				Chat( message );
 			}
 		}
 

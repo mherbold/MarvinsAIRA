@@ -43,8 +43,7 @@ namespace MarvinsAIRA
 
 		public void Initialize( nint windowHandle )
 		{
-			WriteLine( "" );
-			WriteLine( "Initialize called." );
+			WriteLine( "Initialize called.", true );
 
 			try
 			{
@@ -61,16 +60,14 @@ namespace MarvinsAIRA
 			}
 			catch ( Exception exception )
 			{
-				WriteLine( "" );
-				WriteLine( "Unexpected exception thrown:" );
+				WriteLine( "Unexpected exception thrown:", true );
 				WriteLine( exception.Message.Trim() );
 			}
 		}
 
 		public void Stop()
 		{
-			WriteLine( "" );
-			WriteLine( "Stop called." );
+			WriteLine( "Stop called.", true );
 
 			try
 			{
@@ -82,8 +79,7 @@ namespace MarvinsAIRA
 			}
 			catch ( Exception exception )
 			{
-				WriteLine( "" );
-				WriteLine( "Unexpected exception thrown:" );
+				WriteLine( "Unexpected exception thrown:", true );
 				WriteLine( exception.Message.Trim() );
 			}
 		}

@@ -20,8 +20,7 @@ namespace MarvinsAIRA
 
 		private void InitializeSettings()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeSettings called." );
+			WriteLine( "InitializeSettings called.", true );
 
 			var filePath = Path.Combine( DocumentsFolder, "Settings.xml" );
 
@@ -105,8 +104,8 @@ namespace MarvinsAIRA
 							steeringEffectsSettings.USStartYawRateFactorRight = Settings.USStartYawRateFactorRight;
 							steeringEffectsSettings.USEndYawRateFactorRight = Settings.USEndYawRateFactorRight;
 
-							steeringEffectsSettings.OSStartYawRateFactorLeft = Settings.OSStartYVelocity;
-							steeringEffectsSettings.OSEndYawRateFactorLeft = Settings.OSEndYVelocity;
+							steeringEffectsSettings.OSStartYVelocity = Settings.OSStartYVelocity;
+							steeringEffectsSettings.OSEndYVelocity = Settings.OSEndYVelocity;
 
 							steeringEffectsSettingsFound = true;
 
@@ -127,8 +126,8 @@ namespace MarvinsAIRA
 							USStartYawRateFactorRight = Settings.USStartYawRateFactorRight,
 							USEndYawRateFactorRight = Settings.USEndYawRateFactorRight,
 
-							OSStartYawRateFactorLeft = Settings.OSStartYVelocity,
-							OSEndYawRateFactorLeft = Settings.OSEndYVelocity,
+							OSStartYVelocity = Settings.OSStartYVelocity,
+							OSEndYVelocity = Settings.OSEndYVelocity,
 						};
 
 						Settings.SteeringEffectsSettingsList.Add( steeringEffectsSettings );

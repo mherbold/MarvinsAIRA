@@ -22,8 +22,7 @@ namespace MarvinsAIRA
 
 		public void InitializeWindSimulator()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeWindSimulator called." );
+			WriteLine( "InitializeWindSimulator called.", true );
 
 			if ( _wind_arduino.SerialPort == null )
 			{
@@ -39,8 +38,7 @@ namespace MarvinsAIRA
 
 		public void StopWindSimulator()
 		{
-			WriteLine( "" );
-			WriteLine( "StopWindSimulator called." );
+			WriteLine( "StopWindSimulator called.", true );
 
 			_wind_arduino.Close();
 		}

@@ -962,15 +962,15 @@ namespace MarvinsAIRA
 
 		/* Oversteer effect y velocity (start) */
 
-		private int _osStartYVelocity = 0;
+		private float _osStartYVelocity = 0f;
 
-		public int OSStartYVelocity
+		public float OSStartYVelocity
 		{
 			get => _osStartYVelocity;
 
 			set
 			{
-				value = Math.Clamp( value, 0, 50 );
+				value = Math.Clamp( value, 0, 30 );
 
 				if ( _osStartYVelocity != value )
 				{
@@ -983,11 +983,11 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				OSStartYVelocityString = $"!{_osStartYVelocity}";
+				OSStartYVelocityString = $"!{_osStartYVelocity:F1}";
 			}
 		}
 
-		private string _osStartYVelocityString = "0";
+		private string _osStartYVelocityString = "0.0";
 
 		public string OSStartYVelocityString
 		{
@@ -1011,15 +1011,15 @@ namespace MarvinsAIRA
 
 		/* Oversteer effect y velocity (end) */
 
-		private int _osEndYVelocity = 0;
+		private float _osEndYVelocity = 0f;
 
-		public int OSEndYVelocity
+		public float OSEndYVelocity
 		{
 			get => _osEndYVelocity;
 
 			set
 			{
-				value = Math.Clamp( value, 0, 50 );
+				value = Math.Clamp( value, 0, 30 );
 
 				if ( _osEndYVelocity != value )
 				{
@@ -1032,11 +1032,11 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				OSEndYVelocityString = $"!{_osEndYVelocity}";
+				OSEndYVelocityString = $"!{_osEndYVelocity:F1}";
 			}
 		}
 
-		private string _osEndYVelocityString = "0";
+		private string _osEndYVelocityString = "0.0";
 
 		public string OSEndYVelocityString
 		{
@@ -1130,10 +1130,10 @@ namespace MarvinsAIRA
 
 		public class ForceFeedbackSettings
 		{
-			public string WheelName = "";
-			public string CarName = "";
-			public string TrackName = "";
-			public string TrackConfigName = "";
+			public string WheelName = string.Empty;
+			public string CarName = string.Empty;
+			public string TrackName = string.Empty;
+			public string TrackConfigName = string.Empty;
 
 			public int OverallScale = 10;
 			public int DetailScale = 100;
@@ -1145,7 +1145,7 @@ namespace MarvinsAIRA
 
 		public class SteeringEffectsSettings
 		{
-			public string CarName = "";
+			public string CarName = string.Empty;
 
 			public bool SteeringEffectsEnabled = false;
 
@@ -1154,10 +1154,9 @@ namespace MarvinsAIRA
 			public int USStartYawRateFactorRight = 0;
 			public int USEndYawRateFactorRight = 0;
 
-			public int OSStartYawRateFactorLeft = 0;
-			public int OSEndYawRateFactorLeft = 0;
-			public int OSStartYawRateFactorRight = 0;
-			public int OSEndYawRateFactorRight = 0;
+
+			public float OSStartYVelocity = 0f;
+			public float OSEndYVelocity = 0f;
 		}
 
 		public List<SteeringEffectsSettings> SteeringEffectsSettingsList { get; private set; } = [];
@@ -2075,50 +2074,51 @@ namespace MarvinsAIRA
 
 		/* Various translations */
 
-		private string _sayHello = "Hello!";
-		private string _sayConnected = "We are connected to the iRacing simulator.";
-		private string _sayDisconnected = "We have been disconnected from the iRacing simulator.";
-		private string _sayVoiceVolume = "My voice is now at :value: percent.";
-		private string _sayCarName = "You are driving a :value:.";
-		private string _sayTrackName = "You are racing at :value:.";
-		private string _sayTrackConfigName = ":value:.";
-		private string _sayOverallScale = "The overall scale is now :value: percent.";
-		private string _sayDetailScale = "The detail scale is now :value: percent.";
-		private string _sayLFEScale = "The LFE scale is now :value: percent.";
-		private string _sayScalesReset = "This is the first time you have driven this combination, so we have reset the overall and detail scale.";
-		private string _sayLoadOverallScale = "The overall scale has been restored to :value: percent";
-		private string _sayLoadDetailScale = "The detail scale has been restored to :value: percent.";
-		private string _sayClear = "Clear!";
-		private string _sayCarLeft = "Car left.";
-		private string _sayCarRight = "Car right.";
-		private string _sayTwoCarsLeft = "Two left!";
-		private string _sayTwoCarsRight = "Two right!";
-		private string _sayThreeWide = "Three wide!";
-		private string _sayCheckeredFlag = "Checkered flag.";
-		private string _sayWhiteFlag = "White flag - last lap.";
-		private string _sayGreenFlag = "Green flag.";
-		private string _sayYellowFlag = "Yellow flag.";
-		private string _sayRedFlag = "Red flag.";
-		private string _sayBlueFlag = "Blue flag.";
-		private string _sayDebrisFlag = "Watch for debris.";
-		private string _sayCrossedFlag = "Crossed flag.";
-		private string _sayYellowWavingFlag = "Yellow flag.";
-		private string _sayOneLapToGreenFlag = "One lap to green.";
-		private string _sayGreenHeldFlag = "";
-		private string _sayTenToGoFlag = "Ten to go.";
-		private string _sayFiveToGoFlag = "Five to go.";
-		private string _sayRandomWavingFlag = "";
-		private string _sayCautionFlag = "";
-		private string _sayCautionWavingFlag = "Caution flag.";
-		private string _sayBlackFlag = "Black flag.";
-		private string _sayDisqualifyFlag = "You've been disqualified.";
-		private string _sayServicibleFlag = "";
-		private string _sayFurledFlag = "Furled black flag.";
-		private string _sayRepairFlag = "Meatball flag.";
-		private string _sayStartHiddenFlag = "";
-		private string _sayStartReadyFlag = "Get ready!";
-		private string _sayStartSetFlag = "";
-		private string _sayStartGoFlag = "Go Go Go!";
+		private string _sayHello = "Hello";
+		private string _sayConnected = "Connected";
+		private string _sayDisconnected = "Disconnected";
+		private string _sayVoiceVolume = ":value:";
+		private string _sayCarName = ":value:";
+		private string _sayTrackName = ":value:";
+		private string _sayTrackConfigName = ":value:";
+		private string _sayOverallScale = "Overall :value:";
+		private string _sayDetailScale = "Detail :value:";
+		private string _sayLFEScale = "LFE :value:";
+		private string _sayScalesReset = "Scales were reset";
+		private string _sayLoadOverallScale = "Overall :value:";
+		private string _sayLoadDetailScale = "Detail :value:";
+		private string _sayClipping = "Clipping";
+		private string _sayClear = "Clear";
+		private string _sayCarLeft = "Car left";
+		private string _sayCarRight = "Car right";
+		private string _sayTwoCarsLeft = "Two left";
+		private string _sayTwoCarsRight = "Two right";
+		private string _sayThreeWide = "Three wide";
+		private string _sayCheckeredFlag = "Checkered flag";
+		private string _sayWhiteFlag = "White flag - last lap";
+		private string _sayGreenFlag = "Green flag";
+		private string _sayYellowFlag = "Yellow flag";
+		private string _sayRedFlag = "Red flag";
+		private string _sayBlueFlag = "Blue flag";
+		private string _sayDebrisFlag = "Watch for debris";
+		private string _sayCrossedFlag = "Crossed flag";
+		private string _sayYellowWavingFlag = "Yellow flag";
+		private string _sayOneLapToGreenFlag = "One lap to green";
+		private string _sayGreenHeldFlag = string.Empty;
+		private string _sayTenToGoFlag = "Ten to go";
+		private string _sayFiveToGoFlag = "Five to go";
+		private string _sayRandomWavingFlag = string.Empty;
+		private string _sayCautionFlag = string.Empty;
+		private string _sayCautionWavingFlag = "Caution flag";
+		private string _sayBlackFlag = "Black flag";
+		private string _sayDisqualifyFlag = "You've been disqualified";
+		private string _sayServicibleFlag = string.Empty;
+		private string _sayFurledFlag = "Furled black flag";
+		private string _sayRepairFlag = "Meatball flag";
+		private string _sayStartHiddenFlag = string.Empty;
+		private string _sayStartReadyFlag = "Get ready";
+		private string _sayStartSetFlag = string.Empty;
+		private string _sayStartGoFlag = "Go Go Go";
 
 		public string SayHello { get => _sayHello; set { if ( _sayHello != value ) { _sayHello = value; OnPropertyChanged(); } } }
 		public string SayConnected { get => _sayConnected; set { if ( _sayConnected != value ) { _sayConnected = value; OnPropertyChanged(); } } }
@@ -2133,6 +2133,7 @@ namespace MarvinsAIRA
 		public string SayScalesReset { get => _sayScalesReset; set { if ( _sayScalesReset != value ) { _sayScalesReset = value; OnPropertyChanged(); } } }
 		public string SayLoadOverallScale { get => _sayLoadOverallScale; set { if ( _sayLoadOverallScale != value ) { _sayLoadOverallScale = value; OnPropertyChanged(); } } }
 		public string SayLoadDetailScale { get => _sayLoadDetailScale; set { if ( _sayLoadDetailScale != value ) { _sayLoadDetailScale = value; OnPropertyChanged(); } } }
+		public string SayClipping { get => _sayClipping; set { if ( _sayClipping != value ) { _sayClipping = value; OnPropertyChanged(); } } }
 		public string SayClear { get => _sayClear; set { if ( _sayClear != value ) { _sayClear = value; OnPropertyChanged(); } } }
 		public string SayCarLeft { get => _sayCarLeft; set { if ( _sayCarLeft != value ) { _sayCarLeft = value; OnPropertyChanged(); } } }
 		public string SayCarRight { get => _sayCarRight; set { if ( _sayCarRight != value ) { _sayCarRight = value; OnPropertyChanged(); } } }

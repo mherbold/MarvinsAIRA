@@ -68,8 +68,7 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "MainWindow.Window_Closing called." );
+			app.WriteLine( "MainWindow.Window_Closing called.", true );
 
 			app.WriteLine( "...stopping the main window timer..." );
 
@@ -120,8 +119,7 @@ namespace MarvinsAIRA
 
 				UpdateImages();
 
-				app.WriteLine( "" );
-				app.WriteLine( "Starting the update loop..." );
+				app.WriteLine( "Starting the update loop...", true );
 
 				_win_stopwatch.Restart();
 
@@ -136,8 +134,7 @@ namespace MarvinsAIRA
 
 				app.WriteLine( "...update loop started." );
 
-				app.WriteLine( "" );
-				app.WriteLine( "Starting the window timer..." );
+				app.WriteLine( "Starting the window timer...", true );
 
 				_win_timer.Elapsed += OnTimer;
 				_win_timer.Start();
@@ -146,9 +143,8 @@ namespace MarvinsAIRA
 
 				LoadRecording();
 
-				app.WriteLine( "" );
-				app.WriteLine( $"{Title} has been initialized!" );
-				app.WriteLine( "" );
+				app.WriteLine( $"{Title} has been initialized!", true );
+				app.WriteLine( string.Empty );
 
 				if ( app.Settings.TopmostWindow )
 				{
@@ -174,8 +170,7 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "Registering device change notification..." );
+			app.WriteLine( "Registering device change notification...", true );
 
 			var source = PresentationSource.FromVisual( this ) as HwndSource;
 
@@ -368,7 +363,12 @@ namespace MarvinsAIRA
 
 									if ( app.FFB_ClippedTimer > 0 )
 									{
-										Clipping_Label.Visibility = Visibility.Visible;
+										if ( Clipping_Label.Visibility != Visibility.Visible )
+										{
+											Clipping_Label.Visibility = Visibility.Visible;
+
+											app.Say( app.Settings.SayClipping );
+										}
 									}
 									else
 									{
@@ -410,11 +410,11 @@ namespace MarvinsAIRA
 
 									// Y Velocity
 
-									YVelocity_Label.Content = $"{app._irsdk_velocityY:F0} m/s";
+									YVelocity_Label.Content = $"{app._irsdk_velocityY:F1} m/s";
 
-									if ( (string) YVelocity_Label.Content == "-0 m/s" )
+									if ( (string) YVelocity_Label.Content == "-0.0 m/s" )
 									{
-										YVelocity_Label.Content = "0 m/s";
+										YVelocity_Label.Content = "0.0 m/s";
 									}
 
 									// Yaw rate
@@ -467,8 +467,8 @@ namespace MarvinsAIRA
 
 									Oversteer_Ellipse.RenderTransform = new TranslateTransform( IMAGE_WIDTH / 2f - x, IMAGE_HEIGHT / 2f - y );
 
-									Oversteer_StartYVelocity_Label.Content = $"{app.Settings.OSStartYVelocity} m/s";
-									Oversteer_EndYVelocity_Label.Content = $"{app.Settings.OSEndYVelocity} m/s";
+									Oversteer_StartYVelocity_Label.Content = $"{app.Settings.OSStartYVelocity:F1} m/s";
+									Oversteer_EndYVelocity_Label.Content = $"{app.Settings.OSEndYVelocity:F1} m/s";
 
 									// Understeer graph
 
@@ -518,8 +518,7 @@ namespace MarvinsAIRA
 			}
 			catch ( Exception exception )
 			{
-				app.WriteLine( "" );
-				app.WriteLine( $"Exception caught inside the update loop: {exception.Message.Trim()}" );
+				app.WriteLine( $"Exception caught inside the update loop: {exception.Message.Trim()}", true );
 			}
 
 			_win_updateLoopRunning = false;
@@ -549,7 +548,7 @@ namespace MarvinsAIRA
 		{
 			if ( sender is TextBox textBox )
 			{
-				textBox.Text = NotDecimalNumbersRegex().Replace( textBox.Text, "" );
+				textBox.Text = NotDecimalNumbersRegex().Replace( textBox.Text, string.Empty );
 			}
 		}
 
@@ -1228,7 +1227,6 @@ namespace MarvinsAIRA
 				// settings voice tab
 
 				Settings_Voice_SayLFEScale_Grid.Visibility = visibility;
-				Settings_Voice_SteeringEffects_GroupBox.Visibility = visibility;
 				Settings_Voice_SpotterCarLeftRight_GroupBox.Visibility = visibility;
 				Settings_Voice_SpotterSessionFlags_GroupBox.Visibility = visibility;
 			}
@@ -1242,8 +1240,7 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "" );
-			app.WriteLine( "Showing the map buttons dialog window..." );
+			app.WriteLine( "Showing the map buttons dialog window...", true );
 
 			_win_pauseButtons = true;
 

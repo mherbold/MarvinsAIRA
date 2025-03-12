@@ -17,11 +17,11 @@ namespace MarvinsAIRA
 
 		private void Chat( string message )
 		{
-			if ( Settings.EnableChat && _irsdk_connected && ( _irsdk_playerCarNumberRaw != -1 ) )
+			if ( Settings.EnableChat && _irsdk_connected && ( _irsdk_playerCarNumber != string.Empty ) )
 			{
 				message = _chatQueue_regex().Replace( message, "{($1)}" );
 
-				_chatQueue_messageList.Add( $"/{_irsdk_playerCarNumberRaw} {message}\r" );
+				_chatQueue_messageList.Add( $"/{_irsdk_playerCarNumber} {message}\r" );
 			}
 		}
 

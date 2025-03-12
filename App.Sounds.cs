@@ -16,8 +16,7 @@ namespace MarvinsAIRA
 
 		private void InitializeSounds()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeSounds called." );
+			WriteLine( "InitializeSounds called.", true );
 
 			_sounds_initialized = false;
 

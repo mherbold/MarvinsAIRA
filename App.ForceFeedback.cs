@@ -127,8 +127,7 @@ namespace MarvinsAIRA
 				UninitializeForceFeedback();
 			}
 
-			WriteLine( "" );
-			WriteLine( "InitializeForceFeedback called." );
+			WriteLine( "InitializeForceFeedback called.", true );
 
 			_ffb_stopwatch.Restart();
 
@@ -231,8 +230,7 @@ namespace MarvinsAIRA
 
 		private void UninitializeForceFeedback( bool disposeOfDrivingJoystick = true )
 		{
-			WriteLine( "" );
-			WriteLine( "UninitializeForceFeedback called." );
+			WriteLine( "UninitializeForceFeedback called.", true );
 
 			if ( _ffb_multimediaTimerId != 0 )
 			{
@@ -281,8 +279,7 @@ namespace MarvinsAIRA
 		{
 			UninitializeForceFeedback( false );
 
-			WriteLine( "" );
-			WriteLine( "ReinitializeForceFeedbackDevice called." );
+			WriteLine( "ReinitializeForceFeedbackDevice called.", true );
 
 			if ( !_ffb_initialized )
 			{
@@ -399,8 +396,7 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( "RESET button pressed!" );
+					WriteLine( "RESET button pressed!", true );
 
 					ReinitializeForceFeedbackDevice( windowHandle );
 				}
@@ -409,8 +405,7 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( "AUTO-OVERALL-SCALE button pressed!" );
+					WriteLine( "AUTO-OVERALL-SCALE button pressed!", true );
 
 					var smoothedTorque = 0f;
 					var smoothedPeak = 0f;
@@ -437,8 +432,7 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( $"DECREASE-OVERALL-SCALE button pressed! (x{buttonPresses})" );
+					WriteLine( $"DECREASE-OVERALL-SCALE button pressed! (x{buttonPresses})", true );
 
 					Settings.OverallScale -= buttonPresses;
 
@@ -451,8 +445,7 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( $"INCREASE-OVERALL-SCALE button pressed! (x{buttonPresses})" );
+					WriteLine( $"INCREASE-OVERALL-SCALE button pressed! (x{buttonPresses})", true );
 
 					Settings.OverallScale += buttonPresses;
 
@@ -465,8 +458,7 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( $"DECREASE-DETAIL-SCALE button pressed! (x{buttonPresses})" );
+					WriteLine( $"DECREASE-DETAIL-SCALE button pressed! (x{buttonPresses})", true );
 
 					Settings.DetailScale -= buttonPresses;
 
@@ -479,8 +471,7 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( $"INCREASE-DETAIL-SCALE button pressed! (x{buttonPresses})" );
+					WriteLine( $"INCREASE-DETAIL-SCALE button pressed! (x{buttonPresses})", true );
 
 					Settings.DetailScale += buttonPresses;
 
@@ -493,37 +484,25 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( $"UNDERSTEER-EFFECT button pressed!" );
+					WriteLine( $"UNDERSTEER-EFFECT button pressed!", true );
 
 					if ( _irsdk_steeringWheelAngle >= 0 )
 					{
 						Settings.USStartYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
+						Settings.USEndYawRateFactorLeft = (int) _ffb_yawRateFactorInstant + 80;
 					}
 					else
 					{
 						Settings.USStartYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
+						Settings.USEndYawRateFactorRight = (int) _ffb_yawRateFactorInstant + 80;
 					}
-				}
-
-
-				buttonPresses = Settings.OversteerEffectButtons.ClickCount;
-
-				if ( buttonPresses > 0 )
-				{
-					WriteLine( "" );
-					WriteLine( $"OVERSTEER-EFFECT button pressed!" );
-
-					Settings.OSStartYVelocity = (int) Math.Abs( _irsdk_velocityY );
-					Settings.OSEndYVelocity = Settings.OSStartYVelocity + 10;
 				}
 
 				buttonPresses = Settings.DecreaseLFEScaleButtons.ClickCount;
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( $"DECREASE-LFE-SCALE button pressed! (x{buttonPresses})" );
+					WriteLine( $"DECREASE-LFE-SCALE button pressed! (x{buttonPresses})", true );
 
 					Settings.LFEScale -= buttonPresses;
 
@@ -536,8 +515,7 @@ namespace MarvinsAIRA
 
 				if ( buttonPresses > 0 )
 				{
-					WriteLine( "" );
-					WriteLine( $"INCREASE-LFE-SCALE button pressed! (x{buttonPresses})" );
+					WriteLine( $"INCREASE-LFE-SCALE button pressed! (x{buttonPresses})", true );
 
 					Settings.LFEScale += buttonPresses;
 
@@ -657,8 +635,7 @@ namespace MarvinsAIRA
 
 			if ( _car_carChanged )
 			{
-				WriteLine( "" );
-				WriteLine( $"Loading steering effects configuration [{_car_carSaveName}]" );
+				WriteLine( $"Loading steering effects configuration [{_car_carSaveName}]", true );
 
 				_settings_pauseSerialization = true;
 
@@ -675,8 +652,8 @@ namespace MarvinsAIRA
 						Settings.USStartYawRateFactorRight = steeringEffectsSettings.USStartYawRateFactorRight;
 						Settings.USEndYawRateFactorRight = steeringEffectsSettings.USEndYawRateFactorRight;
 
-						Settings.OSStartYVelocity = steeringEffectsSettings.OSStartYawRateFactorLeft;
-						Settings.OSEndYVelocity = steeringEffectsSettings.OSEndYawRateFactorLeft;
+						Settings.OSStartYVelocity = steeringEffectsSettings.OSStartYVelocity;
+						Settings.OSEndYVelocity = steeringEffectsSettings.OSEndYVelocity;
 
 						steeringEffectsSettingsFound = true;
 
@@ -693,8 +670,8 @@ namespace MarvinsAIRA
 					Settings.USStartYawRateFactorRight = 0;
 					Settings.USEndYawRateFactorRight = 0;
 
-					Settings.OSStartYVelocity = 0;
-					Settings.OSEndYVelocity = 0;
+					Settings.OSStartYVelocity = 0f;
+					Settings.OSEndYVelocity = 0f;
 				}
 
 				_settings_pauseSerialization = false;
@@ -709,7 +686,7 @@ namespace MarvinsAIRA
 
 			// auto-center wheel feature
 
-			if ( Settings.AutoCenterWheel && !_irsdk_isOnTrack && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
+			if ( Settings.AutoCenterWheel && ( !_irsdk_isOnTrack || ( _irsdk_simMode == "replay" ) ) && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
 			{
 				var leftRange = (float) ( Settings.WheelCenterValue - Settings.WheelMinValue );
 				var rightRange = (float) ( Settings.WheelMaxValue - Settings.WheelCenterValue );
@@ -884,11 +861,14 @@ namespace MarvinsAIRA
 					_ffb_recordedSteeringWheelTorqueBufferIndex = ( _ffb_recordedSteeringWheelTorqueBufferIndex + 1 ) % _ffb_recordedSteeringWheelTorqueBuffer.Length;
 				}
 			}
-			else if ( !_irsdk_isOnTrack )
+			else if ( !_irsdk_isOnTrack || ( _irsdk_simMode == "replay" ) )
 			{
-				if ( _irsdk_isOnTrackLastFrame )
+				if ( _irsdk_simMode != "replay" )
 				{
-					_ffb_startCooldownNow = true;
+					if ( _irsdk_isOnTrackLastFrame )
+					{
+						_ffb_startCooldownNow = true;
+					}
 				}
 
 				steeringWheelTorque_ST[ 0 ] = 0f;
@@ -980,7 +960,7 @@ namespace MarvinsAIRA
 
 				// calculate oversteer amount
 
-				_ffb_oversteerAmountLinear = Math.Clamp( ( Math.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / (float) ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
+				_ffb_oversteerAmountLinear = Math.Clamp( ( Math.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
 
 				// understeer effect
 
@@ -1416,8 +1396,7 @@ namespace MarvinsAIRA
 						app._ffb_forceFeedbackExceptionThrown = true;
 						app._ffb_reinitializeNeeded = true;
 
-						app.WriteLine( "" );
-						app.WriteLine( "An exception was thrown while trying to update the constant force effect parameters!" );
+						app.WriteLine( "An exception was thrown while trying to update the constant force effect parameters!", true );
 						app.WriteLine( exception.Message.Trim() );
 					}
 				}

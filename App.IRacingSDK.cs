@@ -55,11 +55,13 @@ namespace MarvinsAIRA
 		public float _irsdk_velocityY = 0f;
 		public float _irsdk_yawRate = 0f;
 
+		public string _irsdk_simMode = string.Empty;
+
 		public float _irsdk_shiftLightsFirstRPM = 0f;
 		public float _irsdk_shiftLightsShiftRPM = 0f;
 		public float _irsdk_shiftLightsBlinkRPM = 0f;
 
-		public int _irsdk_playerCarNumberRaw = -1;
+		public string _irsdk_playerCarNumber = string.Empty;
 
 		public int _irsdk_tickCountLastFrame = 0;
 		public bool _irsdk_isOnTrackLastFrame = false;
@@ -73,8 +75,7 @@ namespace MarvinsAIRA
 
 		private void InitializeIRacingSDK()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeIRacingSDK called." );
+			WriteLine( "InitializeIRacingSDK called.", true );
 			WriteLine( "Initializing the iRacing SDK..." );
 
 			_irsdk.OnException += OnException;
@@ -91,8 +92,7 @@ namespace MarvinsAIRA
 
 		public void StopIRacingSDK()
 		{
-			WriteLine( "" );
-			WriteLine( "StopIRacingSDK called." );
+			WriteLine( "StopIRacingSDK called.", true );
 
 			WriteLine( "Stopping the iRacing SDK..." );
 
@@ -108,8 +108,7 @@ namespace MarvinsAIRA
 
 		private void OnException( Exception exception )
 		{
-			WriteLine( "" );
-			WriteLine( $"OnException called." );
+			WriteLine( $"OnException called.", true );
 
 			WriteLine( "The following exception was thrown from inside the iRacing SDK:" );
 			WriteLine( exception.Message.Trim() );
@@ -117,8 +116,7 @@ namespace MarvinsAIRA
 
 		private void OnConnected()
 		{
-			WriteLine( "" );
-			WriteLine( "OnConnected called." );
+			WriteLine( "OnConnected called.", true );
 
 			Say( Settings.SayConnected, null, false, false );
 
@@ -142,8 +140,7 @@ namespace MarvinsAIRA
 
 		private void OnDisconnected()
 		{
-			WriteLine( "" );
-			WriteLine( "OnDisconnected called." );
+			WriteLine( "OnDisconnected called.", true );
 
 			_irsdk_connected = false;
 
@@ -174,11 +171,13 @@ namespace MarvinsAIRA
 			_irsdk_velocityY = 0f;
 			_irsdk_yawRate = 0f;
 
+			_irsdk_simMode = string.Empty;
+
 			_irsdk_shiftLightsFirstRPM = 0f;
 			_irsdk_shiftLightsShiftRPM = 0f;
 			_irsdk_shiftLightsBlinkRPM = 0f;
 
-			_irsdk_playerCarNumberRaw = -1;
+			_irsdk_playerCarNumber = string.Empty;
 
 			_irsdk_tickCountLastFrame = 0;
 			_irsdk_speedLastFrame = 0f;
@@ -218,13 +217,21 @@ namespace MarvinsAIRA
 			UpdateCurrentCar();
 			UpdateCurrentTrack();
 
+			_irsdk_simMode = _irsdk.Data.SessionInfo.WeekendInfo.SimMode;
+
+			WriteLine( $"Sim mode = {_irsdk_simMode}", true );
+
 			_irsdk_shiftLightsFirstRPM = _irsdk.Data.SessionInfo.DriverInfo.DriverCarSLFirstRPM;
 			_irsdk_shiftLightsShiftRPM = _irsdk.Data.SessionInfo.DriverInfo.DriverCarSLShiftRPM;
 			_irsdk_shiftLightsBlinkRPM = _irsdk.Data.SessionInfo.DriverInfo.DriverCarSLBlinkRPM;
 
+			WriteLine( $"Shift lights RPMs = {_irsdk_shiftLightsFirstRPM}, {_irsdk_shiftLightsShiftRPM}, {_irsdk_shiftLightsBlinkRPM}" );
+
 			var driver = _irsdk.Data.SessionInfo.DriverInfo.Drivers.Find( driver => driver.CarIdx == _irsdk_playerCarIdx );
 
-			_irsdk_playerCarNumberRaw = driver?.CarNumberRaw ?? -1;
+			_irsdk_playerCarNumber = driver?.CarNumber ?? string.Empty;
+
+			WriteLine( $"Player's car number = {_irsdk_playerCarNumber}" );
 		}
 
 		private void OnTelemetryData()
@@ -286,7 +293,7 @@ namespace MarvinsAIRA
 				_irsdk_gForce = 0;
 			}
 
-			_irsdk.PauseSessionInfoUpdates = _irsdk_isOnTrack;
+			_irsdk.PauseSessionInfoUpdates = _irsdk_isOnTrack || ( _irsdk_simMode == "replay" );
 
 			UpdateForceFeedback();
 

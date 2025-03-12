@@ -13,8 +13,7 @@ namespace MarvinsAIRA
 
 		public void InitializeConsole()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeConsole called." );
+			WriteLine( "InitializeConsole called.", true );
 
 			var filePath = Path.Combine( DocumentsFolder, "Console.log" );
 
@@ -33,8 +32,7 @@ namespace MarvinsAIRA
 
 		public void StopConsole()
 		{
-			WriteLine( "" );
-			WriteLine( "StopConsole called." );
+			WriteLine( "StopConsole called.", true );
 
 			_console_fileStream?.Close();
 			_console_fileStream?.Dispose();
@@ -42,9 +40,11 @@ namespace MarvinsAIRA
 			_console_fileStream = null;
 		}
 
-		public void WriteLine( string message )
+		public void WriteLine( string message, bool addBlankLine = false )
 		{
-			var messageWithTime = $"{DateTime.Now}   {message}";
+			var blankLine = addBlankLine ? "\r\n" : string.Empty;
+
+			var messageWithTime = $"{blankLine}{DateTime.Now}   {message}";
 
 			Debug.WriteLine( message );
 

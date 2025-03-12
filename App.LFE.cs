@@ -30,8 +30,7 @@ namespace MarvinsAIRA
 
 		public void InitializeLFE()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeLFE called." );
+			WriteLine( "InitializeLFE called.", true );
 
 			if ( _lfe_initialized )
 			{
@@ -120,8 +119,7 @@ namespace MarvinsAIRA
 
 		private void UninitializeLFE()
 		{
-			WriteLine( "" );
-			WriteLine( "UninitializeLFE called." );
+			WriteLine( "UninitializeLFE called.", true );
 
 			if ( _lfe_threadRunning )
 			{

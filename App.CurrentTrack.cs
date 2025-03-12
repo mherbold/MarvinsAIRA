@@ -23,8 +23,7 @@ namespace MarvinsAIRA
 
 		private void InitializeCurrentTrack()
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeCurrentTrack called." );
+			WriteLine( "InitializeCurrentTrack called.", true );
 
 			UpdateCurrentTrack();
 		}
@@ -44,13 +43,11 @@ namespace MarvinsAIRA
 			{
 				if ( trackDisplayName == NO_TRACK_DISPLAY_NAME )
 				{
-					WriteLine( "" );
-					WriteLine( "You are no longer on a track." );
+					WriteLine( "You are no longer on a track.", true );
 				}
 				else
 				{
-					WriteLine( "" );
-					WriteLine( $"You are racing at {trackDisplayName} ({trackConfigName})." );
+					WriteLine( $"You are racing at {trackDisplayName} ({trackConfigName}).", true );
 
 					Say( Settings.SayTrackName, trackDisplayName );
 					Say( Settings.SayTrackConfigName, trackConfigName );

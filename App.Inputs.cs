@@ -28,8 +28,7 @@ namespace MarvinsAIRA
 
 		public void InitializeInputs( nint windowHandle )
 		{
-			WriteLine( "" );
-			WriteLine( "InitializeInputs called." );
+			WriteLine( "InitializeInputs called.", true );
 			WriteLine( "...initializing DirectInput (all devices)..." );
 
 			_input_joystickList.Clear();
@@ -215,8 +214,7 @@ namespace MarvinsAIRA
 				}
 				catch ( Exception exception )
 				{
-					WriteLine( "" );
-					WriteLine( $"Exception caught while getting input from {joystick.Information.ProductName}: {exception.Message.Trim()}" );
+					WriteLine( $"Exception caught while getting input from {joystick.Information.ProductName}: {exception.Message.Trim()}", true );
 
 					_input_joystickList.Remove( joystick );
 
@@ -289,8 +287,7 @@ namespace MarvinsAIRA
 				}
 				catch ( Exception exception )
 				{
-					WriteLine( "" );
-					WriteLine( $"Exception caught while getting input from {joystick.Information.ProductName}: {exception.Message.Trim()}" );
+					WriteLine( $"Exception caught while getting input from {joystick.Information.ProductName}: {exception.Message.Trim()}", true );
 
 					_input_joystickList.Remove( joystick );
 
