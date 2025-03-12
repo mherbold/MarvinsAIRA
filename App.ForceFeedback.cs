@@ -274,8 +274,8 @@ namespace MarvinsAIRA
 
 			WriteLine( "...force feedback uninitialized." );
 		}
-
-		public void ReinitializeForceFeedbackDevice( nint windowHandle )
+        public bool _win_Show_MapButtonWindow { get; set; } = false;
+        public void ReinitializeForceFeedbackDevice( nint windowHandle )
 		{
 			UninitializeForceFeedback( false );
 
@@ -685,6 +685,12 @@ namespace MarvinsAIRA
 			_track_trackConfigChanged = false;
 
 			// auto-center wheel feature
+
+			if (_win_Show_MapButtonWindow)
+			{
+                UpdateConstantForce([0]);
+				return;
+            }
 
 			if ( Settings.AutoCenterWheel && ( !_irsdk_isOnTrack || ( _irsdk_simMode == "replay" ) ) && ( !_ffb_playingBackNow || !Settings.PlaybackSendToDevice ) )
 			{

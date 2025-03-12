@@ -1235,7 +1235,7 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region Map button window
-
+		
 		private Settings.MappedButtons ShowMapButtonsWindow( Settings.MappedButtons mappedButtons )
 		{
 			var app = (App) Application.Current;
@@ -1243,8 +1243,8 @@ namespace MarvinsAIRA
 			app.WriteLine( "Showing the map buttons dialog window...", true );
 
 			_win_pauseButtons = true;
-
-			var window = new MapButtonWindow
+			app._win_Show_MapButtonWindow = true;
+            var window = new MapButtonWindow
 			{
 				Owner = this,
 				MappedButtons = mappedButtons,
@@ -1262,11 +1262,15 @@ namespace MarvinsAIRA
 				app.QueueForSerialization();
 
 				app.WriteLine( $"...button mapping was changed." );
-			}
+				app._win_Show_MapButtonWindow = false;
+
+            }
 			else
 			{
 				app.WriteLine( "...dialog window was closed (canceled)." );
-			}
+				app._win_Show_MapButtonWindow = false;
+
+            }
 
 			_win_pauseButtons = false;
 
