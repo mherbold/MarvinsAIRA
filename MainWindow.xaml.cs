@@ -27,7 +27,7 @@ namespace MarvinsAIRA
 
 		private bool _win_initialized = false;
 		private bool _win_updateLoopRunning = false;
-		private bool _win_pauseButtons = false;
+		private bool _win_pauseInputProcessing = false;
 
 		private nint _win_windowHandle = 0;
 
@@ -166,6 +166,20 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private void Window_StateChanged( object sender, EventArgs e )
+		{
+			if ( WindowState == WindowState.Minimized )
+			{
+				ShowInTaskbar = false;
+				Visibility = Visibility.Hidden;
+			}
+			else if ( WindowState == WindowState.Normal )
+			{
+				ShowInTaskbar = true;
+				Visibility = Visibility.Visible;
+			}
+		}
+
 		private void Window_SourceInitialized( object sender, EventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -253,6 +267,22 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Taskbar Icon
+
+		private void TaskbarIcon_TrayLeftMouseDown( object sender, RoutedEventArgs e )
+		{
+			SystemCommands.RestoreWindow( this );
+			WinApi.SetForegroundWindow( _win_windowHandle );
+		}
+
+		private void TaskbarIcon_TrayRightMouseDown( object sender, RoutedEventArgs e )
+		{
+			SystemCommands.RestoreWindow(this);
+			WinApi.SetForegroundWindow( _win_windowHandle );
+		}
+
+		#endregion
+
 		#region Update loop
 
 		private void OnTimer( object? sender, EventArgs e )
@@ -287,12 +317,12 @@ namespace MarvinsAIRA
 
 							app.UpdateSettings( deltaTime );
 
-							if ( !_win_pauseButtons )
+							if ( !_win_pauseInputProcessing )
 							{
 								app.UpdateInputs( deltaTime );
 							}
 
-							app.UpdateForceFeedback( deltaTime, !_win_pauseButtons, _win_windowHandle );
+							app.UpdateForceFeedback( deltaTime, _win_pauseInputProcessing, _win_windowHandle );
 							app.UpdateWindSimulator();
 							app.UpdateSpotter( deltaTime );
 							app.UpdateLogitech();
@@ -1242,7 +1272,7 @@ namespace MarvinsAIRA
 
 			app.WriteLine( "Showing the map buttons dialog window...", true );
 
-			_win_pauseButtons = true;
+			_win_pauseInputProcessing = true;
 
 			var window = new MapButtonWindow
 			{
@@ -1268,7 +1298,7 @@ namespace MarvinsAIRA
 				app.WriteLine( "...dialog window was closed (canceled)." );
 			}
 
-			_win_pauseButtons = false;
+			_win_pauseInputProcessing = false;
 
 			return mappedButtons;
 		}

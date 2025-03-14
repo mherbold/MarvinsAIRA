@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:MarvinsAIRA"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.44"
+        Title="Marvin's Awesome iRacing App v0.45"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -17,13 +18,13 @@
         ResizeMode="CanMinimize"
         Icon="/icon.ico"
         WindowStartupLocation="CenterScreen"
-        ui:WindowHelper.UseModernWindowStyle="True">
+        ui:WindowHelper.UseModernWindowStyle="True" StateChanged="Window_StateChanged">
 
     <Window.DataContext>
         <local:Settings />
     </Window.DataContext>
 
-    <StackPanel Grid.Column="0">
+    <StackPanel>
         <TabControl>
             <TabItem>
                 <TabItem.Header>
@@ -1227,5 +1228,6 @@
                 </ui:ToggleSwitch>
             </StatusBarItem>
         </StatusBar>
+        <tb:TaskbarIcon IconSource="/icon.ico" ToolTipText="Marvin's Awesome iRacing App" NoLeftClickDelay="True" TrayLeftMouseDown="TaskbarIcon_TrayLeftMouseDown" TrayRightMouseDown="TaskbarIcon_TrayRightMouseDown" />
     </StackPanel>
 </Window>

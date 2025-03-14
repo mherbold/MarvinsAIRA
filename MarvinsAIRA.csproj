@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.7.25104.5739" />
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
