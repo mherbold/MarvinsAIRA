@@ -31,7 +31,7 @@ namespace MarvinsAIRA
 				{
 					if ( driver.CarIdx == _irsdk.Data.SessionInfo.DriverInfo.DriverCarIdx )
 					{
-						carScreenName = driver.CarScreenName;
+						carScreenName = driver.CarScreenName ?? string.Empty;
 						break;
 					}
 				}

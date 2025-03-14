@@ -65,8 +65,9 @@ namespace MarvinsAIRA
 
 		public int _irsdk_tickCountLastFrame = 0;
 		public bool _irsdk_isOnTrackLastFrame = false;
-		public float _irsdk_speedLastFrame = 0f;
 
+		public float _irsdk_velocity = 0f;
+		public float _irsdk_velocityLastFrame = 0f;
 		public float _irsdk_gForce = 0f;
 
 		private int _irsdk_updateLoopTickCount = 0;
@@ -180,9 +181,10 @@ namespace MarvinsAIRA
 			_irsdk_playerCarNumber = string.Empty;
 
 			_irsdk_tickCountLastFrame = 0;
-			_irsdk_speedLastFrame = 0f;
 			_irsdk_isOnTrackLastFrame = false;
 
+			_irsdk_velocity = 0f;
+			_irsdk_velocityLastFrame = 0f;
 			_irsdk_gForce = 0f;
 
 			_irsdk_updateLoopTickCount = 0;
@@ -259,7 +261,6 @@ namespace MarvinsAIRA
 			}
 
 			_irsdk_tickCountLastFrame = _irsdk_tickCount;
-			_irsdk_speedLastFrame = _irsdk_speed;
 			_irsdk_isOnTrackLastFrame = _irsdk_isOnTrack;
 
 			_irsdk_tickRate = _irsdk.Data.TickRate;
@@ -282,18 +283,32 @@ namespace MarvinsAIRA
 			_irsdk_velocityY = _irsdk.Data.GetFloat( _irsdk_velocityYDatum );
 			_irsdk_yawRate = _irsdk.Data.GetFloat( _irsdk_yawRateDatum );
 
+			// calculate exact delta time
+
 			var deltaTime = ( _irsdk_tickCount - _irsdk_tickCountLastFrame ) / (float) _irsdk_tickRate;
+
+			// calculate velocity
+
+			_irsdk_velocityLastFrame = _irsdk_velocity;
+
+			_irsdk_velocity = MathF.Sqrt( ( _irsdk_velocityX * _irsdk_velocityX ) + ( _irsdk_velocityY * _irsdk_velocityY ) );
+
+			// calculate g force
 
 			if ( deltaTime > 0 )
 			{
-				_irsdk_gForce = ( _irsdk_speed - _irsdk_speedLastFrame ) / deltaTime / IRSDK_ONE_G;
+				_irsdk_gForce = MathF.Abs( _irsdk_velocity - _irsdk_velocityLastFrame ) / deltaTime / IRSDK_ONE_G;
 			}
 			else
 			{
 				_irsdk_gForce = 0;
 			}
 
+			// pause session info updates if we are in a replay or off the track
+
 			_irsdk.PauseSessionInfoUpdates = _irsdk_isOnTrack || ( _irsdk_simMode == "replay" );
+
+			// update the force feedback magnitudes
 
 			UpdateForceFeedback();
 

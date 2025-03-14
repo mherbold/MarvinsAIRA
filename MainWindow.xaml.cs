@@ -19,8 +19,8 @@ namespace MarvinsAIRA
 	{
 		#region Properties
 
-		private const int IMAGE_WIDTH = 360;
-		private const int IMAGE_HEIGHT = 200;
+		private const int IMAGE_WIDTH = 440;
+		private const int IMAGE_HEIGHT = 160;
 		private const int IMAGE_BYTES_PER_PIXEL = 4;
 		private const int IMAGE_DPI = 96;
 		private const int IMAGE_STRIDE = IMAGE_WIDTH * IMAGE_BYTES_PER_PIXEL;
@@ -350,7 +350,7 @@ namespace MarvinsAIRA
 
 							if ( _win_guiUpdateTimer <= 0f )
 							{
-								_win_guiUpdateTimer = 0.05f;
+								_win_guiUpdateTimer = 0.033f;
 
 								Dispatcher.BeginInvoke( () =>
 								{
@@ -407,7 +407,7 @@ namespace MarvinsAIRA
 
 									// Steering wheel angle
 
-									var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / Math.PI;
+									var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / MathF.PI;
 
 									SteeringWheel_Image.RenderTransform = new RotateTransform( -steeringWheelAngleInDegrees );
 
@@ -449,7 +449,7 @@ namespace MarvinsAIRA
 
 									// Yaw rate
 
-									var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / Math.PI;
+									var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / MathF.PI;
 
 									YawRate_Label.Content = $"{yawRateInDegreesPerSecond:F0}°/sec";
 
@@ -460,31 +460,35 @@ namespace MarvinsAIRA
 
 									// Yaw rate factor (instant)
 
-									YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F2}";
+									YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F0}";
 
-									if ( (string) YawRateFactorInstant_Label.Content == "-0.00" )
+									if ( (string) YawRateFactorInstant_Label.Content == "-0" )
 									{
-										YawRateFactorInstant_Label.Content = "0.00";
+										YawRateFactorInstant_Label.Content = "0";
 									}
 
 									// Yaw rate factor (average)
 
-									YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F2}";
+									YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F0}";
 
-									if ( (string) YawRateFactorAverage_Label.Content == "-0.00" )
+									if ( (string) YawRateFactorAverage_Label.Content == "-0" )
 									{
-										YawRateFactorAverage_Label.Content = "0.00";
+										YawRateFactorAverage_Label.Content = "0";
 									}
+
+									// Peak G force (last 2 seconds)
+
+									PeakGForce_Label.Content = $"{app.FFB_PeakGForce:F1} G";
 
 									// Oversteer amount
 
-									var oversteerAmount = Math.Abs( app.FFB_OversteerAmount );
+									var oversteerAmount = MathF.Abs( app.FFB_OversteerAmount );
 
 									OversteerAmount_Label.Content = $"{oversteerAmount * 100f:F0}%";
 
 									// Understeer amount
 
-									var understeerAmount = Math.Abs( app.FFB_UndersteerAmount );
+									var understeerAmount = MathF.Abs( app.FFB_UndersteerAmount );
 
 									UndersteerAmount_Label.Content = $"{understeerAmount * 100f:F0}%";
 
@@ -1316,8 +1320,8 @@ namespace MarvinsAIRA
 				var usStr = (float) x / IMAGE_WIDTH;
 				var osStr = 1f - usStr;
 
-				var usPct = (float) Math.Pow( usStr, app.Settings.USCurve );
-				var osPct = (float) Math.Pow( osStr, app.Settings.OSCurve );
+				var usPct = MathF.Pow( usStr, app.Settings.USCurve );
+				var osPct = MathF.Pow( osStr, app.Settings.OSCurve );
 
 				var usY0 = (int) ( usPct * IMAGE_HEIGHT ) - 1;
 				var usY1 = usY0 + 2;

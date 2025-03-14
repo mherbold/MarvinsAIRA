@@ -35,8 +35,8 @@ namespace MarvinsAIRA
 
 			if ( _irsdk.IsConnected && ( _irsdk.Data.SessionInfo != null ) )
 			{
-				trackDisplayName = _irsdk.Data.SessionInfo.WeekendInfo.TrackDisplayName;
-				trackConfigName = _irsdk.Data.SessionInfo.WeekendInfo.TrackConfigName;
+				trackDisplayName = _irsdk.Data.SessionInfo.WeekendInfo.TrackDisplayName ?? string.Empty;
+				trackConfigName = _irsdk.Data.SessionInfo.WeekendInfo.TrackConfigName ?? string.Empty;
 			}
 
 			if ( ( _track_currentTrackDisplayName != trackDisplayName ) || ( _track_currentTrackConfigName != trackConfigName ) )
@@ -67,7 +67,15 @@ namespace MarvinsAIRA
 
 					if ( mainWindow != null )
 					{
-						mainWindow.CurrentTrack_StatusBarItem.Content = $"{_track_currentTrackDisplayName} ({_track_currentTrackConfigName})";
+						if ( _track_currentTrackConfigName != string.Empty )
+						{
+							mainWindow.CurrentTrack_StatusBarItem.Content = $"{_track_currentTrackDisplayName} ({_track_currentTrackConfigName})";
+						}
+						else
+						{
+							mainWindow.CurrentTrack_StatusBarItem.Content = $"{_track_currentTrackDisplayName}";
+						}
+
 						mainWindow.CurrentTrack_StatusBarItem.Foreground = ( _track_currentTrackDisplayName == NO_TRACK_DISPLAY_NAME ) ? Brushes.Gray : Brushes.ForestGreen;
 					}
 				} );
