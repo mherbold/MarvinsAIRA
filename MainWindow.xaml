@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.46"
+        Title="Marvin's Awesome iRacing App v0.47"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"

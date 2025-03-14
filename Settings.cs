@@ -2182,6 +2182,11 @@ namespace MarvinsAIRA
 		{
 			if ( sayString != value )
 			{
+				if ( value == null )
+				{
+					value = string.Empty;
+				}
+
 				var app = (App) Application.Current;
 
 				app.WriteLine( $"{stringName} changed - before \"{sayString}\" now \"{value}\"" );

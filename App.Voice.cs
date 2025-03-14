@@ -73,6 +73,8 @@ namespace MarvinsAIRA
 
 		public void Say( string message, string? value = null, bool interrupt = false, bool alsoAddToChatQueue = true )
 		{
+			message ??= string.Empty;
+
 			if ( value != null )
 			{
 				if ( value == string.Empty )

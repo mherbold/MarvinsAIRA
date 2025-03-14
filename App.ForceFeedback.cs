@@ -76,6 +76,7 @@ namespace MarvinsAIRA
 
 		private float _ffb_previousSteeringWheelTorque = 0f;
 		private float _ffb_runningSteeringWheelTorque = 0f;
+		private float _ffb_rawSteadyStateWheelTorque = 0f;
 		private float _ffb_steadyStateWheelTorque = 0f;
 
 		public bool _ffb_drawPrettyGraph = false;
@@ -837,6 +838,7 @@ namespace MarvinsAIRA
 			_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
 			_ffb_previousSteeringWheelTorque = 0f;
 			_ffb_runningSteeringWheelTorque = 0f;
+			_ffb_rawSteadyStateWheelTorque = 0f;
 			_ffb_steadyStateWheelTorque = 0f;
 		}
 
@@ -1103,13 +1105,21 @@ namespace MarvinsAIRA
 
 				var limitedDeltaSteeringWheelTorque = Math.Clamp( deltaSteeringWheelTorque, -0.09f, 0.09f );
 
+				// calculate raw steady state wheel torque
+
+				_ffb_rawSteadyStateWheelTorque += limitedDeltaSteeringWheelTorque;
+
+				_ffb_rawSteadyStateWheelTorque = ( _ffb_rawSteadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * 0.1f );
+
+				// calculate scaled steady state wheel torque
+
 				_ffb_steadyStateWheelTorque += limitedDeltaSteeringWheelTorque * overallScaleToDirectInputUnits;
 
 				_ffb_steadyStateWheelTorque = ( _ffb_steadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * 0.1f );
 
 				// save the original steering wheel torque (for auto-overall-scale feature)
 
-				_ffb_autoScaleSteeringWheelTorqueBuffer[ _ffb_autoScaleSteeringWheelTorqueBufferIndex ] = _ffb_steadyStateWheelTorque;
+				_ffb_autoScaleSteeringWheelTorqueBuffer[ _ffb_autoScaleSteeringWheelTorqueBufferIndex ] = _ffb_rawSteadyStateWheelTorque;
 
 				_ffb_autoScaleSteeringWheelTorqueBufferIndex = ( _ffb_autoScaleSteeringWheelTorqueBufferIndex + 1 ) % _ffb_autoScaleSteeringWheelTorqueBuffer.Length;
 
