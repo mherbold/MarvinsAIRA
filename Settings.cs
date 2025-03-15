@@ -1812,7 +1812,30 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Settings tab - Window tab
+		#region Settings tab - App tab
+
+		/* Start with Windows */
+
+		private bool _startWithWindows = false;
+
+		public bool StartWithWindows
+		{
+			get => _startWithWindows;
+
+			set
+			{
+				if ( _startWithWindows != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"StartWithWindows changed - before {_startWithWindows} now {value}" );
+
+					_startWithWindows = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		/* Start minimized */
 
@@ -1948,254 +1971,6 @@ namespace MarvinsAIRA
 			}
 		}
 
-
-		#endregion
-
-		#region Settings tab - Audio tab
-
-		/* Enable click sound */
-
-		private bool _enableClickSound = false;
-
-		public bool EnableClickSound
-		{
-			get => _enableClickSound;
-
-			set
-			{
-				if ( _enableClickSound != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"EnableClickSound changed - before {_enableClickSound} now {value}" );
-
-					_enableClickSound = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Click sound volume */
-
-		private int _clickSoundVolume = 75;
-
-		public int ClickSoundVolume
-		{
-			get => _clickSoundVolume;
-
-			set
-			{
-				if ( _clickSoundVolume != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"ClickSoundVolume changed - before {_clickSoundVolume} now {value}" );
-
-					_clickSoundVolume = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		#endregion
-
-		#region Settings tab - Voice tab
-
-		/* Enable speech synthesizer */
-
-		private bool _enableSpeechSynthesizer = false;
-
-		public bool EnableSpeechSynthesizer
-		{
-			get => _enableSpeechSynthesizer;
-
-			set
-			{
-				if ( _enableSpeechSynthesizer != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"EnableSpeechSynthesizer changed - before {_enableSpeechSynthesizer} now {value}" );
-
-					_enableSpeechSynthesizer = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Speech synthesizer volume */
-
-		private int _speechSynthesizerVolume = 100;
-
-		public int SpeechSynthesizerVolume
-		{
-			get => _speechSynthesizerVolume;
-
-			set
-			{
-				if ( _speechSynthesizerVolume != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"SpeechSynthesizerVolume changed - before {_speechSynthesizerVolume} now {value}" );
-
-					_speechSynthesizerVolume = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Speech synthesizer gender */
-
-		private string _selectedVoice = string.Empty;
-
-		public string SelectedVoice
-		{
-			get => _selectedVoice;
-
-			set
-			{
-				if ( _selectedVoice != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"SelectedVoice changed - before {_selectedVoice} now {value}" );
-
-					_selectedVoice = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Various translations */
-
-		private string _sayHello = "Hello";
-		private string _sayConnected = "Connected";
-		private string _sayDisconnected = "Disconnected";
-		private string _sayVoiceVolume = ":value:";
-
-		private string _sayCarName = ":value:";
-		private string _sayTrackName = ":value:";
-		private string _sayTrackConfigName = ":value:";
-
-		private string _sayOverallScale = "Overall :value:";
-		private string _sayDetailScale = "Detail :value:";
-		private string _sayLFEScale = "LFE :value:";
-		private string _sayScalesReset = "Scales were reset";
-		private string _sayLoadOverallScale = "Overall :value:";
-		private string _sayLoadDetailScale = "Detail :value:";
-		private string _sayClipping = "";
-		private string _sayCrashProtectionOn = "Crash protection on";
-		private string _sayCrashProtectionOff = "Crash protection off";
-		
-		private string _sayClear = "Clear";
-		private string _sayCarLeft = "Car left";
-		private string _sayCarRight = "Car right";
-		private string _sayTwoCarsLeft = "Two left";
-		private string _sayTwoCarsRight = "Two right";
-		private string _sayThreeWide = "Three wide";
-
-		private string _sayCheckeredFlag = "Checkered flag";
-		private string _sayWhiteFlag = "White flag - last lap";
-		private string _sayGreenFlag = "Green flag";
-		private string _sayYellowFlag = "Yellow flag";
-		private string _sayRedFlag = "Red flag";
-		private string _sayBlueFlag = "Blue flag";
-		private string _sayDebrisFlag = "Watch for debris";
-		private string _sayCrossedFlag = "Crossed flag";
-		private string _sayYellowWavingFlag = "Yellow flag";
-		private string _sayOneLapToGreenFlag = "One lap to green";
-		private string _sayGreenHeldFlag = string.Empty;
-		private string _sayTenToGoFlag = "Ten to go";
-		private string _sayFiveToGoFlag = "Five to go";
-		private string _sayRandomWavingFlag = string.Empty;
-		private string _sayCautionFlag = string.Empty;
-		private string _sayCautionWavingFlag = "Caution flag";
-		private string _sayBlackFlag = "Black flag";
-		private string _sayDisqualifyFlag = "You've been disqualified";
-		private string _sayServicibleFlag = string.Empty;
-		private string _sayFurledFlag = "Furled black flag";
-		private string _sayRepairFlag = "Meatball flag";
-		private string _sayStartHiddenFlag = string.Empty;
-		private string _sayStartReadyFlag = "Get ready";
-		private string _sayStartSetFlag = string.Empty;
-		private string _sayStartGoFlag = "Go Go Go";
-
-		public string SayHello { get => _sayHello; set { SetSayString( "SayHello", ref _sayHello, value ); } }
-		public string SayConnected { get => _sayConnected; set { SetSayString( "SayConnected", ref _sayConnected, value ); } }
-		public string SayDisconnected { get => _sayDisconnected; set { SetSayString( "SayDisconnected", ref _sayDisconnected, value ); } }
-		public string SayVoiceVolume { get => _sayVoiceVolume; set { SetSayString( "SayVoiceVolume", ref _sayVoiceVolume, value ); } }
-
-		public string SayCarName { get => _sayCarName; set { SetSayString( "SayCarName", ref _sayCarName, value ); } }
-		public string SayTrackName { get => _sayTrackName; set { SetSayString( "SayTrackName", ref _sayTrackName, value ); } }
-		public string SayTrackConfigName { get => _sayTrackConfigName; set { SetSayString( "SayTrackConfigName", ref _sayTrackConfigName, value ); } }
-
-		public string SayOverallScale { get => _sayOverallScale; set { SetSayString( "SayOverallScale", ref _sayOverallScale, value ); } }
-		public string SayDetailScale { get => _sayDetailScale; set { SetSayString( "SayDetailScale", ref _sayDetailScale, value ); } }
-		public string SayLFEScale { get => _sayLFEScale; set { SetSayString( "SayLFEScale", ref _sayLFEScale, value ); } }
-		public string SayScalesReset { get => _sayScalesReset; set { SetSayString( "SayScalesReset", ref _sayScalesReset, value ); } }
-		public string SayLoadOverallScale { get => _sayLoadOverallScale; set { SetSayString( "SayLoadOverallScale", ref _sayLoadOverallScale, value ); } }
-		public string SayLoadDetailScale { get => _sayLoadDetailScale; set { SetSayString( "SayLoadDetailScale", ref _sayLoadDetailScale, value ); } }
-		public string SayClipping { get => _sayClipping; set { SetSayString( "SayClipping", ref _sayClipping, value ); } }
-		public string SayCrashProtectionOn { get => _sayCrashProtectionOn; set { SetSayString( "SayCrashProtectionOn", ref _sayCrashProtectionOn, value ); } }
-		public string SayCrashProtectionOff { get => _sayCrashProtectionOff; set { SetSayString( "SayCrashProtectionOff", ref _sayCrashProtectionOff, value ); } }
-
-		public string SayClear { get => _sayClear; set { SetSayString( "SayClear", ref _sayClear, value ); } }
-		public string SayCarLeft { get => _sayCarLeft; set { SetSayString( "SayCarLeft", ref _sayCarLeft, value ); } }
-		public string SayCarRight { get => _sayCarRight; set { SetSayString( "SayCarRight", ref _sayCarRight, value ); } }
-		public string SayTwoCarsLeft { get => _sayTwoCarsLeft; set { SetSayString( "SayTwoCarsLeft", ref _sayTwoCarsLeft, value ); } }
-		public string SayTwoCarsRight { get => _sayTwoCarsRight; set { SetSayString( "SayTwoCarsRight", ref _sayTwoCarsRight, value ); } }
-		public string SayThreeWide { get => _sayThreeWide; set { SetSayString( "SayThreeWide", ref _sayThreeWide, value ); } }
-
-		public string SayCheckeredFlag { get => _sayCheckeredFlag; set { SetSayString( "SayCheckeredFlag", ref _sayCheckeredFlag, value ); } }
-		public string SayWhiteFlag { get => _sayWhiteFlag; set { SetSayString( "SayWhiteFlag", ref _sayWhiteFlag, value ); } }
-		public string SayGreenFlag { get => _sayGreenFlag; set { SetSayString( "SayGreenFlag", ref _sayGreenFlag, value ); } }
-		public string SayYellowFlag { get => _sayYellowFlag; set { SetSayString( "SayYellowFlag", ref _sayYellowFlag, value ); } }
-		public string SayRedFlag { get => _sayRedFlag; set { SetSayString( "SayRedFlag", ref _sayRedFlag, value ); } }
-		public string SayBlueFlag { get => _sayBlueFlag; set { SetSayString( "SayBlueFlag", ref _sayBlueFlag, value ); } }
-		public string SayDebrisFlag { get => _sayDebrisFlag; set { SetSayString( "SayDebrisFlag", ref _sayDebrisFlag, value ); } }
-		public string SayCrossedFlag { get => _sayCrossedFlag; set { SetSayString( "SayCrossedFlag", ref _sayCrossedFlag, value ); } }
-		public string SayYellowWavingFlag { get => _sayYellowWavingFlag; set { SetSayString( "SayYellowWavingFlag", ref _sayYellowWavingFlag, value ); } }
-		public string SayOneLapToGreenFlag { get => _sayOneLapToGreenFlag; set { SetSayString( "SayOneLapToGreenFlag", ref _sayOneLapToGreenFlag, value ); } }
-		public string SayGreenHeldFlag { get => _sayGreenHeldFlag; set { SetSayString( "SayGreenHeldFlag", ref _sayGreenHeldFlag, value ); } }
-		public string SayTenToGoFlag { get => _sayTenToGoFlag; set { SetSayString( "SayTenToGoFlag", ref _sayTenToGoFlag, value ); } }
-		public string SayFiveToGoFlag { get => _sayFiveToGoFlag; set { SetSayString( "SayFiveToGoFlag", ref _sayFiveToGoFlag, value ); } }
-		public string SayRandomWavingFlag { get => _sayRandomWavingFlag; set { SetSayString( "SayRandomWavingFlag", ref _sayRandomWavingFlag, value ); } }
-		public string SayCautionFlag { get => _sayCautionFlag; set { SetSayString( "SayCautionFlag", ref _sayCautionFlag, value ); } }
-		public string SayCautionWavingFlag { get => _sayCautionWavingFlag; set { SetSayString( "SayCautionWavingFlag", ref _sayCautionWavingFlag, value ); } }
-		public string SayBlackFlag { get => _sayBlackFlag; set { SetSayString( "SayBlackFlag", ref _sayBlackFlag, value ); } }
-		public string SayDisqualifyFlag { get => _sayDisqualifyFlag; set { SetSayString( "SayDisqualifyFlag", ref _sayDisqualifyFlag, value ); } }
-		public string SayServicibleFlag { get => _sayServicibleFlag; set { SetSayString( "SayServicibleFlag", ref _sayServicibleFlag, value ); } }
-		public string SayFurledFlag { get => _sayFurledFlag; set { SetSayString( "SayFurledFlag", ref _sayFurledFlag, value ); } }
-		public string SayRepairFlag { get => _sayRepairFlag; set { SetSayString( "SayRepairFlag", ref _sayRepairFlag, value ); } }
-		public string SayStartHiddenFlag { get => _sayStartHiddenFlag; set { SetSayString( "SayStartHiddenFlag", ref _sayStartHiddenFlag, value ); } }
-		public string SayStartReadyFlag { get => _sayStartReadyFlag; set { SetSayString( "SayStartReadyFlag", ref _sayStartReadyFlag, value ); } }
-		public string SayStartSetFlag { get => _sayStartSetFlag; set { SetSayString( "SayStartSetFlag", ref _sayStartSetFlag, value ); } }
-		public string SayStartGoFlag { get => _sayStartGoFlag; set { SetSayString( "SayStartGoFlag", ref _sayStartGoFlag, value ); } }
-
-		private void SetSayString( string stringName, ref string sayString, string value, [CallerMemberName] string? name = null )
-		{
-			if ( sayString != value )
-			{
-				if ( value == null )
-				{
-					value = string.Empty;
-				}
-
-				var app = (App) Application.Current;
-
-				app.WriteLine( $"{stringName} changed - before \"{sayString}\" now \"{value}\"" );
-
-				sayString = value;
-
-				OnPropertyChanged( true, name );
-			}
-		}
 
 		#endregion
 
@@ -2587,7 +2362,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private bool _enableCrashProtection = false;
+		private bool _enableCrashProtection = true;
 
 		public bool EnableCrashProtection
 		{
@@ -2753,6 +2528,198 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Settings tab - Audio tab
+
+		/* Enable click sound */
+
+		private bool _enableClickSound = false;
+
+		public bool EnableClickSound
+		{
+			get => _enableClickSound;
+
+			set
+			{
+				if ( _enableClickSound != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableClickSound changed - before {_enableClickSound} now {value}" );
+
+					_enableClickSound = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Click sound volume */
+
+		private int _clickSoundVolume = 75;
+
+		public int ClickSoundVolume
+		{
+			get => _clickSoundVolume;
+
+			set
+			{
+				if ( _clickSoundVolume != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ClickSoundVolume changed - before {_clickSoundVolume} now {value}" );
+
+					_clickSoundVolume = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Enable ABS sound */
+
+		private bool _enableABSSound = false;
+
+		public bool EnableABSSound
+		{
+			get => _enableABSSound;
+
+			set
+			{
+				if ( _enableABSSound != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableABSSound changed - before {_enableABSSound} now {value}" );
+
+					_enableABSSound = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* ABS sound volume */
+
+		private int _absSoundVolume = 75;
+
+		public int ABSSoundVolume
+		{
+			get => _absSoundVolume;
+
+			set
+			{
+				if ( _absSoundVolume != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ABSSoundVolume changed - before {_absSoundVolume} now {value}" );
+
+					_absSoundVolume = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* ABS sound pitch */
+
+		private float _absSoundPitch = 1f;
+
+		public float ABSSoundPitch
+		{
+			get => _absSoundPitch;
+
+			set
+			{
+				if ( _absSoundPitch != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ABSSoundPitch changed - before {_absSoundPitch} now {value}" );
+
+					_absSoundPitch = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region Settings tab - Voice tab
+
+		/* Enable speech synthesizer */
+
+		private bool _enableSpeechSynthesizer = false;
+
+		public bool EnableSpeechSynthesizer
+		{
+			get => _enableSpeechSynthesizer;
+
+			set
+			{
+				if ( _enableSpeechSynthesizer != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableSpeechSynthesizer changed - before {_enableSpeechSynthesizer} now {value}" );
+
+					_enableSpeechSynthesizer = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Speech synthesizer volume */
+
+		private int _speechSynthesizerVolume = 100;
+
+		public int SpeechSynthesizerVolume
+		{
+			get => _speechSynthesizerVolume;
+
+			set
+			{
+				if ( _speechSynthesizerVolume != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SpeechSynthesizerVolume changed - before {_speechSynthesizerVolume} now {value}" );
+
+					_speechSynthesizerVolume = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Speech synthesizer gender */
+
+		private string _selectedVoice = string.Empty;
+
+		public string SelectedVoice
+		{
+			get => _selectedVoice;
+
+			set
+			{
+				if ( _selectedVoice != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SelectedVoice changed - before {_selectedVoice} now {value}" );
+
+					_selectedVoice = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		#region Settings tab - Chat
 
 		private bool _enableChat = false;
@@ -2773,6 +2740,135 @@ namespace MarvinsAIRA
 
 					OnPropertyChanged();
 				}
+			}
+		}
+
+		#endregion
+
+		#region Settings tab - Messages
+
+		private string _sayHello = "Hello";
+		private string _sayConnected = "Connected";
+		private string _sayDisconnected = "Disconnected";
+		private string _sayVoiceVolume = ":value:";
+
+		private string _sayCarName = ":value:";
+		private string _sayTrackName = ":value:";
+		private string _sayTrackConfigName = ":value:";
+		private string _sayFFBWarning = "Force feedback is enabled in iRacing, please turn it off.";
+
+		private string _sayOverallScale = "Overall :value:";
+		private string _sayDetailScale = "Detail :value:";
+		private string _sayLFEScale = "LFE :value:";
+		private string _sayScalesReset = "Scales were reset";
+		private string _sayLoadOverallScale = "Overall :value:";
+		private string _sayLoadDetailScale = "Detail :value:";
+		private string _sayClipping = "";
+		private string _sayCrashProtectionOn = "Crash protection on";
+		private string _sayCrashProtectionOff = "Crash protection off";
+
+		private string _sayClear = "Clear";
+		private string _sayCarLeft = "Car left";
+		private string _sayCarRight = "Car right";
+		private string _sayTwoCarsLeft = "Two left";
+		private string _sayTwoCarsRight = "Two right";
+		private string _sayThreeWide = "Three wide";
+
+		private string _sayCheckeredFlag = "Checkered flag";
+		private string _sayWhiteFlag = "White flag - last lap";
+		private string _sayGreenFlag = "Green flag";
+		private string _sayYellowFlag = "Yellow flag";
+		private string _sayRedFlag = "Red flag";
+		private string _sayBlueFlag = "Blue flag";
+		private string _sayDebrisFlag = "Watch for debris";
+		private string _sayCrossedFlag = "Crossed flag";
+		private string _sayYellowWavingFlag = "Yellow flag";
+		private string _sayOneLapToGreenFlag = "One lap to green";
+		private string _sayGreenHeldFlag = string.Empty;
+		private string _sayTenToGoFlag = "Ten to go";
+		private string _sayFiveToGoFlag = "Five to go";
+		private string _sayRandomWavingFlag = string.Empty;
+		private string _sayCautionFlag = string.Empty;
+		private string _sayCautionWavingFlag = "Caution flag";
+		private string _sayBlackFlag = "Black flag";
+		private string _sayDisqualifyFlag = "You've been disqualified";
+		private string _sayServicibleFlag = string.Empty;
+		private string _sayFurledFlag = "Furled black flag";
+		private string _sayRepairFlag = "Meatball flag";
+		private string _sayStartHiddenFlag = string.Empty;
+		private string _sayStartReadyFlag = "Get ready";
+		private string _sayStartSetFlag = string.Empty;
+		private string _sayStartGoFlag = "Go Go Go";
+
+		public string SayHello { get => _sayHello; set { SetSayString( "SayHello", ref _sayHello, value ); } }
+		public string SayConnected { get => _sayConnected; set { SetSayString( "SayConnected", ref _sayConnected, value ); } }
+		public string SayDisconnected { get => _sayDisconnected; set { SetSayString( "SayDisconnected", ref _sayDisconnected, value ); } }
+		public string SayVoiceVolume { get => _sayVoiceVolume; set { SetSayString( "SayVoiceVolume", ref _sayVoiceVolume, value ); } }
+
+		public string SayCarName { get => _sayCarName; set { SetSayString( "SayCarName", ref _sayCarName, value ); } }
+		public string SayTrackName { get => _sayTrackName; set { SetSayString( "SayTrackName", ref _sayTrackName, value ); } }
+		public string SayTrackConfigName { get => _sayTrackConfigName; set { SetSayString( "SayTrackConfigName", ref _sayTrackConfigName, value ); } }
+		public string SayFFBWarning { get => _sayFFBWarning; set { SetSayString( "SayFFBWarning", ref _sayFFBWarning, value ); } }
+
+		public string SayOverallScale { get => _sayOverallScale; set { SetSayString( "SayOverallScale", ref _sayOverallScale, value ); } }
+		public string SayDetailScale { get => _sayDetailScale; set { SetSayString( "SayDetailScale", ref _sayDetailScale, value ); } }
+		public string SayLFEScale { get => _sayLFEScale; set { SetSayString( "SayLFEScale", ref _sayLFEScale, value ); } }
+		public string SayScalesReset { get => _sayScalesReset; set { SetSayString( "SayScalesReset", ref _sayScalesReset, value ); } }
+		public string SayLoadOverallScale { get => _sayLoadOverallScale; set { SetSayString( "SayLoadOverallScale", ref _sayLoadOverallScale, value ); } }
+		public string SayLoadDetailScale { get => _sayLoadDetailScale; set { SetSayString( "SayLoadDetailScale", ref _sayLoadDetailScale, value ); } }
+		public string SayClipping { get => _sayClipping; set { SetSayString( "SayClipping", ref _sayClipping, value ); } }
+		public string SayCrashProtectionOn { get => _sayCrashProtectionOn; set { SetSayString( "SayCrashProtectionOn", ref _sayCrashProtectionOn, value ); } }
+		public string SayCrashProtectionOff { get => _sayCrashProtectionOff; set { SetSayString( "SayCrashProtectionOff", ref _sayCrashProtectionOff, value ); } }
+
+		public string SayClear { get => _sayClear; set { SetSayString( "SayClear", ref _sayClear, value ); } }
+		public string SayCarLeft { get => _sayCarLeft; set { SetSayString( "SayCarLeft", ref _sayCarLeft, value ); } }
+		public string SayCarRight { get => _sayCarRight; set { SetSayString( "SayCarRight", ref _sayCarRight, value ); } }
+		public string SayTwoCarsLeft { get => _sayTwoCarsLeft; set { SetSayString( "SayTwoCarsLeft", ref _sayTwoCarsLeft, value ); } }
+		public string SayTwoCarsRight { get => _sayTwoCarsRight; set { SetSayString( "SayTwoCarsRight", ref _sayTwoCarsRight, value ); } }
+		public string SayThreeWide { get => _sayThreeWide; set { SetSayString( "SayThreeWide", ref _sayThreeWide, value ); } }
+
+		public string SayCheckeredFlag { get => _sayCheckeredFlag; set { SetSayString( "SayCheckeredFlag", ref _sayCheckeredFlag, value ); } }
+		public string SayWhiteFlag { get => _sayWhiteFlag; set { SetSayString( "SayWhiteFlag", ref _sayWhiteFlag, value ); } }
+		public string SayGreenFlag { get => _sayGreenFlag; set { SetSayString( "SayGreenFlag", ref _sayGreenFlag, value ); } }
+		public string SayYellowFlag { get => _sayYellowFlag; set { SetSayString( "SayYellowFlag", ref _sayYellowFlag, value ); } }
+		public string SayRedFlag { get => _sayRedFlag; set { SetSayString( "SayRedFlag", ref _sayRedFlag, value ); } }
+		public string SayBlueFlag { get => _sayBlueFlag; set { SetSayString( "SayBlueFlag", ref _sayBlueFlag, value ); } }
+		public string SayDebrisFlag { get => _sayDebrisFlag; set { SetSayString( "SayDebrisFlag", ref _sayDebrisFlag, value ); } }
+		public string SayCrossedFlag { get => _sayCrossedFlag; set { SetSayString( "SayCrossedFlag", ref _sayCrossedFlag, value ); } }
+		public string SayYellowWavingFlag { get => _sayYellowWavingFlag; set { SetSayString( "SayYellowWavingFlag", ref _sayYellowWavingFlag, value ); } }
+		public string SayOneLapToGreenFlag { get => _sayOneLapToGreenFlag; set { SetSayString( "SayOneLapToGreenFlag", ref _sayOneLapToGreenFlag, value ); } }
+		public string SayGreenHeldFlag { get => _sayGreenHeldFlag; set { SetSayString( "SayGreenHeldFlag", ref _sayGreenHeldFlag, value ); } }
+		public string SayTenToGoFlag { get => _sayTenToGoFlag; set { SetSayString( "SayTenToGoFlag", ref _sayTenToGoFlag, value ); } }
+		public string SayFiveToGoFlag { get => _sayFiveToGoFlag; set { SetSayString( "SayFiveToGoFlag", ref _sayFiveToGoFlag, value ); } }
+		public string SayRandomWavingFlag { get => _sayRandomWavingFlag; set { SetSayString( "SayRandomWavingFlag", ref _sayRandomWavingFlag, value ); } }
+		public string SayCautionFlag { get => _sayCautionFlag; set { SetSayString( "SayCautionFlag", ref _sayCautionFlag, value ); } }
+		public string SayCautionWavingFlag { get => _sayCautionWavingFlag; set { SetSayString( "SayCautionWavingFlag", ref _sayCautionWavingFlag, value ); } }
+		public string SayBlackFlag { get => _sayBlackFlag; set { SetSayString( "SayBlackFlag", ref _sayBlackFlag, value ); } }
+		public string SayDisqualifyFlag { get => _sayDisqualifyFlag; set { SetSayString( "SayDisqualifyFlag", ref _sayDisqualifyFlag, value ); } }
+		public string SayServicibleFlag { get => _sayServicibleFlag; set { SetSayString( "SayServicibleFlag", ref _sayServicibleFlag, value ); } }
+		public string SayFurledFlag { get => _sayFurledFlag; set { SetSayString( "SayFurledFlag", ref _sayFurledFlag, value ); } }
+		public string SayRepairFlag { get => _sayRepairFlag; set { SetSayString( "SayRepairFlag", ref _sayRepairFlag, value ); } }
+		public string SayStartHiddenFlag { get => _sayStartHiddenFlag; set { SetSayString( "SayStartHiddenFlag", ref _sayStartHiddenFlag, value ); } }
+		public string SayStartReadyFlag { get => _sayStartReadyFlag; set { SetSayString( "SayStartReadyFlag", ref _sayStartReadyFlag, value ); } }
+		public string SayStartSetFlag { get => _sayStartSetFlag; set { SetSayString( "SayStartSetFlag", ref _sayStartSetFlag, value ); } }
+		public string SayStartGoFlag { get => _sayStartGoFlag; set { SetSayString( "SayStartGoFlag", ref _sayStartGoFlag, value ); } }
+
+		private void SetSayString( string stringName, ref string sayString, string value, [CallerMemberName] string? name = null )
+		{
+			if ( sayString != value )
+			{
+				if ( value == null )
+				{
+					value = string.Empty;
+				}
+
+				var app = (App) Application.Current;
+
+				app.WriteLine( $"{stringName} changed - before \"{sayString}\" now \"{value}\"" );
+
+				sayString = value;
+
+				OnPropertyChanged( true, name );
 			}
 		}
 

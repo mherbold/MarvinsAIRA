@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.47"
+        Title="Marvin's Awesome iRacing App v0.49"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -509,7 +509,87 @@
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <Label Content="Speed" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                            <Label x:Name="Speed_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            <Label x:Name="Speed_Label" Content="0 XXX" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,5" />
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="15" />
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="1">
+                                    <Rectangle Width="20" Height="3" Fill="Gray" />
+                                    <Rectangle x:Name="ClutchMax_Rectangle" Width="20" Height="3" Fill="Blue" />
+                                </Grid>
+                                <Grid Grid.Column="3">
+                                    <Rectangle Width="20" Height="3" Fill="Gray" />
+                                    <Rectangle x:Name="BrakeMax_Rectangle" Width="20" Height="3" Fill="Red" />
+                                </Grid>
+                                <Grid Grid.Column="5">
+                                    <Rectangle Width="20" Height="3" Fill="Gray" />
+                                    <Rectangle x:Name="ThrottleMax_Rectangle"  Width="20" Height="3" Fill="Lime" />
+                                </Grid>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="15" />
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="1">
+                                    <Rectangle Width="20" Height="90" Fill="Gray" />
+                                    <Rectangle x:Name="Clutch_Rectangle" Width="20" Height="90" Fill="Blue" />
+                                </Grid>
+                                <Grid Grid.Column="3">
+                                    <Rectangle Width="20" Height="90" Fill="Gray" />
+                                    <Rectangle x:Name="Brake_Rectangle" Width="20" Height="90" Fill="Red" />
+                                </Grid>
+                                <Grid Grid.Column="5">
+                                    <Rectangle Width="20" Height="90" Fill="Gray" />
+                                    <Rectangle x:Name="Throttle_Rectangle" Width="20" Height="90" Fill="Lime" />
+                                </Grid>
+                            </Grid>
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="15" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="15" />
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="1">
+                                    <Rectangle Width="20" Height="3" Fill="Gray" />
+                                    <Rectangle x:Name="ClutchMin_Rectangle" Width="20" Height="3" Fill="Blue" />
+                                </Grid>
+                                <Grid Grid.Column="3">
+                                    <Rectangle Width="20" Height="3" Fill="Gray" />
+                                    <Rectangle x:Name="BrakeMin_Rectangle" Width="20" Height="3" Fill="Red" />
+                                </Grid>
+                                <Grid Grid.Column="5">
+                                    <Rectangle Width="20" Height="3" Fill="Gray" />
+                                    <Rectangle x:Name="ThrottleMin_Rectangle" Width="20" Height="3" Fill="Lime" />
+                                </Grid>
+                            </Grid>
+                            <Grid Margin="0,3,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="1" x:Name="Gear_Label" Content="N" HorizontalAlignment="Center" FontWeight="Bold" FontSize="17" />
+                                <Label Grid.Column="2" x:Name="ABS_Label" Content="ABS" HorizontalAlignment="Center" FontWeight="Bold" FontSize="17" Foreground="Gray" />
+                            </Grid>
                         </StackPanel>
                         <StackPanel Grid.Column="4">
                             <Label Content="X Velocity" HorizontalAlignment="Center" Margin="0,0,0,5"/>
@@ -617,12 +697,11 @@
                     <Label Content="Settings" VerticalAlignment="Center" />
                 </TabItem.Header>
                 <TabControl TabStripPlacement="Left">
-                    <TabItem Header="Window">
+                    <TabItem Header="App">
                         <StackPanel Margin="10,10,10,10">
-                            <StackPanel>
-                                <CheckBox Content="Start Minimized" IsChecked="{Binding StartMinimized}"/>
-                                <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow}" Click="TopmostWindow_CheckBox_Click"/>
-                            </StackPanel>
+                            <CheckBox x:Name="StartWithWindows_CheckBox" Content="Start With Windows" IsChecked="{Binding StartWithWindows}" Click="StartWithWindows_CheckBox_Click"/>
+                            <CheckBox Content="Start Minimized" IsChecked="{Binding StartMinimized}"/>
+                            <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow}" Click="TopmostWindow_CheckBox_Click"/>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Save File">
@@ -780,11 +859,26 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Column="0" Content="Enable Click Sound" IsChecked="{Binding EnableClickSound}" />
                                 <Slider x:Name="ClickSoundVolume_Slider" Grid.Column="1"  Margin="20,0,0,0" ValueChanged="ClickSoundVolume_Slider_ValueChanged" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding ClickSoundVolume}"/>
                                 <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" Content="Enable ABS Sound" IsChecked="{Binding EnableABSSound}" />
+                                <Slider x:Name="ABSSoundVolume_Slider" Grid.Column="1"  Margin="20,0,0,0" SmallChange="1" LargeChange="10" Maximum="100" Minimum="1" TickFrequency="5" TickPlacement="Both" Value="{Binding ABSSoundVolume}"/>
+                                <Label Grid.Column="2" Content="Volume" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                <Slider x:Name="ABSSoundPitch_Slider" Grid.Column="3"  Margin="20,0,0,0" SmallChange="0.025" LargeChange="0.1" Maximum="2" Minimum="0.25" TickFrequency="0.1" TickPlacement="Both" Value="{Binding ABSSoundPitch}"/>
+                                <Label Grid.Column="4" Content="Pitch" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                <Button Grid.Column="5" x:Name="ABSTest_Button" Margin="15,0,0,0" Content="TEST" MouseLeave="ABSTest_Button_MouseLeave" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" PreviewMouseLeftButtonDown="ABSTest_Button_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="ABSTest_Button_PreviewMouseLeftButtonUp" />
                             </Grid>
                         </StackPanel>
                     </TabItem>
@@ -876,6 +970,14 @@
                                                 </Grid.ColumnDefinitions>
                                                 <Label Grid.Column="0" Content="Track Config Name" VerticalAlignment="Center"/>
                                                 <TextBox Grid.Column="1" Text="{Binding SayTrackConfigName}" />
+                                            </Grid>
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="FFB Warning" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding SayFFBWarning}" />
                                             </Grid>
                                         </StackPanel>
                                     </GroupBox>

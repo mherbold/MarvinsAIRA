@@ -892,6 +892,13 @@ namespace MarvinsAIRA
 				return;
 			}
 
+			// warn if FFB is enabled in iRacing
+
+			if ( _irsdk_steeringFFBEnabled && !_irsdk_steeringFFBEnabledLastFrame )
+			{
+				Say( Settings.SayFFBWarning );
+			}
+
 			// see if we want to process FFB without actually updating the FFB magnitude buffer
 
 			var processThisFrame = ( Interlocked.Decrement( ref _ffb_updatesToSkip ) < 0 );

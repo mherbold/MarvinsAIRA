@@ -11,7 +11,11 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
+using WK.Libraries.BootMeUpNS;
+
 using ModernWpf.Controls;
+using System.Drawing;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace MarvinsAIRA
 {
@@ -28,6 +32,7 @@ namespace MarvinsAIRA
 		private bool _win_initialized = false;
 		private bool _win_updateLoopRunning = false;
 		private bool _win_pauseInputProcessing = false;
+		private bool _win_absTestPlaying = false;
 
 		private nint _win_windowHandle = 0;
 
@@ -46,6 +51,8 @@ namespace MarvinsAIRA
 		private float _win_inputReinitTimer = 0;
 
 		private IntPtr _win_deviceChangeNotificationHandle = 0;
+
+		private BootMeUp _win_bootMeUp = new();
 
 		private readonly Stopwatch _win_stopwatch = new();
 
@@ -162,6 +169,11 @@ namespace MarvinsAIRA
 
 				Advanced_ToggleSwitch_Toggled( Advanced_ToggleSwitch, new RoutedEventArgs() );
 
+				_win_bootMeUp.UseAlternativeOnFail = true;
+				_win_bootMeUp.BootArea = BootMeUp.BootAreas.Registry;
+				_win_bootMeUp.TargetUser = BootMeUp.TargetUsers.CurrentUser;
+				_win_bootMeUp.Enabled = app.Settings.StartWithWindows;
+
 				_win_initialized = true;
 			}
 		}
@@ -277,7 +289,7 @@ namespace MarvinsAIRA
 
 		private void TaskbarIcon_TrayRightMouseDown( object sender, RoutedEventArgs e )
 		{
-			SystemCommands.RestoreWindow(this);
+			SystemCommands.RestoreWindow( this );
 			WinApi.SetForegroundWindow( _win_windowHandle );
 		}
 
@@ -416,6 +428,61 @@ namespace MarvinsAIRA
 									if ( (string) SteeringWheel_Label.Content == "-0°" )
 									{
 										SteeringWheel_Label.Content = "0°";
+									}
+
+									// Clutch, brake, and throttle minimums
+
+									ClutchMin_Rectangle.Visibility = ( app._irsdk_clutch < 1f ) ? Visibility.Visible : Visibility.Hidden;
+									BrakeMin_Rectangle.Visibility = ( app._irsdk_brake > 0f ) ? Visibility.Visible : Visibility.Hidden;
+									ThrottleMin_Rectangle.Visibility = ( app._irsdk_throttle > 0f ) ? Visibility.Visible : Visibility.Hidden;
+
+									// Clutch, brake, and throttle
+
+									var clutchHeight = Math.Clamp( 90f - app._irsdk_clutch * 90f, 0f, 90f );
+
+									Clutch_Rectangle.Height = clutchHeight;
+									Clutch_Rectangle.Margin = new Thickness( 0, 90f - clutchHeight, 0f, 0f );
+
+									var brakeHeight = Math.Clamp( app._irsdk_brake * 90f, 0f, 90f );
+
+									Brake_Rectangle.Height = brakeHeight;
+									Brake_Rectangle.Margin = new Thickness( 0, 90f - brakeHeight, 0f, 0f );
+
+									var throttleHeight = Math.Clamp( app._irsdk_throttle * 90f, 0f, 90f );
+
+									Throttle_Rectangle.Height = throttleHeight;
+									Throttle_Rectangle.Margin = new Thickness( 0, 90f - throttleHeight, 0f, 0f );
+
+									// Clutch, brake, and throttle maximums
+
+									ClutchMax_Rectangle.Visibility = ( app._irsdk_clutch == 0f ) ? Visibility.Visible : Visibility.Hidden;
+									BrakeMax_Rectangle.Visibility = ( app._irsdk_brake == 1f ) ? Visibility.Visible : Visibility.Hidden;
+									ThrottleMax_Rectangle.Visibility = ( app._irsdk_throttle == 1f ) ? Visibility.Visible : Visibility.Hidden;
+
+									// Gear
+
+									if ( app._irsdk_gear == -1 )
+									{
+										Gear_Label.Content = "R";
+									}
+									else if ( app._irsdk_gear == 0 )
+									{
+										Gear_Label.Content = "N";
+									}
+									else
+									{
+										Gear_Label.Content = app._irsdk_gear.ToString();
+									}
+
+									// ABS
+
+									if ( app._irsdk_brakeABSactive )
+									{
+										ABS_Label.Foreground = Brushes.Orange;
+									}
+									else
+									{
+										ABS_Label.Foreground = Brushes.Gray;
 									}
 
 									// Speed
@@ -1056,7 +1123,16 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Settings tab - Window tab
+		#region Settings tab - App tab
+
+		private void StartWithWindows_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var checkBox = (CheckBox) sender;
+
+			var startWithWindows = checkBox.IsChecked == true;
+
+			_win_bootMeUp.Enabled = startWithWindows;
+		}
 
 		private void TopmostWindow_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
@@ -1105,6 +1181,31 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Settings tab - Wheel tab
+
+		private void SetWheelMinValue_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.Settings.WheelMinValue = app.Input_CurrentWheelPosition;
+		}
+
+		private void SetWheelCenterValue_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.Settings.WheelCenterValue = app.Input_CurrentWheelPosition;
+		}
+
+		private void SetWheelMaxValue_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.Settings.WheelMaxValue = app.Input_CurrentWheelPosition;
+		}
+
+		#endregion
+
 		#region Settings tab - Audio tab
 
 		private void ClickSoundVolume_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
@@ -1114,6 +1215,42 @@ namespace MarvinsAIRA
 				var app = (App) Application.Current;
 
 				app.PlayClick();
+			}
+		}
+
+		private void ABSTest_Button_PreviewMouseLeftButtonDown( object sender, MouseButtonEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			if ( !_win_absTestPlaying )
+			{
+				_win_absTestPlaying = true;
+
+				app.PlayABS();
+			}
+		}
+
+		private void ABSTest_Button_PreviewMouseLeftButtonUp( object sender, MouseButtonEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			if ( _win_absTestPlaying )
+			{
+				_win_absTestPlaying = false;
+
+				app.StopABS();
+			}
+		}
+
+		private void ABSTest_Button_MouseLeave( object sender, MouseEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			if ( _win_absTestPlaying )
+			{
+				_win_absTestPlaying = false;
+
+				app.StopABS();
 			}
 		}
 
@@ -1143,31 +1280,6 @@ namespace MarvinsAIRA
 
 				app.Say( app.Settings.SayHello, null, true, false );
 			}
-		}
-
-		#endregion
-
-		#region Settings tab - Wheel tab
-
-		private void SetWheelMinValue_Button_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.Settings.WheelMinValue = app.Input_CurrentWheelPosition;
-		}
-
-		private void SetWheelCenterValue_Button_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.Settings.WheelCenterValue = app.Input_CurrentWheelPosition;
-		}
-
-		private void SetWheelMaxValue_Button_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.Settings.WheelMaxValue = app.Input_CurrentWheelPosition;
 		}
 
 		#endregion
