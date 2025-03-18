@@ -139,7 +139,7 @@ namespace MarvinsAIRA
 
 					Serializer.Save( filePath, _settings );
 
-					WriteLine( "Settings.xml file updated." );
+					WriteLine( $"Settings.xml file updated [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}, {_wetdry_conditionSaveName}]" );
 				}
 			}
 		}

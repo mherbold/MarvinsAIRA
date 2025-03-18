@@ -140,55 +140,6 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Target force */
-
-		private float _targetForce = 5f;
-
-		public float TargetForce
-		{
-			get => _targetForce;
-
-			set
-			{
-				value = Math.Clamp( value, 2f, 50f );
-
-				if ( _targetForce != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"TargetForce changed - before {_targetForce} now {value}" );
-
-					_targetForce = value;
-
-					OnPropertyChanged();
-				}
-
-				TargetForceString = $"!{_targetForce:F1} N⋅m";
-			}
-		}
-
-		private string _targetForceString = "5 N⋅m";
-
-		public string TargetForceString
-		{
-			get => _targetForceString;
-
-			set
-			{
-				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
-				{
-					value = value[ 1.. ];
-
-					if ( _targetForceString != value )
-					{
-						_targetForceString = value;
-
-						OnPropertyChanged();
-					}
-				}
-			}
-		}
-
 		/* Auto overall scale */
 
 		private MappedButtons _autoOverallScaleButtons = new();
@@ -210,28 +161,35 @@ namespace MarvinsAIRA
 
 		/* Overall scale */
 
-		private int _overallScale = 10;
+		private float _overallScale = 10f;
 
-		public int OverallScale
+		public float OverallScale
 		{
 			get => _overallScale;
 
 			set
 			{
-				value = Math.Clamp( value, 1, 250 );
+				value = Math.Clamp( value, 1f, 100f );
 
 				if ( _overallScale != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"OverallScale changed - before {_overallScale} now {value}" );
+					app.WriteLine( $"OverallScale changed - before {_overallScale:F1} now {value:F1}" );
 
 					_overallScale = value;
 
 					OnPropertyChanged();
 				}
 
-				OverallScaleString = $"!{_overallScale}%";
+				if ( _overallScale < 10f )
+				{
+					OverallScaleString = $"!{_overallScale:F1}%";
+				}
+				else
+				{
+					OverallScaleString = $"!{_overallScale:F0}%";
+				}
 			}
 		}
 
@@ -259,28 +217,35 @@ namespace MarvinsAIRA
 
 		/* Detail scale */
 
-		private int _detailScale = 100;
+		private float _detailScale = 100f;
 
-		public int DetailScale
+		public float DetailScale
 		{
 			get => _detailScale;
 
 			set
 			{
-				value = Math.Clamp( value, 0, 500 );
+				value = Math.Clamp( value, 0f, 500f );
 
 				if ( _detailScale != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"DetailScale changed - before {_detailScale} now {value}" );
+					app.WriteLine( $"DetailScale changed - before {_detailScale:F1} now {value:F1}" );
 
 					_detailScale = value;
 
 					OnPropertyChanged();
 				}
 
-				DetailScaleString = $"!{_detailScale}%";
+				if ( _detailScale < 10f )
+				{
+					DetailScaleString = $"!{_detailScale:F1}%";
+				}
+				else
+				{
+					DetailScaleString = $"!{_detailScale:F0}%";
+				}
 			}
 		}
 
@@ -552,7 +517,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect strength */
 
-		private int _usEffectStrength = 0;
+		private int _usEffectStrength = 15;
 
 		public int USEffectStrength
 		{
@@ -577,7 +542,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usEffectStrengthString = "0%";
+		private string _usEffectStrengthString = "15%";
 
 		public string USEffectStrengthString
 		{
@@ -601,7 +566,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect yaw rate factor (start left) */
 
-		private int _usStartYawRateFactorLeft = 0;
+		private int _usStartYawRateFactorLeft = 120;
 
 		public int USStartYawRateFactorLeft
 		{
@@ -626,7 +591,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usStartYawRateFactorLeftString = "0";
+		private string _usStartYawRateFactorLeftString = "120";
 
 		public string USStartYawRateFactorLeftString
 		{
@@ -650,7 +615,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect yaw rate factor (end left) */
 
-		private int _usEndYawRateFactorLeft = 0;
+		private int _usEndYawRateFactorLeft = 180;
 
 		public int USEndYawRateFactorLeft
 		{
@@ -675,7 +640,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usEndYawRateFactorLeftString = "0";
+		private string _usEndYawRateFactorLeftString = "180";
 
 		public string USEndYawRateFactorLeftString
 		{
@@ -699,7 +664,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect yaw rate factor (start right) */
 
-		private int _usStartYawRateFactorRight = 0;
+		private int _usStartYawRateFactorRight = 120;
 
 		public int USStartYawRateFactorRight
 		{
@@ -724,7 +689,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usStartYawRateFactorRightString = "0";
+		private string _usStartYawRateFactorRightString = "120";
 
 		public string USStartYawRateFactorRightString
 		{
@@ -748,7 +713,7 @@ namespace MarvinsAIRA
 
 		/* Understeer effect yaw rate factor (end right) */
 
-		private int _usEndYawRateFactorRight = 0;
+		private int _usEndYawRateFactorRight = 180;
 
 		public int USEndYawRateFactorRight
 		{
@@ -773,7 +738,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usEndYawRateFactorRightString = "0";
+		private string _usEndYawRateFactorRightString = "180";
 
 		public string USEndYawRateFactorRightString
 		{
@@ -865,11 +830,11 @@ namespace MarvinsAIRA
 
 		/* Oversteer effect style */
 
-		public bool OSEffectStyleSineWaveBuzz { get; set; } = true;
+		public bool OSEffectStyleSineWaveBuzz { get; set; } = false;
 		public bool OSEffectStyleSawtoothWaveBuzz { get; set; } = false;
-		public bool OSEffectStyleConstantForce { get; set; } = false;
+		public bool OSEffectStyleConstantForce { get; set; } = true;
 
-		private int _osEffectStyle = 0;
+		private int _osEffectStyle = 2;
 
 		public int OSEffectStyle
 		{
@@ -890,7 +855,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private bool _osEffectStyleInvert = false;
+		private bool _osEffectStyleInvert = true;
 
 		public bool OSEffectStyleInvert
 		{
@@ -913,7 +878,7 @@ namespace MarvinsAIRA
 
 		/* Oversteer effect strength */
 
-		private int _osEffectStrength = 0;
+		private int _osEffectStrength = 30;
 
 		public int OSEffectStrength
 		{
@@ -938,7 +903,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _osEffectStrengthString = "0%";
+		private string _osEffectStrengthString = "30%";
 
 		public string OSEffectStrengthString
 		{
@@ -962,7 +927,7 @@ namespace MarvinsAIRA
 
 		/* Oversteer effect y velocity (start) */
 
-		private float _osStartYVelocity = 0f;
+		private float _osStartYVelocity = 3f;
 
 		public float OSStartYVelocity
 		{
@@ -987,7 +952,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _osStartYVelocityString = "0.0";
+		private string _osStartYVelocityString = "3.0";
 
 		public string OSStartYVelocityString
 		{
@@ -1011,7 +976,7 @@ namespace MarvinsAIRA
 
 		/* Oversteer effect y velocity (end) */
 
-		private float _osEndYVelocity = 0f;
+		private float _osEndYVelocity = 8f;
 
 		public float OSEndYVelocity
 		{
@@ -1036,7 +1001,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _osEndYVelocityString = "0.0";
+		private string _osEndYVelocityString = "8.0";
 
 		public string OSEndYVelocityString
 		{
@@ -1107,36 +1072,18 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Oversteer effect button */
-
-		private MappedButtons _oversteerEffectButtons = new();
-
-		public MappedButtons OversteerEffectButtons
-		{
-			get => _oversteerEffectButtons;
-
-			set
-			{
-				if ( _oversteerEffectButtons != value )
-				{
-					_oversteerEffectButtons = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
 		/* Per-car/track/track config force feedback settings */
 
 		public class ForceFeedbackSettings
 		{
-			public string WheelName = string.Empty;
-			public string CarName = string.Empty;
-			public string TrackName = string.Empty;
-			public string TrackConfigName = string.Empty;
+			public string WheelName = App.ALL_WHEELS_SAVE_NAME;
+			public string CarName = App.ALL_CARS_SAVE_NAME;
+			public string TrackName = App.ALL_TRACKS_SAVE_NAME;
+			public string TrackConfigName = App.ALL_TRACK_CONFIGS_SAVE_NAME;
+			public string WetDryConditionName = App.ALL_WETDRYCONDITIONS_SAVE_NAME;
 
-			public int OverallScale = 10;
-			public int DetailScale = 100;
+			public float OverallScale = 10f;
+			public float DetailScale = 100f;
 		}
 
 		public List<ForceFeedbackSettings> ForceFeedbackSettingsList { get; private set; } = [];
@@ -1149,14 +1096,14 @@ namespace MarvinsAIRA
 
 			public bool SteeringEffectsEnabled = false;
 
-			public int USStartYawRateFactorLeft = 0;
-			public int USEndYawRateFactorLeft = 0;
-			public int USStartYawRateFactorRight = 0;
-			public int USEndYawRateFactorRight = 0;
+			public int USStartYawRateFactorLeft = 120;
+			public int USEndYawRateFactorLeft = 180;
+			public int USStartYawRateFactorRight = 120;
+			public int USEndYawRateFactorRight = 180;
 
 
-			public float OSStartYVelocity = 0f;
-			public float OSEndYVelocity = 0f;
+			public float OSStartYVelocity = 3f;
+			public float OSEndYVelocity = 8f;
 		}
 
 		public List<SteeringEffectsSettings> SteeringEffectsSettingsList { get; private set; } = [];
@@ -1213,15 +1160,15 @@ namespace MarvinsAIRA
 
 		/* LFE scale */
 
-		private int _lfeScale = 50;
+		private float _lfeScale = 50f;
 
-		public int LFEScale
+		public float LFEScale
 		{
 			get => _lfeScale;
 
 			set
 			{
-				value = Math.Clamp( value, 0, 100 );
+				value = Math.Clamp( value, 0f, 200f );
 
 				if ( _lfeScale != value )
 				{
@@ -1234,7 +1181,14 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				LFEScaleString = $"!{_lfeScale}%";
+				if ( _lfeScale < 10f )
+				{
+					LFEScaleString = $"!{_lfeScale:F1}%";
+				}
+				else
+				{
+					LFEScaleString = $"!{_lfeScale:F0}%";
+				}
 			}
 		}
 
@@ -1860,6 +1814,52 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Minimize to tray */
+
+		private bool _closeToSystemTray = false;
+
+		public bool CloseToSystemTray
+		{
+			get => _closeToSystemTray;
+
+			set
+			{
+				if ( _closeToSystemTray != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"CloseToSystemTray changed - before {_closeToSystemTray} now {value}" );
+
+					_closeToSystemTray = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Minimize to tray */
+
+		private bool _hideTrayAlert = false;
+
+		public bool HideTrayAlert
+		{
+			get => _hideTrayAlert;
+
+			set
+			{
+				if ( _hideTrayAlert != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"HideTrayAlert changed - before {_hideTrayAlert} now {value}" );
+
+					_hideTrayAlert = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Topmost window */
 
 		private bool _topmostWindow = false;
@@ -1971,6 +1971,26 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private bool _saveSettingsPerWetDryCondition = false;
+
+		public bool SaveSettingsPerWetDryCondition
+		{
+			get => _saveSettingsPerWetDryCondition;
+
+			set
+			{
+				if ( _saveSettingsPerWetDryCondition != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"SaveSettingsPerWetDryCondition changed - before {_saveSettingsPerWetDryCondition} now {value}" );
+
+					_saveSettingsPerWetDryCondition = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		#endregion
 
@@ -2001,7 +2021,7 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Settings tab - Wheel tab
+		#region Settings tab - Auto centering tab
 
 		private bool _autoCenterWheel = true;
 
@@ -2247,6 +2267,129 @@ namespace MarvinsAIRA
 			}
 		}
 
+		#endregion
+
+		#region Settings tab - Crash protection tab
+
+		private bool _enableCrashProtection = true;
+
+		public bool EnableCrashProtection
+		{
+			get => _enableCrashProtection;
+
+			set
+			{
+				if ( _enableCrashProtection != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableCrashProtection changed - before {_enableCrashProtection} now {value}" );
+
+					_enableCrashProtection = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private float _gForce = 4f;
+
+		public float GForce
+		{
+			get => _gForce;
+
+			set
+			{
+				value = Math.Clamp( value, 1f, 10f );
+
+				if ( _gForce != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"GForce changed - before {_gForce} now {value}" );
+
+					_gForce = value;
+
+					OnPropertyChanged();
+				}
+
+				GForceString = $"!{(float) _gForce:F1} G";
+			}
+		}
+
+		private string _gForceString = "4.0 G";
+
+		public string GForceString
+		{
+			get => _gForceString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _gForceString != value )
+					{
+						_gForceString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		private float _crashDuration = 4f;
+
+		public float CrashDuration
+		{
+			get => _crashDuration;
+
+			set
+			{
+				value = Math.Clamp( value, 1f, 10f );
+
+				if ( _crashDuration != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"CrashDuration changed - before {_crashDuration} now {value}" );
+
+					_crashDuration = value;
+
+					OnPropertyChanged();
+				}
+
+				CrashDurationString = $"!{(float) _crashDuration:F1} sec";
+			}
+		}
+
+		private string _crashDurationString = "4.0 sec";
+
+		public string CrashDurationString
+		{
+			get => _crashDurationString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _crashDurationString != value )
+					{
+						_crashDurationString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Settings tab - Soft lock
+
 		private bool _enableSoftLock = true;
 
 		public bool EnableSoftLock
@@ -2362,120 +2505,9 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private bool _enableCrashProtection = true;
+		#endregion
 
-		public bool EnableCrashProtection
-		{
-			get => _enableCrashProtection;
-
-			set
-			{
-				if ( _enableCrashProtection != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"EnableCrashProtection changed - before {_enableCrashProtection} now {value}" );
-
-					_enableCrashProtection = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		private float _gForce = 4f;
-
-		public float GForce
-		{
-			get => _gForce;
-
-			set
-			{
-				value = Math.Clamp( value, 1f, 10f );
-
-				if ( _gForce != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"GForce changed - before {_gForce} now {value}" );
-
-					_gForce = value;
-
-					OnPropertyChanged();
-				}
-
-				GForceString = $"!{(float) _gForce:F1} G";
-			}
-		}
-
-		private string _gForceString = "4.0 G";
-
-		public string GForceString
-		{
-			get => _gForceString;
-
-			set
-			{
-				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
-				{
-					value = value[ 1.. ];
-
-					if ( _gForceString != value )
-					{
-						_gForceString = value;
-
-						OnPropertyChanged();
-					}
-				}
-			}
-		}
-
-		private float _crashDuration = 2f;
-
-		public float CrashDuration
-		{
-			get => _crashDuration;
-
-			set
-			{
-				value = Math.Clamp( value, 1f, 10f );
-
-				if ( _crashDuration != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"CrashDuration changed - before {_crashDuration} now {value}" );
-
-					_crashDuration = value;
-
-					OnPropertyChanged();
-				}
-
-				CrashDurationString = $"!{(float) _crashDuration:F1} sec";
-			}
-		}
-
-		private string _crashDurationString = "2.0 sec";
-
-		public string CrashDurationString
-		{
-			get => _crashDurationString;
-
-			set
-			{
-				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
-				{
-					value = value[ 1.. ];
-
-					if ( _crashDurationString != value )
-					{
-						_crashDurationString = value;
-
-						OnPropertyChanged();
-					}
-				}
-			}
-		}
+		#region Settings tab - Force feedback tab
 
 		private bool _playbackSendToDevice = true;
 
@@ -2494,6 +2526,53 @@ namespace MarvinsAIRA
 					_playbackSendToDevice = value;
 
 					OnPropertyChanged();
+				}
+			}
+		}
+
+		private int _autoOverallScaleClipLimit = 0;
+
+		public int AutoOverallScaleClipLimit
+		{
+			get => _autoOverallScaleClipLimit;
+
+			set
+			{
+				value = Math.Clamp( value, 0, 100 );
+
+				if ( _autoOverallScaleClipLimit != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"AutoOverallScaleClipLimit changed - before {_autoOverallScaleClipLimit} now {value}" );
+
+					_autoOverallScaleClipLimit = value;
+
+					OnPropertyChanged();
+				}
+
+				AutoOverallScaleClipLimitString = $"!{_autoOverallScaleClipLimit}%";
+			}
+		}
+
+		private string _autoOverallScaleClipLimitString = "0%";
+
+		public string AutoOverallScaleClipLimitString
+		{
+			get => _autoOverallScaleClipLimitString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _autoOverallScaleClipLimitString != value )
+					{
+						_autoOverallScaleClipLimitString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -2601,7 +2680,7 @@ namespace MarvinsAIRA
 
 		/* ABS sound volume */
 
-		private int _absSoundVolume = 75;
+		private int _absSoundVolume = 35;
 
 		public int ABSSoundVolume
 		{
@@ -2755,6 +2834,8 @@ namespace MarvinsAIRA
 		private string _sayCarName = ":value:";
 		private string _sayTrackName = ":value:";
 		private string _sayTrackConfigName = ":value:";
+		private string _sayTrackWet = "The track is wet";
+		private string _sayTrackDry = "";
 		private string _sayFFBWarning = "Force feedback is enabled in iRacing, please turn it off.";
 
 		private string _sayOverallScale = "Overall :value:";
@@ -2808,6 +2889,8 @@ namespace MarvinsAIRA
 		public string SayCarName { get => _sayCarName; set { SetSayString( "SayCarName", ref _sayCarName, value ); } }
 		public string SayTrackName { get => _sayTrackName; set { SetSayString( "SayTrackName", ref _sayTrackName, value ); } }
 		public string SayTrackConfigName { get => _sayTrackConfigName; set { SetSayString( "SayTrackConfigName", ref _sayTrackConfigName, value ); } }
+		public string SayTrackWet { get => _sayTrackWet; set { SetSayString( "SayTrackWet", ref _sayTrackWet, value ); } }
+		public string SayTrackDry { get => _sayTrackDry; set { SetSayString( "SayTrackDry", ref _sayTrackDry, value ); } }
 		public string SayFFBWarning { get => _sayFFBWarning; set { SetSayString( "SayFFBWarning", ref _sayFFBWarning, value ); } }
 
 		public string SayOverallScale { get => _sayOverallScale; set { SetSayString( "SayOverallScale", ref _sayOverallScale, value ); } }

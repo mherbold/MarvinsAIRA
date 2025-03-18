@@ -7,19 +7,12 @@ namespace MarvinsAIRA
 	public partial class App : Application
 	{
 		private const string NO_CAR_SCREEN_NAME = "No Car";
-		private const string ALL_CARS_SAVE_NAME = "All";
+		public const string ALL_CARS_SAVE_NAME = "All";
 
 		private string _car_currentCarScreenName = NO_CAR_SCREEN_NAME;
 		private string _car_carSaveName = ALL_CARS_SAVE_NAME;
 
 		private bool _car_carChanged = false;
-
-		private void InitializeCurrentCar()
-		{
-			WriteLine( "InitializeCurrentCar called.", true );
-
-			UpdateCurrentCar();
-		}
 
 		private void UpdateCurrentCar()
 		{

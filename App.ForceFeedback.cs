@@ -33,7 +33,7 @@ namespace MarvinsAIRA
 		public const int FFB_PIXELS_BUFFER_BYTES_PER_PIXEL = 4;
 		public const int FFB_PIXELS_BUFFER_STRIDE = FFB_PIXELS_BUFFER_WIDTH * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
 
-		private const string ALL_WHEELS_SAVE_NAME = "All";
+		public const string ALL_WHEELS_SAVE_NAME = "All";
 
 		private Joystick? _ffb_drivingJoystick = null;
 
@@ -57,8 +57,8 @@ namespace MarvinsAIRA
 		private float _ffb_announceDetailScaleTimer = 0f;
 		private float _ffb_announceLFEScaleTimer = 0f;
 
-		private readonly float[] _ffb_autoScaleSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 10 ];
-		private int _ffb_autoScaleSteeringWheelTorqueBufferIndex = 0;
+		private readonly float[] _ffb_autoScaleSteeringWheelTorqueBuffer = new float[ 10000 ];
+		private int _ffb_autoScaleSteeringWheelTorqueBufferCount = 0;
 
 		public readonly float[] _ffb_recordedSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 60 * 10 ];
 		public int _ffb_recordedSteeringWheelTorqueBufferIndex = 0;
@@ -118,6 +118,7 @@ namespace MarvinsAIRA
 		public float FFB_UndersteerAmountLinear { get => _ffb_understeerAmountLinear; }
 		public float FFB_OversteerAmount { get => _ffb_oversteerAmount; }
 		public float FFB_OversteerAmountLinear { get => _ffb_oversteerAmountLinear; }
+		public bool FFB_AutoScaleSteeringWheelTorqueBufferIsReady { get { return _ffb_autoScaleSteeringWheelTorqueBufferCount >= 2000; } }
 
 		public void InitializeForceFeedback( nint windowHandle, bool isFirstInitialization = false )
 		{
@@ -392,6 +393,105 @@ namespace MarvinsAIRA
 			_ffb_reinitializeNeeded = true;
 		}
 
+		public void AutoOverallScale()
+		{
+			var calculatedOverallScale = 1f;
+
+			for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
+			{
+				var rawSteeringWheelTorque = _ffb_autoScaleSteeringWheelTorqueBuffer[ i ];
+
+				if ( rawSteeringWheelTorque > 1f )
+				{
+					var scale = Settings.WheelMaxForce / ( ( 1f - ( Settings.AutoOverallScaleClipLimit / 100.0f ) ) * rawSteeringWheelTorque );
+
+					if ( scale < calculatedOverallScale )
+					{
+						calculatedOverallScale = scale;
+					}
+				}
+
+				_ffb_autoScaleSteeringWheelTorqueBuffer[ i ] = 0f;
+			}
+
+			_ffb_autoScaleSteeringWheelTorqueBufferCount = 0;
+
+			Settings.OverallScale = calculatedOverallScale * 100f;
+		}
+
+		private float UpdateScale( float scale, float direction )
+		{
+			if ( direction >= 0f )
+			{
+				if ( scale < 10f )
+				{
+					scale += 0.1f;
+				}
+				else if ( scale < 50f )
+				{
+					scale += 1f;
+				}
+				else if ( scale < 100f )
+				{
+					scale += 2f;
+				}
+				else if ( scale < 150f )
+				{
+					scale += 5f;
+				}
+				else
+				{
+					scale += 10f;
+				}
+			}
+			else
+			{
+				if ( scale > 150f )
+				{
+					scale -= 10f;
+				}
+				else if ( scale > 100f )
+				{
+					scale -= 5f;
+				}
+				else if ( scale > 50f )
+				{
+					scale -= 2f;
+				}
+				else if ( scale > 10f )
+				{
+					scale -= 1f;
+				}
+				else
+				{
+					scale -= 0.1f;
+				}
+			}
+
+			if ( scale < 10f )
+			{
+				scale = MathF.Round( scale, 1 );
+			}
+			else if ( scale < 50f )
+			{
+				scale = MathF.Round( scale, 0 );
+			}
+			else if ( scale < 100f )
+			{
+				scale = ( (int) scale ) / 2 * 2;
+			}
+			else if ( scale < 150f )
+			{
+				scale = ( (int) scale ) / 5 * 5;
+			}
+			else
+			{
+				scale = ( (int) scale ) / 10 * 10;
+			}
+
+			return scale;
+		}
+
 		public void UpdateForceFeedback( float deltaTime, bool pauseInputProcessing, nint windowHandle )
 		{
 			if ( !pauseInputProcessing )
@@ -413,24 +513,9 @@ namespace MarvinsAIRA
 				{
 					WriteLine( "AUTO-OVERALL-SCALE button pressed!", true );
 
-					var smoothedTorque = 0f;
-					var smoothedPeak = 0f;
-
-					for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
+					if ( _ffb_autoScaleSteeringWheelTorqueBufferCount >= 2000 )
 					{
-						smoothedTorque = smoothedTorque * 0.9f + MathF.Abs( _ffb_autoScaleSteeringWheelTorqueBuffer[ i ] ) * 0.1f;
-
-						if ( smoothedTorque > smoothedPeak )
-						{
-							smoothedPeak = smoothedTorque;
-						}
-					}
-
-					if ( smoothedPeak > 0 )
-					{
-						var ratio = Math.Min( 1, Settings.TargetForce / smoothedPeak );
-
-						Settings.OverallScale = (int) ( ratio * 100 );
+						AutoOverallScale();
 					}
 				}
 
@@ -440,9 +525,12 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"DECREASE-OVERALL-SCALE button pressed! (x{buttonPresses})", true );
 
-					Settings.OverallScale -= buttonPresses;
+					for ( var i = 0; i < buttonPresses; i++ )
+					{
+						Settings.OverallScale = UpdateScale( Settings.OverallScale, -1f );
+					}
 
-					_ffb_announceOverallScaleTimer = 1;
+					_ffb_announceOverallScaleTimer = 1f;
 
 					playClickSound = true;
 				}
@@ -453,9 +541,12 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"INCREASE-OVERALL-SCALE button pressed! (x{buttonPresses})", true );
 
-					Settings.OverallScale += buttonPresses;
+					for ( var i = 0; i < buttonPresses; i++ )
+					{
+						Settings.OverallScale = UpdateScale( Settings.OverallScale, +1f );
+					}
 
-					_ffb_announceOverallScaleTimer = 1;
+					_ffb_announceOverallScaleTimer = 1f;
 
 					playClickSound = true;
 				}
@@ -466,9 +557,12 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"DECREASE-DETAIL-SCALE button pressed! (x{buttonPresses})", true );
 
-					Settings.DetailScale -= buttonPresses;
+					for ( var i = 0; i < buttonPresses; i++ )
+					{
+						Settings.DetailScale = UpdateScale( Settings.DetailScale, -1f );
+					}
 
-					_ffb_announceDetailScaleTimer = 1;
+					_ffb_announceDetailScaleTimer = 1f;
 
 					playClickSound = true;
 				}
@@ -479,9 +573,12 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"INCREASE-DETAIL-SCALE button pressed! (x{buttonPresses})", true );
 
-					Settings.DetailScale += buttonPresses;
+					for ( var i = 0; i < buttonPresses; i++ )
+					{
+						Settings.DetailScale = UpdateScale( Settings.DetailScale, +1f );
+					}
 
-					_ffb_announceDetailScaleTimer = 1;
+					_ffb_announceDetailScaleTimer = 1f;
 
 					playClickSound = true;
 				}
@@ -494,11 +591,17 @@ namespace MarvinsAIRA
 
 					if ( _irsdk_steeringWheelAngle >= 0 )
 					{
+						Settings.USStartYawRateFactorLeft = 0;
+						Settings.USEndYawRateFactorLeft = 200;
+
 						Settings.USStartYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
 						Settings.USEndYawRateFactorLeft = (int) _ffb_yawRateFactorInstant + 80;
 					}
 					else
 					{
+						Settings.USStartYawRateFactorRight = 0;
+						Settings.USEndYawRateFactorRight = 200;
+
 						Settings.USStartYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
 						Settings.USEndYawRateFactorRight = (int) _ffb_yawRateFactorInstant + 80;
 					}
@@ -510,9 +613,12 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"DECREASE-LFE-SCALE button pressed! (x{buttonPresses})", true );
 
-					Settings.LFEScale -= buttonPresses;
+					for ( var i = 0; i < buttonPresses; i++ )
+					{
+						Settings.LFEScale = UpdateScale( Settings.LFEScale, -1f );
+					}
 
-					_ffb_announceLFEScaleTimer = 1;
+					_ffb_announceLFEScaleTimer = 1f;
 
 					playClickSound = true;
 				}
@@ -523,9 +629,12 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"INCREASE-LFE-SCALE button pressed! (x{buttonPresses})", true );
 
-					Settings.LFEScale += buttonPresses;
+					for ( var i = 0; i < buttonPresses; i++ )
+					{
+						Settings.LFEScale = UpdateScale( Settings.LFEScale, +1f );
+					}
 
-					_ffb_announceLFEScaleTimer = 1;
+					_ffb_announceLFEScaleTimer = 1f;
 
 					playClickSound = true;
 				}
@@ -536,33 +645,54 @@ namespace MarvinsAIRA
 				}
 			}
 
-			if ( _ffb_announceOverallScaleTimer > 0 )
+			if ( _ffb_announceOverallScaleTimer > 0f )
 			{
 				_ffb_announceOverallScaleTimer -= deltaTime;
 
-				if ( _ffb_announceOverallScaleTimer <= 0 )
+				if ( _ffb_announceOverallScaleTimer <= 0f )
 				{
-					Say( Settings.SayOverallScale, Settings.OverallScale.ToString() );
+					if ( Settings.OverallScale < 10f )
+					{
+						Say( Settings.SayOverallScale, $"{Settings.OverallScale:F1}" );
+					}
+					else
+					{
+						Say( Settings.SayOverallScale, $"{Settings.OverallScale:F0}" );
+					}
 				}
 			}
 
-			if ( _ffb_announceDetailScaleTimer > 0 )
+			if ( _ffb_announceDetailScaleTimer > 0f )
 			{
 				_ffb_announceDetailScaleTimer -= deltaTime;
 
-				if ( _ffb_announceDetailScaleTimer <= 0 )
+				if ( _ffb_announceDetailScaleTimer <= 0f )
 				{
-					Say( Settings.SayDetailScale, Settings.DetailScale.ToString() );
+					if ( Settings.DetailScale < 10f )
+					{
+						Say( Settings.SayDetailScale, $"{Settings.DetailScale:F1}" );
+					}
+					else
+					{
+						Say( Settings.SayDetailScale, $"{Settings.DetailScale:F0}" );
+					}
 				}
 			}
 
-			if ( _ffb_announceLFEScaleTimer > 0 )
+			if ( _ffb_announceLFEScaleTimer > 0f )
 			{
 				_ffb_announceLFEScaleTimer -= deltaTime;
 
-				if ( _ffb_announceLFEScaleTimer <= 0 )
+				if ( _ffb_announceLFEScaleTimer <= 0f )
 				{
-					Say( Settings.SayLFEScale, Settings.LFEScale.ToString() );
+					if ( Settings.LFEScale < 10f )
+					{
+						Say( Settings.SayLFEScale, $"{Settings.LFEScale:F1}" );
+					}
+					else
+					{
+						Say( Settings.SayLFEScale, $"{Settings.LFEScale:F0}" );
+					}
 				}
 			}
 
@@ -573,11 +703,11 @@ namespace MarvinsAIRA
 				_ffb_reinitializeTimer = Math.Max( 1f, _ffb_reinitializeTimer );
 			}
 
-			if ( _ffb_reinitializeTimer > 0 )
+			if ( _ffb_reinitializeTimer > 0f )
 			{
 				_ffb_reinitializeTimer -= deltaTime;
 
-				if ( _ffb_reinitializeTimer <= 0 )
+				if ( _ffb_reinitializeTimer <= 0f )
 				{
 					ReinitializeForceFeedbackDevice( windowHandle );
 				}
@@ -585,53 +715,59 @@ namespace MarvinsAIRA
 
 			// load force feedback settings if the wheel, car, track, or track configuration has changed
 
-			if ( _ffb_wheelChanged || _car_carChanged || _track_trackChanged || _track_trackConfigChanged )
+			if ( _ffb_wheelChanged || _car_carChanged || _track_trackChanged || _track_trackConfigChanged || _wetdry_conditionChanged )
 			{
-				WriteLine( $"Loading force feedback configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}]" );
+				WriteLine( $"Loading force feedback configuration [{_ffb_wheelSaveName}, {_car_carSaveName}, {_track_trackSaveName}, {_track_trackConfigSaveName}, {_wetdry_conditionSaveName}]" );
 
 				_settings_pauseSerialization = true;
 
-				var forceFeedbackSettingsFound = false;
+				Settings.ForceFeedbackSettings? bestMatchingForceFeedbackSettings = null;
 
-				Settings.ForceFeedbackSettings? defaultForceFeedbackSettings = null;
+				var bestMatchRanking = 0;
 
 				foreach ( var forceFeedbackSettings in Settings.ForceFeedbackSettingsList )
 				{
-					if ( ( forceFeedbackSettings.WheelName == ALL_WHEELS_SAVE_NAME ) && ( forceFeedbackSettings.CarName == ALL_CARS_SAVE_NAME ) && ( forceFeedbackSettings.TrackName == ALL_TRACKS_SAVE_NAME ) && ( forceFeedbackSettings.TrackConfigName == ALL_TRACK_CONFIGS_SAVE_NAME ) )
+					var ranking = 0;
+
+					if ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) ranking += 20;
+					if ( forceFeedbackSettings.CarName == _car_carSaveName ) ranking += 20;
+					if ( forceFeedbackSettings.TrackName == _track_trackSaveName ) ranking += 20;
+					if ( forceFeedbackSettings.TrackConfigName == _track_trackConfigSaveName ) ranking += 20;
+					if ( forceFeedbackSettings.WetDryConditionName == _wetdry_conditionSaveName ) ranking += 20;
+
+					if ( ranking > bestMatchRanking )
 					{
-						defaultForceFeedbackSettings = forceFeedbackSettings;
-					}
-
-					if ( ( forceFeedbackSettings.WheelName == _ffb_wheelSaveName ) && ( forceFeedbackSettings.CarName == _car_carSaveName ) && ( forceFeedbackSettings.TrackName == _track_trackSaveName ) && ( forceFeedbackSettings.TrackConfigName == _track_trackConfigSaveName ) )
-					{
-						Settings.OverallScale = forceFeedbackSettings.OverallScale;
-						Settings.DetailScale = forceFeedbackSettings.DetailScale;
-
-						forceFeedbackSettingsFound = true;
-
-						Say( Settings.SayLoadOverallScale, Settings.OverallScale.ToString() );
-						Say( Settings.SayLoadDetailScale, Settings.DetailScale.ToString() );
-
-						break;
+						bestMatchRanking = ranking;
+						bestMatchingForceFeedbackSettings = forceFeedbackSettings;
 					}
 				}
 
-				if ( !forceFeedbackSettingsFound )
+				if ( bestMatchingForceFeedbackSettings == null )
 				{
-					if ( defaultForceFeedbackSettings != null )
-					{
-						Settings.OverallScale = defaultForceFeedbackSettings.OverallScale;
-						Settings.DetailScale = defaultForceFeedbackSettings.DetailScale;
+					bestMatchingForceFeedbackSettings = new Settings.ForceFeedbackSettings();
 
-						Say( Settings.SayScalesReset );
-					}
-					else
-					{
-						Settings.OverallScale = 10;
-						Settings.DetailScale = 100;
+					Say( Settings.SayScalesReset );
+				}
 
-						Say( Settings.SayScalesReset );
-					}
+				Settings.OverallScale = bestMatchingForceFeedbackSettings.OverallScale;
+				Settings.DetailScale = bestMatchingForceFeedbackSettings.DetailScale;
+
+				if ( Settings.OverallScale < 10f )
+				{
+					Say( Settings.SayOverallScale, $"{Settings.OverallScale:F1}" );
+				}
+				else
+				{
+					Say( Settings.SayOverallScale, $"{Settings.OverallScale:F0}" );
+				}
+
+				if ( Settings.DetailScale < 10f )
+				{
+					Say( Settings.SayDetailScale, $"{Settings.DetailScale:F1}" );
+				}
+				else
+				{
+					Say( Settings.SayDetailScale, $"{Settings.DetailScale:F0}" );
 				}
 
 				_settings_pauseSerialization = false;
@@ -653,13 +789,20 @@ namespace MarvinsAIRA
 					{
 						Settings.SteeringEffectsEnabled = steeringEffectsSettings.SteeringEffectsEnabled;
 
+						Settings.USStartYawRateFactorLeft = 0;
+						Settings.USEndYawRateFactorLeft = 200;
+
 						Settings.USStartYawRateFactorLeft = steeringEffectsSettings.USStartYawRateFactorLeft;
 						Settings.USEndYawRateFactorLeft = steeringEffectsSettings.USEndYawRateFactorLeft;
+
+						Settings.USStartYawRateFactorRight = 0;
+						Settings.USEndYawRateFactorRight = 200;
+
 						Settings.USStartYawRateFactorRight = steeringEffectsSettings.USStartYawRateFactorRight;
 						Settings.USEndYawRateFactorRight = steeringEffectsSettings.USEndYawRateFactorRight;
 
-						Settings.OSStartYVelocity = steeringEffectsSettings.OSStartYVelocity;
 						Settings.OSEndYVelocity = steeringEffectsSettings.OSEndYVelocity;
+						Settings.OSStartYVelocity = steeringEffectsSettings.OSStartYVelocity;
 
 						steeringEffectsSettingsFound = true;
 
@@ -671,13 +814,13 @@ namespace MarvinsAIRA
 				{
 					Settings.SteeringEffectsEnabled = false;
 
-					Settings.USStartYawRateFactorLeft = 0;
-					Settings.USEndYawRateFactorLeft = 0;
-					Settings.USStartYawRateFactorRight = 0;
-					Settings.USEndYawRateFactorRight = 0;
+					Settings.USStartYawRateFactorLeft = 120;
+					Settings.USEndYawRateFactorLeft = 180;
+					Settings.USStartYawRateFactorRight = 120;
+					Settings.USEndYawRateFactorRight = 180;
 
-					Settings.OSStartYVelocity = 0f;
-					Settings.OSEndYVelocity = 0f;
+					Settings.OSStartYVelocity = 3f;
+					Settings.OSEndYVelocity = 8f;
 				}
 
 				_settings_pauseSerialization = false;
@@ -689,6 +832,7 @@ namespace MarvinsAIRA
 			_car_carChanged = false;
 			_track_trackChanged = false;
 			_track_trackConfigChanged = false;
+			_wetdry_conditionChanged = false;
 
 			// auto-center wheel feature
 
@@ -984,21 +1128,12 @@ namespace MarvinsAIRA
 				_ffb_crashProtectionScale = ( _ffb_crashProtectionScale * 0.99f ) + ( 1f * 0.01f );
 			}
 
-			// steering effects
-
-			_ffb_understeerAmount = 0f;
-			_ffb_understeerAmountLinear = 0f;
-
-			_ffb_oversteerAmount = 0f;
-			_ffb_oversteerAmountLinear = 0;
+			// understeer effect
 
 			var understeerFrequency = 0f;
-			var oversteerFrequency = 0f;
 
 			if ( _ffb_yawRateFactorInstant > 0f )
 			{
-				// calculate understeer amount
-
 				if ( _irsdk_steeringWheelAngle >= 0f )
 				{
 					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorLeft ) / (float) ( Settings.USEndYawRateFactorLeft - Settings.USStartYawRateFactorLeft ), 0f, 1f );
@@ -1008,33 +1143,42 @@ namespace MarvinsAIRA
 					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorRight ) / (float) ( Settings.USEndYawRateFactorRight - Settings.USStartYawRateFactorRight ), 0f, 1f );
 				}
 
-				// calculate oversteer amount
-
-				_ffb_oversteerAmountLinear = Math.Clamp( ( MathF.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
-
-				// understeer effect
-
 				understeerFrequency = Math.Max( 0.25f, _ffb_understeerAmountLinear );
 
 				_ffb_understeerAmount = MathF.Pow( _ffb_understeerAmountLinear, Settings.USCurve );
-
-				// oversteer effect
-
-				oversteerFrequency = Math.Max( 0.25f, _ffb_oversteerAmountLinear );
-
-				_ffb_oversteerAmount = MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
-
-				// invert the effects if the user wants them inverted
 
 				if ( Settings.USEffectStyleInvert )
 				{
 					_ffb_understeerAmount = -_ffb_understeerAmount;
 				}
+			}
+			else
+			{
+				_ffb_understeerAmount = 0f;
+				_ffb_understeerAmountLinear = 0f;
+			}
+
+			// oversteer effect
+
+			var oversteerFrequency = 0f;
+
+			if ( MathF.Sign( _irsdk_steeringWheelAngle ) != MathF.Sign( _irsdk_velocityY ) )
+			{
+				_ffb_oversteerAmountLinear = Math.Clamp( ( MathF.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
+
+				oversteerFrequency = Math.Max( 0.25f, _ffb_oversteerAmountLinear );
+
+				_ffb_oversteerAmount = MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
 
 				if ( Settings.OSEffectStyleInvert )
 				{
 					_ffb_oversteerAmount = -_ffb_oversteerAmount;
 				}
+			}
+			else
+			{
+				_ffb_oversteerAmount = 0f;
+				_ffb_oversteerAmountLinear = 0f;
 			}
 
 			// we want to reduce forces while the car is moving very slow or parked
@@ -1123,12 +1267,6 @@ namespace MarvinsAIRA
 				_ffb_steadyStateWheelTorque += limitedDeltaSteeringWheelTorque * overallScaleToDirectInputUnits;
 
 				_ffb_steadyStateWheelTorque = ( _ffb_steadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * 0.1f );
-
-				// save the original steering wheel torque (for auto-overall-scale feature)
-
-				_ffb_autoScaleSteeringWheelTorqueBuffer[ _ffb_autoScaleSteeringWheelTorqueBufferIndex ] = _ffb_rawSteadyStateWheelTorque;
-
-				_ffb_autoScaleSteeringWheelTorqueBufferIndex = ( _ffb_autoScaleSteeringWheelTorqueBufferIndex + 1 ) % _ffb_autoScaleSteeringWheelTorqueBuffer.Length;
 
 				// algorithm is different for detail scale >= 100 and < 100
 
@@ -1236,6 +1374,24 @@ namespace MarvinsAIRA
 				// reset the magnitude index now
 
 				_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
+
+				// save the original steering wheel torque (for auto-overall-scale feature)
+
+				var absOutputWheelMagnitude = MathF.Abs( _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] );
+
+				if ( absOutputWheelMagnitude > 0f )
+				{
+					var autoScaleSteeringWheelTorqueBufferIndex = Math.Clamp( (int) ( _irsdk_lapDistPct * _ffb_autoScaleSteeringWheelTorqueBuffer.Length ), 0, _ffb_autoScaleSteeringWheelTorqueBuffer.Length - 1 );
+
+					if ( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] == 0f )
+					{
+						_ffb_autoScaleSteeringWheelTorqueBufferCount++;
+					}
+
+					var outputWheelMagnitudeInNm = absOutputWheelMagnitude / overallScaleToDirectInputUnits;
+
+					_ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] = Math.Max( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ], outputWheelMagnitudeInNm );
+				}
 
 				// update the pretty graph
 

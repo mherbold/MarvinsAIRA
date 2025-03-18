@@ -124,8 +124,7 @@ namespace MarvinsAIRA
 				Settings.DecreaseDetailScaleButtons,
 				Settings.IncreaseLFEScaleButtons,
 				Settings.DecreaseLFEScaleButtons,
-				Settings.UndersteerEffectButtons,
-				Settings.OversteerEffectButtons
+				Settings.UndersteerEffectButtons
 			];
 
 			foreach ( var mappedButton in mappedButtonsList )

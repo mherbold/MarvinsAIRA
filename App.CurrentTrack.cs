@@ -7,10 +7,10 @@ namespace MarvinsAIRA
 	public partial class App : Application
 	{
 		private const string NO_TRACK_DISPLAY_NAME = "No Track";
-		private const string ALL_TRACKS_SAVE_NAME = "All";
+		public const string ALL_TRACKS_SAVE_NAME = "All";
 
 		private const string NO_TRACK_CONFIG_NAME = "No Track Configuration";
-		private const string ALL_TRACK_CONFIGS_SAVE_NAME = "All";
+		public const string ALL_TRACK_CONFIGS_SAVE_NAME = "All";
 
 		private string _track_currentTrackDisplayName = NO_TRACK_DISPLAY_NAME;
 		private string _track_trackSaveName = ALL_TRACKS_SAVE_NAME;
@@ -20,13 +20,6 @@ namespace MarvinsAIRA
 
 		private bool _track_trackChanged = false;
 		private bool _track_trackConfigChanged = false;
-
-		private void InitializeCurrentTrack()
-		{
-			WriteLine( "InitializeCurrentTrack called.", true );
-
-			UpdateCurrentTrack();
-		}
 
 		private void UpdateCurrentTrack()
 		{

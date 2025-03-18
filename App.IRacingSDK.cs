@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
 using IRSDKSharper;
 
 namespace MarvinsAIRA
@@ -22,6 +25,7 @@ namespace MarvinsAIRA
 		private IRacingSdkDatum? _irsdk_displayUnitsDatum = null;
 		private IRacingSdkDatum? _irsdk_gearDatum = null;
 		private IRacingSdkDatum? _irsdk_isOnTrackDatum = null;
+		private IRacingSdkDatum? _irsdk_lapDistPctDatum = null;
 		private IRacingSdkDatum? _irsdk_latAccelDatum = null;
 		private IRacingSdkDatum? _irsdk_longAccelDatum = null;
 		private IRacingSdkDatum? _irsdk_playerCarIdxDatum = null;
@@ -36,9 +40,11 @@ namespace MarvinsAIRA
 		private IRacingSdkDatum? _irsdk_throttleDatum = null;
 		private IRacingSdkDatum? _irsdk_velocityXDatum = null;
 		private IRacingSdkDatum? _irsdk_velocityYDatum = null;
+		private IRacingSdkDatum? _irsdk_weatherDeclaredWetDatum = null;
 		private IRacingSdkDatum? _irsdk_yawRateDatum = null;
 
 		private bool _irsdk_telemetryDataInitialized = false;
+		private bool _irsdk_sessionInfoReceived = false;
 
 		public bool _irsdk_connected = false;
 
@@ -48,10 +54,11 @@ namespace MarvinsAIRA
 		public float _irsdk_brake = 0f;
 		public bool _irsdk_brakeABSactive = false;
 		public IRacingSdkEnum.CarLeftRight _irsdk_carLeftRight = 0;
-		public float _irsdk_clutch = 0f;
+		public float _irsdk_clutch = 1f;
 		public int _irsdk_displayUnits = 0;
 		public int _irsdk_gear = 0;
 		public bool _irsdk_isOnTrack = false;
+		public float _irsdk_lapDistPct = 0f;
 		public float _irsdk_latAccel = 0f;
 		public float _irsdk_longAccel = 0f;
 		public int _irsdk_playerCarIdx = 0;
@@ -66,6 +73,7 @@ namespace MarvinsAIRA
 		public float _irsdk_throttle = 0f;
 		public float _irsdk_velocityX = 0f;
 		public float _irsdk_velocityY = 0f;
+		public bool _irsdk_weatherDeclaredWet = false;
 		public float _irsdk_yawRate = 0f;
 
 		public string _irsdk_simMode = string.Empty;
@@ -80,7 +88,9 @@ namespace MarvinsAIRA
 
 		public bool _irsdk_brakeABSactiveLastFrame = false;
 		public bool _irsdk_isOnTrackLastFrame = false;
+		public float _irsdk_lapDistPctLastFrame = 0f;
 		public bool _irsdk_steeringFFBEnabledLastFrame = false;
+		public bool _irsdk_weatherDeclaredWetLastFrame = false;
 
 		public float _irsdk_velocity = 0f;
 		public float _irsdk_velocityLastFrame = 0f;
@@ -141,6 +151,13 @@ namespace MarvinsAIRA
 
 			_irsdk_windowHandle = WinApi.FindWindow( null, "iRacing.com Simulator" );
 
+			_ffb_reinitializeNeeded = true;
+
+			for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
+			{
+				_ffb_autoScaleSteeringWheelTorqueBuffer[ i ] = 0f;
+			}
+
 			Dispatcher.BeginInvoke( () =>
 			{
 				var mainWindow = MarvinsAIRA.MainWindow.Instance;
@@ -160,6 +177,7 @@ namespace MarvinsAIRA
 			WriteLine( "OnDisconnected called.", true );
 
 			_irsdk_connected = false;
+			_irsdk_sessionInfoReceived = false;
 
 			_irsdk_windowHandle = null;
 
@@ -169,10 +187,11 @@ namespace MarvinsAIRA
 			_irsdk_brake = 0f;
 			_irsdk_brakeABSactive = false;
 			_irsdk_carLeftRight = IRacingSdkEnum.CarLeftRight.Off;
-			_irsdk_clutch = 0f;
+			_irsdk_clutch = 1f;
 			_irsdk_displayUnits = 0;
 			_irsdk_gear = 0;
 			_irsdk_isOnTrack = false;
+			_irsdk_lapDistPct = 0f;
 			_irsdk_latAccel = 0f;
 			_irsdk_longAccel = 0f;
 			_irsdk_playerCarIdx = 0;
@@ -192,6 +211,7 @@ namespace MarvinsAIRA
 			_irsdk_throttle = 0f;
 			_irsdk_velocityX = 0f;
 			_irsdk_velocityY = 0f;
+			_irsdk_weatherDeclaredWet = false;
 			_irsdk_yawRate = 0f;
 
 			_irsdk_simMode = string.Empty;
@@ -206,7 +226,9 @@ namespace MarvinsAIRA
 
 			_irsdk_brakeABSactiveLastFrame = false;
 			_irsdk_isOnTrackLastFrame = false;
+			_irsdk_lapDistPctLastFrame = 0f;
 			_irsdk_steeringFFBEnabledLastFrame = false;
+			_irsdk_weatherDeclaredWetLastFrame = false;
 
 			_irsdk_velocity = 0f;
 			_irsdk_velocityLastFrame = 0f;
@@ -222,6 +244,10 @@ namespace MarvinsAIRA
 
 			StopABS();
 
+			UpdateCurrentCar();
+			UpdateCurrentTrack();
+			UpdateCurrentWetDryCondition();
+
 			Say( Settings.SayDisconnected, null, false, false );
 
 			Dispatcher.BeginInvoke( () =>
@@ -234,33 +260,43 @@ namespace MarvinsAIRA
 					mainWindow.Connection_StatusBarItem.Foreground = Brushes.Red;
 
 					mainWindow.SimulatorNotRunning_Label.Visibility = Visibility.Visible;
-
-					UpdateCurrentCar();
-					UpdateCurrentTrack();
 				}
 			} );
 		}
 
 		private void OnSessionInfo()
 		{
+			_irsdk_sessionInfoReceived = true;
+
 			UpdateCurrentCar();
 			UpdateCurrentTrack();
+			UpdateCurrentWetDryCondition();
 
-			_irsdk_simMode = _irsdk.Data.SessionInfo.WeekendInfo.SimMode;
+			var sessionInfo = _irsdk.Data.SessionInfo;
+
+			_irsdk_simMode = sessionInfo.WeekendInfo.SimMode;
 
 			WriteLine( $"Sim mode = {_irsdk_simMode}", true );
 
-			_irsdk_shiftLightsFirstRPM = _irsdk.Data.SessionInfo.DriverInfo.DriverCarSLFirstRPM;
-			_irsdk_shiftLightsShiftRPM = _irsdk.Data.SessionInfo.DriverInfo.DriverCarSLShiftRPM;
-			_irsdk_shiftLightsBlinkRPM = _irsdk.Data.SessionInfo.DriverInfo.DriverCarSLBlinkRPM;
+			_irsdk_shiftLightsFirstRPM = sessionInfo.DriverInfo.DriverCarSLFirstRPM;
+			_irsdk_shiftLightsShiftRPM = sessionInfo.DriverInfo.DriverCarSLShiftRPM;
+			_irsdk_shiftLightsBlinkRPM = sessionInfo.DriverInfo.DriverCarSLBlinkRPM;
 
 			WriteLine( $"Shift lights RPMs = {_irsdk_shiftLightsFirstRPM}, {_irsdk_shiftLightsShiftRPM}, {_irsdk_shiftLightsBlinkRPM}" );
 
-			var driver = _irsdk.Data.SessionInfo.DriverInfo.Drivers.Find( driver => driver.CarIdx == _irsdk_playerCarIdx );
+			var driver = sessionInfo.DriverInfo.Drivers.Find( driver => driver.CarIdx == _irsdk_playerCarIdx );
 
 			_irsdk_playerCarNumber = driver?.CarNumber ?? string.Empty;
 
 			WriteLine( $"Player's car number = {_irsdk_playerCarNumber}" );
+
+#if DEBUG
+
+			var jsonString = JsonConvert.SerializeObject( sessionInfo, Formatting.Indented, [ new StringEnumConverter() ] );
+
+			Debug.WriteLine( jsonString );
+
+#endif
 		}
 
 		private void OnTelemetryData()
@@ -274,6 +310,7 @@ namespace MarvinsAIRA
 				_irsdk_displayUnitsDatum = _irsdk.Data.TelemetryDataProperties[ "DisplayUnits" ];
 				_irsdk_gearDatum = _irsdk.Data.TelemetryDataProperties[ "Gear" ];
 				_irsdk_isOnTrackDatum = _irsdk.Data.TelemetryDataProperties[ "IsOnTrack" ];
+				_irsdk_lapDistPctDatum = _irsdk.Data.TelemetryDataProperties[ "LapDistPct" ];
 				_irsdk_latAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LatAccel" ];
 				_irsdk_longAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LongAccel" ];
 				_irsdk_playerCarIdxDatum = _irsdk.Data.TelemetryDataProperties[ "PlayerCarIdx" ];
@@ -288,24 +325,26 @@ namespace MarvinsAIRA
 				_irsdk_throttleDatum = _irsdk.Data.TelemetryDataProperties[ "Throttle" ];
 				_irsdk_velocityXDatum = _irsdk.Data.TelemetryDataProperties[ "VelocityX" ];
 				_irsdk_velocityYDatum = _irsdk.Data.TelemetryDataProperties[ "VelocityY" ];
+				_irsdk_weatherDeclaredWetDatum = _irsdk.Data.TelemetryDataProperties[ "WeatherDeclaredWet" ];
 				_irsdk_yawRateDatum = _irsdk.Data.TelemetryDataProperties[ "YawRate" ];
 
 				_irsdk_telemetryDataInitialized = true;
 
-				if ( true )
+#if DEBUG
+				foreach ( var telemetryDataProperty in _irsdk.Data.TelemetryDataProperties )
 				{
-					foreach ( var telemetryDataProperty in _irsdk.Data.TelemetryDataProperties )
-					{
-						Debug.WriteLine( $"{telemetryDataProperty.Value.Name}, {telemetryDataProperty.Value.VarType}, {telemetryDataProperty.Value.Desc}, {telemetryDataProperty.Value.Unit}, {telemetryDataProperty.Value.Count}" );
-					}
+					Debug.WriteLine( $"{telemetryDataProperty.Value.Name}, {telemetryDataProperty.Value.VarType}, {telemetryDataProperty.Value.Desc}, {telemetryDataProperty.Value.Unit}, {telemetryDataProperty.Value.Count}" );
 				}
+#endif
 			}
 
 			_irsdk_tickCountLastFrame = _irsdk_tickCount;
 
 			_irsdk_brakeABSactiveLastFrame = _irsdk_brakeABSactive;
 			_irsdk_isOnTrackLastFrame = _irsdk_isOnTrack;
+			_irsdk_lapDistPctLastFrame = _irsdk_lapDistPct;
 			_irsdk_steeringFFBEnabledLastFrame = _irsdk_steeringFFBEnabled;
+			_irsdk_weatherDeclaredWetLastFrame = _irsdk_weatherDeclaredWet;
 
 			_irsdk_tickRate = _irsdk.Data.TickRate;
 			_irsdk_tickCount = _irsdk.Data.TickCount;
@@ -315,8 +354,9 @@ namespace MarvinsAIRA
 			_irsdk_carLeftRight = (IRacingSdkEnum.CarLeftRight) _irsdk.Data.GetInt( _irsdk_carLeftRightDatum );
 			_irsdk_clutch = _irsdk.Data.GetFloat( _irsdk_clutchDatum );
 			_irsdk_displayUnits = _irsdk.Data.GetInt( _irsdk_displayUnitsDatum );
-			_irsdk_gear = _irsdk.Data.GetInt(_irsdk_gearDatum );
+			_irsdk_gear = _irsdk.Data.GetInt( _irsdk_gearDatum );
 			_irsdk_isOnTrack = _irsdk.Data.GetBool( _irsdk_isOnTrackDatum );
+			_irsdk_lapDistPct = _irsdk.Data.GetFloat(_irsdk_lapDistPctDatum );
 			_irsdk_latAccel = _irsdk.Data.GetFloat( _irsdk_latAccelDatum );
 			_irsdk_longAccel = _irsdk.Data.GetFloat( _irsdk_longAccelDatum );
 			_irsdk_playerCarIdx = _irsdk.Data.GetInt( _irsdk_playerCarIdxDatum );
@@ -331,6 +371,7 @@ namespace MarvinsAIRA
 			_irsdk.Data.GetFloatArray( _irsdk_steeringWheelTorque_STDatum, _irsdk_steeringWheelTorque_ST, 0, _irsdk_steeringWheelTorque_ST.Length );
 			_irsdk_velocityX = _irsdk.Data.GetFloat( _irsdk_velocityXDatum );
 			_irsdk_velocityY = _irsdk.Data.GetFloat( _irsdk_velocityYDatum );
+			_irsdk_weatherDeclaredWet = _irsdk.Data.GetBool( _irsdk_weatherDeclaredWetDatum );
 			_irsdk_yawRate = _irsdk.Data.GetFloat( _irsdk_yawRateDatum );
 
 			// calculate exact delta time
@@ -369,6 +410,16 @@ namespace MarvinsAIRA
 				else
 				{
 					StopABS();
+				}
+			}
+
+			// update wet dry condition
+
+			if ( _irsdk_sessionInfoReceived )
+			{
+				if ( _irsdk_weatherDeclaredWet != _irsdk_weatherDeclaredWetLastFrame )
+				{
+					UpdateCurrentWetDryCondition();
 				}
 			}
 

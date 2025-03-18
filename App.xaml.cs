@@ -55,7 +55,6 @@ namespace MarvinsAIRA
 				InitializeForceFeedback( windowHandle, true );
 				InitializeLFE();
 				InitializeIRacingSDK();
-				InitializeCurrentCar();
 				InitializeWindSimulator();
 			}
 			catch ( Exception exception )

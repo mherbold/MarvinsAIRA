@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -14,7 +15,9 @@ using System.Windows.Media.Imaging;
 using WK.Libraries.BootMeUpNS;
 
 using ModernWpf.Controls;
-using System.Drawing;
+
+using Hardcodet.Wpf.TaskbarNotification;
+
 using Brushes = System.Windows.Media.Brushes;
 
 namespace MarvinsAIRA
@@ -33,6 +36,7 @@ namespace MarvinsAIRA
 		private bool _win_updateLoopRunning = false;
 		private bool _win_pauseInputProcessing = false;
 		private bool _win_absTestPlaying = false;
+		private bool _win_dieNow = false;
 
 		private nint _win_windowHandle = 0;
 
@@ -71,7 +75,31 @@ namespace MarvinsAIRA
 			Instance = this;
 		}
 
-		private void Window_Closing( object sender, System.ComponentModel.CancelEventArgs e )
+		private void Window_Closing( object sender, CancelEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "MainWindow.Window_Closing called.", true );
+
+			if ( app.Settings.CloseToSystemTray )
+			{
+				if ( !_win_dieNow )
+				{
+					e.Cancel = true;
+
+					Hide();
+
+					ShowInTaskbar = false;
+
+					if ( !app.Settings.HideTrayAlert )
+					{
+						MARIA_TaskbarIcon.ShowBalloonTip( "Hello there!", "Marvin's Awesome iRacing App is over here now.", BalloonIcon.None );
+					}
+				}
+			}
+		}
+
+		private void Window_Closed( object sender, EventArgs e )
 		{
 			var app = (App) Application.Current;
 
@@ -178,20 +206,6 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void Window_StateChanged( object sender, EventArgs e )
-		{
-			if ( WindowState == WindowState.Minimized )
-			{
-				ShowInTaskbar = false;
-				Visibility = Visibility.Hidden;
-			}
-			else if ( WindowState == WindowState.Normal )
-			{
-				ShowInTaskbar = true;
-				Visibility = Visibility.Visible;
-			}
-		}
-
 		private void Window_SourceInitialized( object sender, EventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -281,16 +295,25 @@ namespace MarvinsAIRA
 
 		#region Taskbar Icon
 
-		private void TaskbarIcon_TrayLeftMouseDown( object sender, RoutedEventArgs e )
+		private void ShowApp_MenuItem_Click( object sender, RoutedEventArgs e )
 		{
-			SystemCommands.RestoreWindow( this );
+			Show();
+
+			if ( WindowState == WindowState.Minimized )
+			{
+				WindowState = WindowState.Normal;
+			}
+
 			WinApi.SetForegroundWindow( _win_windowHandle );
+
+			ShowInTaskbar = true;
 		}
 
-		private void TaskbarIcon_TrayRightMouseDown( object sender, RoutedEventArgs e )
+		private void ExitApp_MenuItem_Click( object sender, RoutedEventArgs e )
 		{
-			SystemCommands.RestoreWindow( this );
-			WinApi.SetForegroundWindow( _win_windowHandle );
+			_win_dieNow = true;
+
+			Close();
 		}
 
 		#endregion
@@ -366,6 +389,23 @@ namespace MarvinsAIRA
 
 								Dispatcher.BeginInvoke( () =>
 								{
+									// iRacing FFB warning
+
+									ForceFeedbackWarning_Label.Visibility = app._irsdk_steeringFFBEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+									// Auto overall scale button
+
+									if ( app.FFB_AutoScaleSteeringWheelTorqueBufferIsReady )
+									{
+										AutoOverallScale_Button.IsEnabled = true;
+										AutoOverallScale_Button.BorderBrush = Brushes.Green;
+									}
+									else
+									{
+										AutoOverallScale_Button.IsEnabled = false;
+										AutoOverallScale_Button.BorderBrush = Brushes.DarkRed;
+									}
+
 									// Pretty graph
 
 									if ( app._ffb_drawPrettyGraph )
@@ -702,6 +742,11 @@ namespace MarvinsAIRA
 			return null;
 		}
 
+		private void Slider_PreviewKeyDown( object sender, KeyEventArgs e )
+		{
+			e.Handled = true;
+		}
+
 		#endregion
 
 		#region Force feedback tab
@@ -813,13 +858,13 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void ResetForceFeedback_Button_Click( object sender, RoutedEventArgs e )
+		private void ResetForceFeedbackMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "ResetForceFeedback_Button_Click called." );
+			app.WriteLine( "ResetForceFeedbackMap_Button_Click called." );
 
-			app.Settings.ReinitForceFeedbackButtons = ShowMapButtonsWindow( app.Settings.ReinitForceFeedbackButtons );
+			ShowMapButtonsWindow( app.Settings.ReinitForceFeedbackButtons );
 		}
 
 		private void AutoOverallScale_Button_Click( object sender, RoutedEventArgs e )
@@ -828,43 +873,52 @@ namespace MarvinsAIRA
 
 			app.WriteLine( "AutoOverallScale_Button_Click called." );
 
-			app.Settings.AutoOverallScaleButtons = ShowMapButtonsWindow( app.Settings.AutoOverallScaleButtons );
+			app.AutoOverallScale();
 		}
 
-		private void DecreaseOverallScale_Button_Click( object sender, RoutedEventArgs e )
+		private void AutoOverallScaleMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "DecreaseOverallScale_Button_Click called." );
+			app.WriteLine( "AutoOverallScaleMap_Button_Click called." );
 
-			app.Settings.DecreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseOverallScaleButtons );
+			ShowMapButtonsWindow( app.Settings.AutoOverallScaleButtons );
 		}
 
-		private void IncreaseOverallScale_Button_Click( object sender, RoutedEventArgs e )
+		private void DecreaseOverallScaleMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "IncreaseOverallScale_Button_Click called." );
+			app.WriteLine( "DecreaseOverallScaleMap_Button_Click called." );
 
-			app.Settings.IncreaseOverallScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseOverallScaleButtons );
+			ShowMapButtonsWindow( app.Settings.DecreaseOverallScaleButtons );
 		}
 
-		private void DecreaseDetailScale_Button_Click( object sender, RoutedEventArgs e )
+		private void IncreaseOverallScaleMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "DecreaseDetailScale_Button_Click called." );
+			app.WriteLine( "IncreaseOverallScaleMap_Button_Click called." );
 
-			app.Settings.DecreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseDetailScaleButtons );
+			ShowMapButtonsWindow( app.Settings.IncreaseOverallScaleButtons );
 		}
 
-		private void IncreaseDetailScale_Button_Click( object sender, RoutedEventArgs e )
+		private void DecreaseDetailScaleMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "IncreaseDetailScale_Button_Click called." );
+			app.WriteLine( "DecreaseDetailScaleMap_Button_Click called." );
 
-			app.Settings.IncreaseDetailScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseDetailScaleButtons );
+			ShowMapButtonsWindow( app.Settings.DecreaseDetailScaleButtons );
+		}
+
+		private void IncreaseDetailScaleMap_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "IncreaseDetailScaleMap_Button_Click called." );
+
+			ShowMapButtonsWindow( app.Settings.IncreaseDetailScaleButtons );
 		}
 
 		private void Frequency_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
@@ -982,11 +1036,11 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void UndersteerEffect_Button_Click( object sender, RoutedEventArgs e )
+		private void UndersteerEffectMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "UndersteerEffect_Button_Click called." );
+			app.WriteLine( "UndersteerEffectMap_Button_Click called." );
 
 			ShowMapButtonsWindow( app.Settings.UndersteerEffectButtons );
 		}
@@ -1026,15 +1080,6 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void OversteerEffect_Button_Click( object sender, RoutedEventArgs e )
-		{
-			var app = (App) Application.Current;
-
-			app.WriteLine( "OversteerEffect_Button_Click called." );
-
-			ShowMapButtonsWindow( app.Settings.OversteerEffectButtons );
-		}
-
 		private void OSCurve_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
 			UpdateImages();
@@ -1064,22 +1109,22 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private void DecreaseLFEScale_Button_Click( object sender, RoutedEventArgs e )
+		private void DecreaseLFEScaleMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "DecreaseLFEScale_Button_Click called." );
+			app.WriteLine( "DecreaseLFEScaleMap_Button_Click called." );
 
-			app.Settings.DecreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.DecreaseLFEScaleButtons );
+			ShowMapButtonsWindow( app.Settings.DecreaseLFEScaleButtons );
 		}
 
-		private void IncreaseLFEScale_Button_Click( object sender, RoutedEventArgs e )
+		private void IncreaseLFEScaleMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "IncreaseLFEScale_Button_Click called." );
+			app.WriteLine( "IncreaseLFEScaleMap_Button_Click called." );
 
-			app.Settings.IncreaseLFEScaleButtons = ShowMapButtonsWindow( app.Settings.IncreaseLFEScaleButtons );
+			ShowMapButtonsWindow( app.Settings.IncreaseLFEScaleButtons );
 		}
 
 		#endregion
@@ -1176,6 +1221,14 @@ namespace MarvinsAIRA
 			var app = (App) Application.Current;
 
 			app.UpdateTrackConfigSaveName();
+			app.QueueForSerialization();
+		}
+
+		private void SaveForEachWetDryCondition_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.UpdateWetDryConditionSaveName();
 			app.QueueForSerialization();
 		}
 
@@ -1355,23 +1408,22 @@ namespace MarvinsAIRA
 				WindSimulator_TabItem.Visibility = visibility;
 				Spotter_TabItem.Visibility = visibility;
 				SkidPad_TabItem.Visibility = visibility;
-				Settings_Devices_TabItem.Visibility = visibility;
-				Settings_Wheel_TabItem.Visibility = visibility;
 
 				// force feedback tab
 
 				Record_Button.Visibility = visibility;
 				Play_Button.Visibility = visibility;
-				Target_Label.Visibility = visibility;
-				Target_TextBox.Visibility = visibility;
-				Target_Slider.Visibility = visibility;
-				AutoOverallScale_Button.Visibility = visibility;
 				ParkedScale_Grid.Visibility = visibility;
 				Frequency_Grid.Visibility = visibility;
 				PrettyGraph_StackPanel.Visibility = visibility;
 
-				// settings voice tab
+				// settings tab
 
+				Settings_Devices_TabItem.Visibility = visibility;
+				Settings_ForceFeedback_TabItem.Visibility = visibility;
+				Settings_AutoCenterWheel_TabItem.Visibility = visibility;
+				Settings_CrashProtection_TabItem.Visibility = visibility;
+				Settings_SoftLock_TabItem.Visibility = visibility;
 				Settings_Voice_SayLFEScale_Grid.Visibility = visibility;
 				Settings_Voice_SpotterCarLeftRight_GroupBox.Visibility = visibility;
 				Settings_Voice_SpotterSessionFlags_GroupBox.Visibility = visibility;
@@ -1382,7 +1434,7 @@ namespace MarvinsAIRA
 
 		#region Map button window
 
-		private Settings.MappedButtons ShowMapButtonsWindow( Settings.MappedButtons mappedButtons )
+		private void ShowMapButtonsWindow( Settings.MappedButtons mappedButtons )
 		{
 			var app = (App) Application.Current;
 
@@ -1415,8 +1467,6 @@ namespace MarvinsAIRA
 			}
 
 			_win_pauseInputProcessing = false;
-
-			return mappedButtons;
 		}
 
 		#endregion
