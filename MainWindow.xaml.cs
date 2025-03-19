@@ -190,9 +190,18 @@ namespace MarvinsAIRA
 
 				if ( app.Settings.StartMinimized )
 				{
-					app.WriteLine( "Minimizing the window." );
+					if ( app.Settings.CloseToSystemTray )
+					{
+						app.WriteLine( "Minimizing the window to the system tray." );
 
-					WindowState = WindowState.Minimized;
+						Close();
+					}
+					else
+					{
+						app.WriteLine( "Minimizing the window to the taskbar." );
+
+						WindowState = WindowState.Minimized;
+					}
 				}
 
 				Advanced_ToggleSwitch_Toggled( Advanced_ToggleSwitch, new RoutedEventArgs() );

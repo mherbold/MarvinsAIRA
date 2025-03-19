@@ -417,6 +417,15 @@ namespace MarvinsAIRA
 			_ffb_autoScaleSteeringWheelTorqueBufferCount = 0;
 
 			Settings.OverallScale = calculatedOverallScale * 100f;
+
+			if ( Settings.OverallScale < 10f )
+			{
+				Say( Settings.SayOverallScale, $"{Settings.OverallScale:F1}" );
+			}
+			else
+			{
+				Say( Settings.SayOverallScale, $"{Settings.OverallScale:F0}" );
+			}
 		}
 
 		private float UpdateScale( float scale, float direction )
@@ -1202,8 +1211,9 @@ namespace MarvinsAIRA
 			var normalizedDetailScaleSetting = Settings.DetailScale / 100f;
 			var normalizedLFEScaleSetting = Settings.LFEScale / 100f;
 
-			// apply crash protection to detail scale
+			// apply crash protection to overall and detail scale
 
+			normalizedOverallScaleSetting = ( normalizedOverallScaleSetting * ( 1f - Settings.CrashProtectionOverallScale / 100f ) * ( 1f - _ffb_crashProtectionScale ) ) + ( normalizedOverallScaleSetting * _ffb_crashProtectionScale );
 			normalizedDetailScaleSetting *= _ffb_crashProtectionScale;
 
 			// map scales into DI units (detail scale will be the same as the overall scale if detail scale slider is set to 100%)

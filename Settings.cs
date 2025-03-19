@@ -2386,6 +2386,55 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Crash protection overall scale */
+
+		private float _crashProtectionOverallScale = 100f;
+
+		public float CrashProtectionOverallScale
+		{
+			get => _crashProtectionOverallScale;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _crashProtectionOverallScale != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"CrashProtectionOverallScale changed - before {_crashProtectionOverallScale:F0} now {value:F0}" );
+
+					_crashProtectionOverallScale = value;
+
+					OnPropertyChanged();
+				}
+
+				CrashProtectionOverallScaleString = $"!{_crashProtectionOverallScale:F0}%";
+			}
+		}
+
+		private string _crashProtectionOverallScaleString = "100%";
+
+		public string CrashProtectionOverallScaleString
+		{
+			get => _crashProtectionOverallScaleString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _crashProtectionOverallScaleString != value )
+					{
+						_crashProtectionOverallScaleString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
 		#endregion
 
 		#region Settings tab - Soft lock
