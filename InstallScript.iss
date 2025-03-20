@@ -1,6 +1,6 @@
 [Setup]
 AppName=Marvin's Awesome iRacing App
-AppVersion=0.55
+AppVersion=0.56
 AppCopyright=Created by Marvin Herbold
 AppPublisher=Marvin Herbold
 AppPublisherURL=
