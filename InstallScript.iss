@@ -1,6 +1,6 @@
 [Setup]
 AppName=Marvin's Awesome iRacing App
-AppVersion=0.53
+AppVersion=0.55
 AppCopyright=Created by Marvin Herbold
 AppPublisher=Marvin Herbold
 AppPublisherURL=
@@ -13,16 +13,18 @@ SolidCompression=yes
 OutputBaseFilename=MarvinsAIRA-Setup
 OutputDir=userdocs:MarvinsAIRA
 PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog
 SetupIconFile="C:\Users\marvi\Documents\GitHub\MarvinsAIRA\icon.ico"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
-[Files]
-Source: "C:\Users\marvi\Documents\GitHub\MarvinsAIRA\bin\publish\*"; DestDir: "{app}"; Flags: ignoreversion
-
 [Dirs]
 Name: "{userdocs}\MarvinsAIRA"
+
+[Files]
+Source: "C:\Users\marvi\Documents\GitHub\MarvinsAIRA\bin\publish\*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\marvi\Documents\GitHub\MarvinsAIRASimHub\bin\release\MarvinsAIRASimHub.dll"; DestDir: "{userdocs}\MarvinsAIRA"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\MarvinsAIRA"; Filename: "{app}\MarvinsAIRA.exe"

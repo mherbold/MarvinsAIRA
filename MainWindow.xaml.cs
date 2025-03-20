@@ -304,6 +304,11 @@ namespace MarvinsAIRA
 
 		#region Taskbar Icon
 
+		private void TaskbarIcon_TrayLeftMouseDown( object sender, RoutedEventArgs e )
+		{
+			ShowApp_MenuItem_Click( sender, e );
+		}
+
 		private void ShowApp_MenuItem_Click( object sender, RoutedEventArgs e )
 		{
 			Show();
@@ -370,6 +375,7 @@ namespace MarvinsAIRA
 							app.UpdateWindSimulator();
 							app.UpdateSpotter( deltaTime );
 							app.UpdateLogitech();
+							app.UpdateTelemetry();
 							app.ProcessChatMessageQueue();
 
 							// test signal
@@ -464,6 +470,17 @@ namespace MarvinsAIRA
 									else
 									{
 										Clipping_Label.Visibility = Visibility.Hidden;
+									}
+
+									// Spotter voice synth off warning
+
+									if ( app.Settings.EnableSpeechSynthesizer )
+									{
+										SpotterVoiceSynthOffWarning_Label.Visibility = Visibility.Collapsed;
+									}
+									else
+									{
+										SpotterVoiceSynthOffWarning_Label.Visibility = Visibility.Visible;
 									}
 
 									// Steering wheel angle
@@ -1045,6 +1062,16 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private void USConstantForceInverted_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.Settings.USEffectStyle = 3;
+			}
+		}
+
 		private void UndersteerEffectMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -1086,6 +1113,16 @@ namespace MarvinsAIRA
 				var app = (App) Application.Current;
 
 				app.Settings.OSEffectStyle = 2;
+			}
+		}
+
+		private void OSConstantForceInverted_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.Settings.OSEffectStyle = 3;
 			}
 		}
 
@@ -1430,6 +1467,7 @@ namespace MarvinsAIRA
 
 				Settings_Devices_TabItem.Visibility = visibility;
 				Settings_ForceFeedback_TabItem.Visibility = visibility;
+				Settings_SteeringEffects_TabItem.Visibility = visibility;
 				Settings_AutoCenterWheel_TabItem.Visibility = visibility;
 				Settings_CrashProtection_TabItem.Visibility = visibility;
 				Settings_SoftLock_TabItem.Visibility = visibility;

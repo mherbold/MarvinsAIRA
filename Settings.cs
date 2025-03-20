@@ -140,25 +140,6 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Auto overall scale */
-
-		private MappedButtons _autoOverallScaleButtons = new();
-
-		public MappedButtons AutoOverallScaleButtons
-		{
-			get => _autoOverallScaleButtons;
-
-			set
-			{
-				if ( _autoOverallScaleButtons != value )
-				{
-					_autoOverallScaleButtons = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
 		/* Overall scale */
 
 		private float _overallScale = 10f;
@@ -211,6 +192,25 @@ namespace MarvinsAIRA
 
 						OnPropertyChanged();
 					}
+				}
+			}
+		}
+
+		/* Auto overall scale */
+
+		private MappedButtons _autoOverallScaleButtons = new();
+
+		public MappedButtons AutoOverallScaleButtons
+		{
+			get => _autoOverallScaleButtons;
+
+			set
+			{
+				if ( _autoOverallScaleButtons != value )
+				{
+					_autoOverallScaleButtons = value;
+
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -472,6 +472,7 @@ namespace MarvinsAIRA
 		public bool USEffectStyleSineWaveBuzz { get; set; } = true;
 		public bool USEffectStyleSawtoothWaveBuzz { get; set; } = false;
 		public bool USEffectStyleConstantForce { get; set; } = false;
+		public bool USEffectStyleConstantForceInverted { get; set; } = false;
 
 		private int _usEffectStyle = 0;
 
@@ -832,9 +833,10 @@ namespace MarvinsAIRA
 
 		public bool OSEffectStyleSineWaveBuzz { get; set; } = false;
 		public bool OSEffectStyleSawtoothWaveBuzz { get; set; } = false;
-		public bool OSEffectStyleConstantForce { get; set; } = true;
+		public bool OSEffectStyleConstantForce { get; set; } = false;
+		public bool OSEffectStyleConstantForceInverted { get; set; } = true;
 
-		private int _osEffectStyle = 2;
+		private int _osEffectStyle = 3;
 
 		public int OSEffectStyle
 		{
@@ -2023,7 +2025,7 @@ namespace MarvinsAIRA
 
 		#region Settings tab - Auto centering tab
 
-		private bool _autoCenterWheel = true;
+		private bool _autoCenterWheel = false;
 
 		public bool AutoCenterWheel
 		{
@@ -2628,6 +2630,31 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Settings tab - Steering effects tab
+
+		private bool _limitToCentripetalTrack = false;
+
+		public bool LimitToCentripetalTrack
+		{
+			get => _limitToCentripetalTrack;
+
+			set
+			{
+				if ( _limitToCentripetalTrack != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"LimitToCentripetalTrack changed - before {_limitToCentripetalTrack} now {value}" );
+
+					_limitToCentripetalTrack = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		#region Settings tab - Logitech tab
 
 
@@ -2894,8 +2921,8 @@ namespace MarvinsAIRA
 		private string _sayLoadOverallScale = "Overall :value:";
 		private string _sayLoadDetailScale = "Detail :value:";
 		private string _sayClipping = "";
-		private string _sayCrashProtectionOn = "Crash protection on";
-		private string _sayCrashProtectionOff = "Crash protection off";
+		private string _sayCrashProtectionOn = "Crash protection engaged";
+		private string _sayCrashProtectionOff = "Crash protection standing by";
 
 		private string _sayClear = "Clear";
 		private string _sayCarLeft = "Car left";

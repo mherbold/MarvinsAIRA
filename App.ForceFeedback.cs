@@ -598,21 +598,24 @@ namespace MarvinsAIRA
 				{
 					WriteLine( $"UNDERSTEER-EFFECT button pressed!", true );
 
-					if ( _irsdk_steeringWheelAngle >= 0 )
+					if ( !Settings.LimitToCentripetalTrack || ( _track_currentTrackDisplayName == "Centripetal Circuit" ) )
 					{
-						Settings.USStartYawRateFactorLeft = 0;
-						Settings.USEndYawRateFactorLeft = 200;
+						if ( _irsdk_steeringWheelAngle >= 0 )
+						{
+							Settings.USStartYawRateFactorLeft = 0;
+							Settings.USEndYawRateFactorLeft = 200;
 
-						Settings.USStartYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
-						Settings.USEndYawRateFactorLeft = (int) _ffb_yawRateFactorInstant + 80;
-					}
-					else
-					{
-						Settings.USStartYawRateFactorRight = 0;
-						Settings.USEndYawRateFactorRight = 200;
+							Settings.USStartYawRateFactorLeft = (int) _ffb_yawRateFactorInstant;
+							Settings.USEndYawRateFactorLeft = (int) _ffb_yawRateFactorInstant + 80;
+						}
+						else
+						{
+							Settings.USStartYawRateFactorRight = 0;
+							Settings.USEndYawRateFactorRight = 200;
 
-						Settings.USStartYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
-						Settings.USEndYawRateFactorRight = (int) _ffb_yawRateFactorInstant + 80;
+							Settings.USStartYawRateFactorRight = (int) _ffb_yawRateFactorInstant;
+							Settings.USEndYawRateFactorRight = (int) _ffb_yawRateFactorInstant + 80;
+						}
 					}
 				}
 
@@ -1155,11 +1158,6 @@ namespace MarvinsAIRA
 				understeerFrequency = Math.Max( 0.25f, _ffb_understeerAmountLinear );
 
 				_ffb_understeerAmount = MathF.Pow( _ffb_understeerAmountLinear, Settings.USCurve );
-
-				if ( Settings.USEffectStyleInvert )
-				{
-					_ffb_understeerAmount = -_ffb_understeerAmount;
-				}
 			}
 			else
 			{
@@ -1178,11 +1176,6 @@ namespace MarvinsAIRA
 				oversteerFrequency = Math.Max( 0.25f, _ffb_oversteerAmountLinear );
 
 				_ffb_oversteerAmount = MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
-
-				if ( Settings.OSEffectStyleInvert )
-				{
-					_ffb_oversteerAmount = -_ffb_oversteerAmount;
-				}
 			}
 			else
 			{
@@ -1357,6 +1350,12 @@ namespace MarvinsAIRA
 
 							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
 						}
+						else if ( Settings.USEffectStyle == 3 )
+						{
+							var waveAmplitude = ( ( _irsdk_steeringWheelAngle >= 0f ) ? -1f : 1f );
+
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
+						}
 
 						// oversteer effects
 
@@ -1378,6 +1377,12 @@ namespace MarvinsAIRA
 
 							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
 						}
+						else if ( Settings.OSEffectStyle == 3 )
+						{
+							var waveAmplitude = ( ( _irsdk_steeringWheelAngle >= 0f ) ? -1f : 1f );
+
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
+						}
 					}
 				}
 
@@ -1387,20 +1392,26 @@ namespace MarvinsAIRA
 
 				// save the original steering wheel torque (for auto-overall-scale feature)
 
-				var absOutputWheelMagnitude = MathF.Abs( _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] );
-
-				if ( absOutputWheelMagnitude > 0f )
+				if ( processThisFrame )
 				{
-					var autoScaleSteeringWheelTorqueBufferIndex = Math.Clamp( (int) ( _irsdk_lapDistPct * _ffb_autoScaleSteeringWheelTorqueBuffer.Length ), 0, _ffb_autoScaleSteeringWheelTorqueBuffer.Length - 1 );
-
-					if ( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] == 0f )
+					if ( !_irsdk_onPitRoad && ( _irsdk_playerTrackSurface != IRSDKSharper.IRacingSdkEnum.TrkLoc.OffTrack ) )
 					{
-						_ffb_autoScaleSteeringWheelTorqueBufferCount++;
+						var absOutputWheelMagnitude = MathF.Abs( _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] );
+
+						if ( absOutputWheelMagnitude > 0f )
+						{
+							var autoScaleSteeringWheelTorqueBufferIndex = Math.Clamp( (int) ( _irsdk_lapDistPct * _ffb_autoScaleSteeringWheelTorqueBuffer.Length ), 0, _ffb_autoScaleSteeringWheelTorqueBuffer.Length - 1 );
+
+							if ( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] == 0f )
+							{
+								_ffb_autoScaleSteeringWheelTorqueBufferCount++;
+							}
+
+							var outputWheelMagnitudeInNm = absOutputWheelMagnitude / overallScaleToDirectInputUnits;
+
+							_ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] = Math.Max( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ], outputWheelMagnitudeInNm );
+						}
 					}
-
-					var outputWheelMagnitudeInNm = absOutputWheelMagnitude / overallScaleToDirectInputUnits;
-
-					_ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] = Math.Max( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ], outputWheelMagnitudeInNm );
 				}
 
 				// update the pretty graph

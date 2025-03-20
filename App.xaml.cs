@@ -56,11 +56,14 @@ namespace MarvinsAIRA
 				InitializeLFE();
 				InitializeIRacingSDK();
 				InitializeWindSimulator();
+				InitializeTelemetry();
 			}
 			catch ( Exception exception )
 			{
 				WriteLine( "Unexpected exception thrown:", true );
 				WriteLine( exception.Message.Trim() );
+
+				throw;
 			}
 		}
 
@@ -70,6 +73,7 @@ namespace MarvinsAIRA
 
 			try
 			{
+				StopTelemetry();
 				StopIRacingSDK();
 				StopForceFeedback();
 				StopLFE();

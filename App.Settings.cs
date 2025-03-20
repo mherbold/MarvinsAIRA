@@ -32,6 +32,26 @@ namespace MarvinsAIRA
 
 				if ( settings != null )
 				{
+					// START TEMPORARY CODE - GET RID OF THIS AFTER ABOUT A MONTH
+					if ( ( _settings.USEffectStyle == 2 ) && _settings.USEffectStyleInvert )
+					{
+						_settings.USEffectStyleConstantForce = false;
+						_settings.USEffectStyleConstantForceInverted = true;
+						_settings.USEffectStyle = 3;
+					}
+
+					_settings.USEffectStyleInvert = false;
+
+					if ( ( _settings.OSEffectStyle == 2 ) && _settings.OSEffectStyleInvert )
+					{
+						_settings.OSEffectStyleConstantForce = false;
+						_settings.OSEffectStyleConstantForceInverted = true;
+						_settings.OSEffectStyle = 3;
+					}
+
+					_settings.USEffectStyleInvert = false;
+					// END TEMPORARY CODE - GET RID OF THIS AFTER ABOUT A MONTH
+
 					_settings = settings;
 				}
 

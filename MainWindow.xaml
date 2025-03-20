@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.53"
+        Title="Marvin's Awesome iRacing App v0.55"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -169,8 +169,8 @@
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                                     <RadioButton x:Name="USSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSineWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSineWaveBuzz}"/>
                                     <RadioButton x:Name="USSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding USEffectStyleSawtoothWaveBuzz}"/>
-                                    <RadioButton x:Name="USConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USConstantForce_RadioButton_Click" IsChecked="{Binding USEffectStyleConstantForce}"/>
-                                    <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding USEffectStyleInvert}"/>
+                                    <RadioButton x:Name="USConstantForce_RadioButton" Content="Reduce Force" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USConstantForce_RadioButton_Click" IsChecked="{Binding USEffectStyleConstantForce}"/>
+                                    <RadioButton x:Name="USConstantForceInverted_RadioButton" Content="Increase Force" Margin="10,0,0,0" MinWidth="0" GroupName="USFxStyle" Click="USConstantForceInverted_RadioButton_Click" IsChecked="{Binding USEffectStyleConstantForceInverted}"/>
                                 </StackPanel>
                             </Grid>
                             <Grid Margin="0,5,0,0">
@@ -241,8 +241,8 @@
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                                     <RadioButton x:Name="OSSineWaveBuzz_RadioButton" Content="Sine Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSineWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSineWaveBuzz}"/>
                                     <RadioButton x:Name="OSSawtoothWaveBuzz_RadioButton" Content="Sawtooth Wave Buzz" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSSawtoothWaveBuzz_RadioButton_Click" IsChecked="{Binding OSEffectStyleSawtoothWaveBuzz}"/>
-                                    <RadioButton x:Name="OSConstantForce_RadioButton" Content="Constant Force" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSConstantForce_RadioButton_Click" IsChecked="{Binding OSEffectStyleConstantForce}"/>
-                                    <CheckBox Content="Invert" Margin="400,0,0,0" MinWidth="0" IsChecked="{Binding OSEffectStyleInvert}"/>
+                                    <RadioButton x:Name="OSConstantForce_RadioButton" Content="Reduce Force" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSConstantForce_RadioButton_Click" IsChecked="{Binding OSEffectStyleConstantForce}"/>
+                                    <RadioButton x:Name="OSConstantForceInverted_RadioButton" Content="Increase Force" Margin="10,0,0,0" MinWidth="0" GroupName="OSFxStyle" Click="OSConstantForceInverted_RadioButton_Click" IsChecked="{Binding OSEffectStyleConstantForceInverted}"/>
                                 </StackPanel>
                             </Grid>
                             <Grid Margin="0,5,0,0">
@@ -459,7 +459,9 @@
                     </StackPanel>
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <Grid Margin="0,5,0,0">
+                    <Label Content="This spotter feature is an experimental work in progress. The voice synthesizer needs to be on for it to work." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                    <Label x:Name="SpotterVoiceSynthOffWarning_Label" Content="The voice synthesizer is currently off!" FontWeight="Bold" HorizontalAlignment="Center" Foreground="Red" />
+                    <Grid Margin="0,15,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="90"/>
@@ -868,6 +870,11 @@
                             </Grid>
                         </StackPanel>
                     </TabItem>
+                    <TabItem Header="Steering Effects" x:Name="Settings_SteeringEffects_TabItem">
+                        <StackPanel Margin="10,10,10,10">
+                            <CheckBox x:Name="LimitToCentripetalTrack_CheckBox" Content="Make understeer button mapping active only when the car is on the centripetal track" IsChecked="{Binding LimitToCentripetalTrack}"/>
+                        </StackPanel>
+                    </TabItem>
                     <TabItem Header="Logitech" x:Name="Settings_Logitech_TabItem">
                         <StackPanel Margin="10,10,10,10">
                             <StackPanel>
@@ -929,13 +936,13 @@
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Messages">
-                        <ScrollViewer Margin="0,0,0,0" Height="410">
+                        <ScrollViewer Margin="0,0,0,0" Height="440">
                             <StackPanel Margin="10,10,10,10">
                                 <GroupBox Header="General">
                                     <StackPanel>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Hello" VerticalAlignment="Center"/>
@@ -943,7 +950,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Connected" VerticalAlignment="Center"/>
@@ -951,7 +958,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Disconnected" VerticalAlignment="Center"/>
@@ -959,7 +966,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Voice Volume" VerticalAlignment="Center"/>
@@ -971,7 +978,7 @@
                                     <StackPanel>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Car Name" VerticalAlignment="Center"/>
@@ -979,7 +986,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Track Name" VerticalAlignment="Center"/>
@@ -987,7 +994,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Track Config Name" VerticalAlignment="Center"/>
@@ -995,7 +1002,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Track Is Wet" VerticalAlignment="Center"/>
@@ -1003,7 +1010,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Track Is Dry" VerticalAlignment="Center"/>
@@ -1011,7 +1018,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="FFB Warning" VerticalAlignment="Center"/>
@@ -1023,7 +1030,7 @@
                                     <StackPanel>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center"/>
@@ -1031,7 +1038,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Detail Scale" VerticalAlignment="Center"/>
@@ -1039,7 +1046,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0" x:Name="Settings_Voice_SayLFEScale_Grid">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="LFE Scale" VerticalAlignment="Center"/>
@@ -1047,7 +1054,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Scales Reset" VerticalAlignment="Center"/>
@@ -1055,7 +1062,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Load Overall Scale" VerticalAlignment="Center"/>
@@ -1063,7 +1070,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Load Detail Scale" VerticalAlignment="Center"/>
@@ -1071,7 +1078,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Clipping" VerticalAlignment="Center"/>
@@ -1079,18 +1086,18 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Column="0" Content="Crash Protection On" VerticalAlignment="Center"/>
+                                            <Label Grid.Column="0" Content="Crash Protection Engaged" VerticalAlignment="Center"/>
                                             <TextBox Grid.Column="1" Text="{Binding SayCrashProtectionOn}" />
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Column="0" Content="Crash Protection Off" VerticalAlignment="Center"/>
+                                            <Label Grid.Column="0" Content="Crash Protection Standing By" VerticalAlignment="Center"/>
                                             <TextBox Grid.Column="1" Text="{Binding SayCrashProtectionOff}" />
                                         </Grid>
                                     </StackPanel>
@@ -1099,7 +1106,7 @@
                                     <StackPanel>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Clear" VerticalAlignment="Center"/>
@@ -1107,7 +1114,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Car Left" VerticalAlignment="Center"/>
@@ -1115,7 +1122,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Car Right" VerticalAlignment="Center"/>
@@ -1123,7 +1130,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Two Cars Left" VerticalAlignment="Center"/>
@@ -1131,7 +1138,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Two Cars Right" VerticalAlignment="Center"/>
@@ -1139,7 +1146,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Three Wide" VerticalAlignment="Center"/>
@@ -1151,7 +1158,7 @@
                                     <StackPanel>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Checkered Flag" VerticalAlignment="Center"/>
@@ -1159,7 +1166,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="White Flag" VerticalAlignment="Center"/>
@@ -1167,7 +1174,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Green Flag" VerticalAlignment="Center"/>
@@ -1175,7 +1182,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Yellow Flag" VerticalAlignment="Center"/>
@@ -1183,7 +1190,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Red Flag" VerticalAlignment="Center"/>
@@ -1191,7 +1198,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Blue Flag" VerticalAlignment="Center"/>
@@ -1199,7 +1206,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Debris Flag" VerticalAlignment="Center"/>
@@ -1207,7 +1214,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Crossed Flag" VerticalAlignment="Center"/>
@@ -1215,7 +1222,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Yellow Waving Flag" VerticalAlignment="Center"/>
@@ -1223,7 +1230,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="One Lap To Green Flag" VerticalAlignment="Center"/>
@@ -1231,7 +1238,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Green Held Flag" VerticalAlignment="Center"/>
@@ -1239,7 +1246,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Ten To Go Flag" VerticalAlignment="Center"/>
@@ -1247,7 +1254,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Five To Go Flag" VerticalAlignment="Center"/>
@@ -1255,7 +1262,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Random Waving Flag" VerticalAlignment="Center"/>
@@ -1263,7 +1270,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Caution Flag" VerticalAlignment="Center"/>
@@ -1271,7 +1278,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Caution Waving Flag" VerticalAlignment="Center"/>
@@ -1279,7 +1286,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Black Flag" VerticalAlignment="Center"/>
@@ -1287,7 +1294,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Disqualify Flag" VerticalAlignment="Center"/>
@@ -1295,7 +1302,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Servicible Flag" VerticalAlignment="Center"/>
@@ -1303,7 +1310,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Furled Flag" VerticalAlignment="Center"/>
@@ -1311,7 +1318,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Repair Flag" VerticalAlignment="Center"/>
@@ -1319,7 +1326,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Start Hidden Flag" VerticalAlignment="Center"/>
@@ -1327,7 +1334,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Start Ready Flag" VerticalAlignment="Center"/>
@@ -1335,7 +1342,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Start Set Flag" VerticalAlignment="Center"/>
@@ -1343,7 +1350,7 @@
                                         </Grid>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="Start Go Flag" VerticalAlignment="Center"/>
@@ -1397,7 +1404,7 @@
                 </ui:ToggleSwitch>
             </StatusBarItem>
         </StatusBar>
-        <tb:TaskbarIcon x:Name="MARIA_TaskbarIcon" IconSource="/icon.ico" ToolTipText="Marvin's Awesome iRacing App">
+        <tb:TaskbarIcon x:Name="MARIA_TaskbarIcon" IconSource="/icon.ico" ToolTipText="Marvin's Awesome iRacing App" TrayLeftMouseDown="TaskbarIcon_TrayLeftMouseDown">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem x:Name="ShowApp_MenuItem" Header="Show Marvin's Awesome iRacing App" Click="ShowApp_MenuItem_Click" />

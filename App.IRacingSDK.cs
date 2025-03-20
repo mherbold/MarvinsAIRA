@@ -28,7 +28,9 @@ namespace MarvinsAIRA
 		private IRacingSdkDatum? _irsdk_lapDistPctDatum = null;
 		private IRacingSdkDatum? _irsdk_latAccelDatum = null;
 		private IRacingSdkDatum? _irsdk_longAccelDatum = null;
+		private IRacingSdkDatum? _irsdk_onPitRoadDatum = null;
 		private IRacingSdkDatum? _irsdk_playerCarIdxDatum = null;
+		private IRacingSdkDatum? _irsdk_playerTrackSurfaceDatum = null;
 		private IRacingSdkDatum? _irsdk_rpmDatum = null;
 		private IRacingSdkDatum? _irsdk_sessionFlagsDatum = null;
 		private IRacingSdkDatum? _irsdk_speedDatum = null;
@@ -61,7 +63,9 @@ namespace MarvinsAIRA
 		public float _irsdk_lapDistPct = 0f;
 		public float _irsdk_latAccel = 0f;
 		public float _irsdk_longAccel = 0f;
+		public bool _irsdk_onPitRoad = false;
 		public int _irsdk_playerCarIdx = 0;
+		public IRacingSdkEnum.TrkLoc _irsdk_playerTrackSurface = IRacingSdkEnum.TrkLoc.NotInWorld;
 		public float _irsdk_rpm = 0f;
 		public IRacingSdkEnum.Flags _irsdk_sessionFlags = 0;
 		public float _irsdk_speed = 0f;
@@ -194,7 +198,9 @@ namespace MarvinsAIRA
 			_irsdk_lapDistPct = 0f;
 			_irsdk_latAccel = 0f;
 			_irsdk_longAccel = 0f;
+			_irsdk_onPitRoad = false;
 			_irsdk_playerCarIdx = 0;
+			_irsdk_playerTrackSurface = IRacingSdkEnum.TrkLoc.NotInWorld;
 			_irsdk_rpm = 0f;
 			_irsdk_sessionFlags = 0;
 			_irsdk_speed = 0f;
@@ -313,7 +319,9 @@ namespace MarvinsAIRA
 				_irsdk_lapDistPctDatum = _irsdk.Data.TelemetryDataProperties[ "LapDistPct" ];
 				_irsdk_latAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LatAccel" ];
 				_irsdk_longAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LongAccel" ];
+				_irsdk_onPitRoadDatum = _irsdk.Data.TelemetryDataProperties[ "OnPitRoad" ];
 				_irsdk_playerCarIdxDatum = _irsdk.Data.TelemetryDataProperties[ "PlayerCarIdx" ];
+				_irsdk_playerTrackSurfaceDatum = _irsdk.Data.TelemetryDataProperties[ "PlayerTrackSurface" ];
 				_irsdk_rpmDatum = _irsdk.Data.TelemetryDataProperties[ "RPM" ];
 				_irsdk_sessionFlagsDatum = _irsdk.Data.TelemetryDataProperties[ "SessionFlags" ];
 				_irsdk_speedDatum = _irsdk.Data.TelemetryDataProperties[ "Speed" ];
@@ -356,10 +364,12 @@ namespace MarvinsAIRA
 			_irsdk_displayUnits = _irsdk.Data.GetInt( _irsdk_displayUnitsDatum );
 			_irsdk_gear = _irsdk.Data.GetInt( _irsdk_gearDatum );
 			_irsdk_isOnTrack = _irsdk.Data.GetBool( _irsdk_isOnTrackDatum );
-			_irsdk_lapDistPct = _irsdk.Data.GetFloat(_irsdk_lapDistPctDatum );
+			_irsdk_lapDistPct = _irsdk.Data.GetFloat( _irsdk_lapDistPctDatum );
 			_irsdk_latAccel = _irsdk.Data.GetFloat( _irsdk_latAccelDatum );
 			_irsdk_longAccel = _irsdk.Data.GetFloat( _irsdk_longAccelDatum );
+			_irsdk_onPitRoad = _irsdk.Data.GetBool( _irsdk_onPitRoadDatum );
 			_irsdk_playerCarIdx = _irsdk.Data.GetInt( _irsdk_playerCarIdxDatum );
+			_irsdk_playerTrackSurface = (IRacingSdkEnum.TrkLoc) _irsdk.Data.GetInt( _irsdk_playerTrackSurfaceDatum );
 			_irsdk_rpm = _irsdk.Data.GetFloat( _irsdk_rpmDatum );
 			_irsdk_sessionFlags = (IRacingSdkEnum.Flags) _irsdk.Data.GetBitField( _irsdk_sessionFlagsDatum );
 			_irsdk_steeringFFBEnabled = _irsdk.Data.GetBool( _irsdk_steeringFFBEnabled_Datum );
