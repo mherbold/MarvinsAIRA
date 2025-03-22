@@ -7,31 +7,42 @@ namespace MarvinsAIRA
 	{
 		private readonly System.Timers.Timer _timer = new( 100 );
 
-		public required Settings.MappedButtons MappedButtons { get; set; }
+		private readonly Settings.MappedButtons currentMappedButtons;
+		private readonly Settings.MappedButtons newMappedButtons = new();
 
 		public bool canceled = true;
 
-		public MapButtonWindow()
+		public MapButtonWindow( Settings.MappedButtons mappedButtons )
 		{
 			InitializeComponent();
+
+			currentMappedButtons = mappedButtons;
+
+			newMappedButtons.Button1.DeviceInstanceGuid = currentMappedButtons.Button1.DeviceInstanceGuid;
+			newMappedButtons.Button1.DeviceProductName = currentMappedButtons.Button1.DeviceProductName;
+			newMappedButtons.Button1.ButtonNumber = currentMappedButtons.Button1.ButtonNumber;
+
+			newMappedButtons.Button2.DeviceInstanceGuid = currentMappedButtons.Button2.DeviceInstanceGuid;
+			newMappedButtons.Button2.DeviceProductName = currentMappedButtons.Button2.DeviceProductName;
+			newMappedButtons.Button2.ButtonNumber = currentMappedButtons.Button2.ButtonNumber;
 		}
 
 		private void UpdateButtonInformation()
 		{
-			if ( MappedButtons.Button1.DeviceInstanceGuid != Guid.Empty )
+			if ( newMappedButtons.Button1.DeviceInstanceGuid != Guid.Empty )
 			{
-				Button1NameLabel.Content = $"Button {MappedButtons.Button1.ButtonNumber + 1} on {MappedButtons.Button1.DeviceProductName}";
+				Button1NameLabel.Content = $"Button {newMappedButtons.Button1.ButtonNumber + 1} on {newMappedButtons.Button1.DeviceProductName}";
 			}
 			else
 			{
 				Button1NameLabel.Content = "Not set.";
 			}
 
-			if ( MappedButtons.Button2.DeviceInstanceGuid != Guid.Empty )
+			if ( newMappedButtons.Button2.DeviceInstanceGuid != Guid.Empty )
 			{
 				Button1NameLabel.Content += " (HOLD)";
 
-				Button2NameLabel.Content = $"Button {MappedButtons.Button2.ButtonNumber + 1} on {MappedButtons.Button2.DeviceProductName} (CLICK)";
+				Button2NameLabel.Content = $"Button {newMappedButtons.Button2.ButtonNumber + 1} on {newMappedButtons.Button2.DeviceProductName} (CLICK)";
 
 				PlusLabel.Visibility = Visibility.Visible;
 				Button2NameLabel.Visibility = Visibility.Visible;
@@ -41,7 +52,6 @@ namespace MarvinsAIRA
 				PlusLabel.Visibility = Visibility.Collapsed;
 				Button2NameLabel.Visibility = Visibility.Collapsed;
 			}
-
 		}
 
 		private void Window_Activated( object sender, EventArgs e )
@@ -56,6 +66,12 @@ namespace MarvinsAIRA
 		{
 			_timer.Stop();
 			_timer.Dispose();
+
+			if ( !canceled )
+			{
+				currentMappedButtons.Button1 = newMappedButtons.Button1;
+				currentMappedButtons.Button2 = newMappedButtons.Button2;
+			}
 		}
 
 		private void CancelButton_Click( object sender, RoutedEventArgs e )
@@ -65,8 +81,8 @@ namespace MarvinsAIRA
 
 		private void ClearButton_Click( object sender, RoutedEventArgs e )
 		{
-			MappedButtons.Button1 = new();
-			MappedButtons.Button2 = new();
+			newMappedButtons.Button1 = new();
+			newMappedButtons.Button2 = new();
 
 			UpdateButtonInformation();
 		}
@@ -88,17 +104,17 @@ namespace MarvinsAIRA
 			{
 				var buttonAlreadyCaptured = false;
 
-				if ( app.Input_AnyPressedButton.DeviceInstanceGuid == MappedButtons.Button1.DeviceInstanceGuid )
+				if ( app.Input_AnyPressedButton.DeviceInstanceGuid == newMappedButtons.Button1.DeviceInstanceGuid )
 				{
-					if ( app.Input_AnyPressedButton.ButtonNumber == MappedButtons.Button1.ButtonNumber )
+					if ( app.Input_AnyPressedButton.ButtonNumber == newMappedButtons.Button1.ButtonNumber )
 					{
 						buttonAlreadyCaptured = true;
 					}
 				}
 
-				if ( app.Input_AnyPressedButton.DeviceInstanceGuid == MappedButtons.Button2.DeviceInstanceGuid )
+				if ( app.Input_AnyPressedButton.DeviceInstanceGuid == newMappedButtons.Button2.DeviceInstanceGuid )
 				{
-					if ( app.Input_AnyPressedButton.ButtonNumber == MappedButtons.Button2.ButtonNumber )
+					if ( app.Input_AnyPressedButton.ButtonNumber == newMappedButtons.Button2.ButtonNumber )
 					{
 						buttonAlreadyCaptured = true;
 					}
@@ -113,18 +129,18 @@ namespace MarvinsAIRA
 						ButtonNumber = app.Input_AnyPressedButton.ButtonNumber
 					};
 
-					if ( MappedButtons.Button1.DeviceInstanceGuid == Guid.Empty )
+					if ( newMappedButtons.Button1.DeviceInstanceGuid == Guid.Empty )
 					{
-						MappedButtons.Button1 = mappedButton;
+						newMappedButtons.Button1 = mappedButton;
 					}
-					else if ( MappedButtons.Button2.DeviceInstanceGuid == Guid.Empty )
+					else if ( newMappedButtons.Button2.DeviceInstanceGuid == Guid.Empty )
 					{
-						MappedButtons.Button2 = mappedButton;
+						newMappedButtons.Button2 = mappedButton;
 					}
 					else
 					{
-						MappedButtons.Button1 = MappedButtons.Button2;
-						MappedButtons.Button2 = mappedButton;
+						newMappedButtons.Button1 = newMappedButtons.Button2;
+						newMappedButtons.Button2 = mappedButton;
 					}
 				}
 

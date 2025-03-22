@@ -63,6 +63,8 @@ namespace MarvinsAIRA
 			if ( mainWindow != null )
 			{
 				mainWindow.DataContext = _settings;
+
+				mainWindow.FixRangeSliders();
 			}
 		}
 
@@ -115,7 +117,7 @@ namespace MarvinsAIRA
 
 					foreach ( var steeringEffectsSettings in Settings.SteeringEffectsSettingsList )
 					{
-						if ( steeringEffectsSettings.CarName == _car_carSaveName )
+						if ( steeringEffectsSettings.CarName == _car_currentCarScreenName )
 						{
 							steeringEffectsSettings.SteeringEffectsEnabled = Settings.SteeringEffectsEnabled;
 
@@ -137,7 +139,7 @@ namespace MarvinsAIRA
 					{
 						var steeringEffectsSettings = new SteeringEffectsSettings
 						{
-							CarName = _car_carSaveName,
+							CarName = _car_currentCarScreenName,
 
 							SteeringEffectsEnabled = Settings.SteeringEffectsEnabled,
 

@@ -42,6 +42,12 @@ namespace MarvinsAIRA
 		public float understeerAmount;
 		public float oversteerAmount;
 		public bool crashProtectionEngaged;
+
+		public bool forceFeedbackEnabled;
+		public bool steeringEffectsEnabled;
+		public bool lfeToFFBEnabled;
+		public bool windSimulatorEnabled;
+		public bool spotterEnabled;
 	}
 
 	public partial class App : Application
@@ -120,6 +126,12 @@ namespace MarvinsAIRA
 			_telemetry_data.understeerAmount = _ffb_understeerAmount;
 			_telemetry_data.oversteerAmount = _ffb_oversteerAmount;
 			_telemetry_data.crashProtectionEngaged = _ffb_crashProtectionTimer > 0f;
+
+			_telemetry_data.forceFeedbackEnabled = Settings.ForceFeedbackEnabled;
+			_telemetry_data.steeringEffectsEnabled = Settings.SteeringEffectsEnabled;
+			_telemetry_data.lfeToFFBEnabled = Settings.LFEToFFBEnabled;
+			_telemetry_data.windSimulatorEnabled = Settings.WindSimulatorEnabled;
+			_telemetry_data.spotterEnabled = Settings.SpotterEnabled;
 
 			_telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
 		}

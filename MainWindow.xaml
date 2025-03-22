@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.56"
+        Title="Marvin's Awesome iRacing App v0.57"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -138,10 +138,10 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Image Grid.Row="0" x:Name="WheelForceFeedback_Image" Height="200" Width="978"/>
-                                <Label Grid.Row="0" x:Name="Recording_Label" Content="RECORDING" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FFF32828" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
-                                <Label Grid.Row="0" x:Name="Playback_Label" Content="PLAYBACK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Background="#FF67C50D" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                <Label Grid.Row="0" x:Name="Recording_Label" Content="RECORDING" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,26,0,0" Background="#FFF32828" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                <Label Grid.Row="0" x:Name="Playback_Label" Content="PLAYBACK" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,26,0,0" Background="#FF67C50D" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
                                 <Label Grid.Row="0" x:Name="SimulatorNotRunning_Label" Content="The iRacing Simulator is Not Running" HorizontalAlignment="Center" VerticalAlignment="Center" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" />
-                                <Label Grid.Row="0" x:Name="Clipping_Label" Content="CLIPPING" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
+                                <Label Grid.Row="0" x:Name="Clipping_Label" Content="CLIPPING" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,26" Background="DarkRed" Foreground="White" Padding="10,2,10,2" BorderBrush="Black" BorderThickness="2,2,2,2" Visibility="Hidden" />
                             </Grid>
                         </Border>
                         <Button x:Name="TogglePrettyGraph_Button" Content="Enable Pretty Graph" Margin="0,3,0,0" Click="TogglePrettyGraph_Button_Click" HorizontalAlignment="Stretch" />
@@ -199,7 +199,7 @@
                                         <Label Grid.Column="0" Content="YR Factor L" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning left." />
                                         <TextBox Grid.Column="1" Text="{Binding USStartYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
                                         <TextBox Grid.Column="2" Text="{Binding USEndYawRateFactorLeftString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
-                                        <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="200" VerticalAlignment="Center" HigherValue="{Binding USEndYawRateFactorLeft}" LowerValue="{Binding USStartYawRateFactorLeft}" />
+                                        <xctk:RangeSlider x:Name="USYawRateFactorLeft_RangeSlider" Grid.Column="3" Margin="10,0,0,0" Maximum="200" VerticalAlignment="Center" HigherValue="{Binding USEndYawRateFactorLeft}" LowerValue="{Binding USStartYawRateFactorLeft}" />
                                     </Grid>
                                     <Grid Margin="0,5,0,0">
                                         <Grid.ColumnDefinitions>
@@ -211,7 +211,7 @@
                                         <Label Grid.Column="0" Content="YR Factor R" VerticalAlignment="Center" ToolTip="This is the understeer effect yaw rate factor when turning right." />
                                         <TextBox Grid.Column="1" Text="{Binding USStartYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
                                         <TextBox Grid.Column="2" Text="{Binding USEndYawRateFactorRightString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
-                                        <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="200" VerticalAlignment="Center" HigherValue="{Binding USEndYawRateFactorRight}" LowerValue="{Binding USStartYawRateFactorRight}" />
+                                        <xctk:RangeSlider x:Name="USYawRateFactorRight_RangeSlider" Grid.Column="3" Margin="10,0,0,0" Maximum="200" VerticalAlignment="Center" HigherValue="{Binding USEndYawRateFactorRight}" LowerValue="{Binding USStartYawRateFactorRight}" />
                                     </Grid>
                                 </StackPanel>
                                 <Button Grid.Column="1" x:Name="UndersteerEffectMap_Button" Margin="10,0,0,0" Click="UndersteerEffectMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
@@ -265,7 +265,7 @@
                                 <Label Grid.Column="0" Content="Y Velocity" VerticalAlignment="Center" ToolTip="This is the oversteer effect Y velocity." />
                                 <TextBox Grid.Column="1" Text="{Binding OSStartYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
                                 <TextBox Grid.Column="2" Text="{Binding OSEndYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
-                                <xctk:RangeSlider Grid.Column="3" Margin="10,0,0,0" Maximum="30" VerticalAlignment="Center" HigherValue="{Binding OSEndYVelocity}" LowerValue="{Binding OSStartYVelocity}" Step="0.1" />
+                                <xctk:RangeSlider x:Name="OSYVelocity_RangeSlider" Grid.Column="3" Margin="10,0,0,0" Maximum="30" VerticalAlignment="Center" HigherValue="{Binding OSEndYVelocity}" LowerValue="{Binding OSStartYVelocity}" Step="0.1" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>

@@ -20,22 +20,28 @@ namespace MarvinsAIRA
 
 		public App()
 		{
-			if ( !_mutex.WaitOne( TimeSpan.Zero, true ) )
+			try
 			{
-				var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-				var runningProcesses = Process.GetProcessesByName( assemblyName );
-
-				foreach ( var runningProcess in runningProcesses )
+				if ( !_mutex.WaitOne( TimeSpan.Zero, true ) )
 				{
-					if ( runningProcess.MainWindowHandle != IntPtr.Zero )
+					var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+					var runningProcesses = Process.GetProcessesByName( assemblyName );
+
+					foreach ( var runningProcess in runningProcesses )
 					{
-						WinApi.SetForegroundWindow( runningProcess.MainWindowHandle );
+						if ( runningProcess.MainWindowHandle != IntPtr.Zero )
+						{
+							WinApi.SetForegroundWindow( runningProcess.MainWindowHandle );
+						}
 					}
+
+					Environment.Exit( 0 );
+
+					return;
 				}
-
-				Environment.Exit( 0 );
-
-				return;
+			}
+			catch
+			{
 			}
 
 			DisableThrottling();

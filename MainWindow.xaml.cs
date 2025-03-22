@@ -686,6 +686,8 @@ namespace MarvinsAIRA
 			catch ( Exception exception )
 			{
 				app.WriteLine( $"Exception caught inside the update loop: {exception.Message.Trim()}", true );
+
+				throw;
 			}
 
 			_win_updateLoopRunning = false;
@@ -1131,6 +1133,29 @@ namespace MarvinsAIRA
 			UpdateImages();
 		}
 
+		public void FixRangeSliders()
+		{
+			var app = (App) Application.Current;
+
+			Dispatcher.BeginInvoke( () =>
+			{
+				USYawRateFactorLeft_RangeSlider.LowerValue = app.Settings.USStartYawRateFactorLeft;
+				USYawRateFactorLeft_RangeSlider.HigherValue = app.Settings.USEndYawRateFactorLeft;
+				USYawRateFactorLeft_RangeSlider.LowerValue = app.Settings.USStartYawRateFactorLeft;
+				USYawRateFactorLeft_RangeSlider.HigherValue = app.Settings.USEndYawRateFactorLeft;
+
+				USYawRateFactorRight_RangeSlider.LowerValue = app.Settings.USStartYawRateFactorRight;
+				USYawRateFactorRight_RangeSlider.HigherValue = app.Settings.USEndYawRateFactorRight;
+				USYawRateFactorRight_RangeSlider.LowerValue = app.Settings.USStartYawRateFactorRight;
+				USYawRateFactorRight_RangeSlider.HigherValue = app.Settings.USEndYawRateFactorRight;
+
+				OSYVelocity_RangeSlider.LowerValue = app.Settings.OSStartYVelocity;
+				OSYVelocity_RangeSlider.HigherValue = app.Settings.OSEndYVelocity;
+				OSYVelocity_RangeSlider.LowerValue = app.Settings.OSStartYVelocity;
+				OSYVelocity_RangeSlider.HigherValue = app.Settings.OSEndYVelocity;
+			} );
+		}
+
 		#endregion
 
 		#region LFE to FFB tab
@@ -1489,10 +1514,9 @@ namespace MarvinsAIRA
 
 			_win_pauseInputProcessing = true;
 
-			var window = new MapButtonWindow
+			var window = new MapButtonWindow( mappedButtons )
 			{
-				Owner = this,
-				MappedButtons = mappedButtons,
+				Owner = this
 			};
 
 			window.ShowDialog();
@@ -1500,9 +1524,6 @@ namespace MarvinsAIRA
 			if ( !window.canceled )
 			{
 				app.WriteLine( "...dialog window was closed..." );
-
-				mappedButtons.Button1 = window.MappedButtons.Button1;
-				mappedButtons.Button2 = window.MappedButtons.Button2;
 
 				app.QueueForSerialization();
 

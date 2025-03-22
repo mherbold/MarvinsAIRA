@@ -1,12 +1,17 @@
 
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
+
+using IRSDKSharper;
+
+#if DEBUG
+
+using System.Diagnostics;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-using IRSDKSharper;
+#endif
 
 namespace MarvinsAIRA
 {
@@ -143,6 +148,8 @@ namespace MarvinsAIRA
 
 			WriteLine( "The following exception was thrown from inside the iRacing SDK:" );
 			WriteLine( exception.Message.Trim() );
+
+			throw exception;
 		}
 
 		private void OnConnected()
