@@ -812,6 +812,8 @@ namespace MarvinsAIRA
 						Settings.OSEndYVelocity = steeringEffectsSettings.OSEndYVelocity;
 						Settings.OSStartYVelocity = steeringEffectsSettings.OSStartYVelocity;
 
+						Settings.OSSoftness = steeringEffectsSettings.OSSoftness;
+
 						steeringEffectsSettingsFound = true;
 
 						break;
@@ -830,6 +832,8 @@ namespace MarvinsAIRA
 
 					Settings.OSStartYVelocity = 3f;
 					Settings.OSEndYVelocity = 8f;
+
+					Settings.OSSoftness = 10f;
 				}
 
 				_settings_pauseSerialization = false;
@@ -1181,6 +1185,13 @@ namespace MarvinsAIRA
 				oversteerFrequency = Math.Max( 0.25f, _ffb_oversteerAmountLinear );
 
 				_ffb_oversteerAmount = MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
+
+				if ( Settings.OSSoftness >= 0.1f )
+				{
+					var softnessInRadians = Settings.OSSoftness * MathF.PI / 180f;
+
+					_ffb_oversteerAmount *= 1f - Math.Clamp( ( softnessInRadians - MathF.Abs( _irsdk_steeringWheelAngle ) ) / softnessInRadians, 0f, 1f ); ;
+				}
 			}
 			else
 			{
@@ -1644,6 +1655,11 @@ namespace MarvinsAIRA
 
 				if ( ( app._ffb_constantForceEffectParameters != null ) && ( app._ffb_constantForceEffect != null ) )
 				{
+					if ( app.Settings.InvertDirectInputMagnitude )
+					{
+						magnitude = -magnitude;
+					}
+
 					( (ConstantForce) app._ffb_constantForceEffectParameters.Parameters ).Magnitude = magnitude;
 
 					try

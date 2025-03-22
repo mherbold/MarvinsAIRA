@@ -129,6 +129,8 @@ namespace MarvinsAIRA
 							steeringEffectsSettings.OSStartYVelocity = Settings.OSStartYVelocity;
 							steeringEffectsSettings.OSEndYVelocity = Settings.OSEndYVelocity;
 
+							steeringEffectsSettings.OSSoftness = Settings.OSSoftness;
+
 							steeringEffectsSettingsFound = true;
 
 							break;
@@ -150,6 +152,8 @@ namespace MarvinsAIRA
 
 							OSStartYVelocity = Settings.OSStartYVelocity,
 							OSEndYVelocity = Settings.OSEndYVelocity,
+
+							OSSoftness = Settings.OSSoftness,
 						};
 
 						Settings.SteeringEffectsSettingsList.Add( steeringEffectsSettings );

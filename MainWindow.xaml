@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.57"
+        Title="Marvin's Awesome iRacing App v0.59"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -18,7 +18,8 @@
         ResizeMode="CanMinimize"
         Icon="/icon.ico"
         WindowStartupLocation="CenterScreen"
-        ui:WindowHelper.UseModernWindowStyle="True" Closed="Window_Closed">
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Closed="Window_Closed">
 
     <Window.DataContext>
         <local:Settings />
@@ -34,7 +35,7 @@
                     </StackPanel>
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
-                    <StackPanel>
+                    <StackPanel x:Name="ForceFeedback_StackPanel">
                         <Label x:Name="ForceFeedbackWarning_Label" Content="WARNING - Force feedback is currently enabled in iRacing!" Foreground="Red" FontSize="24" FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10" Visibility="Collapsed" />
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -133,7 +134,7 @@
                     </StackPanel>
                     <StackPanel Margin="0,10,0,0" x:Name="PrettyGraph_StackPanel">
                         <Border x:Name="PrettyGraph_Border" BorderThickness="1,1,1,1" BorderBrush="Gray" Visibility="Collapsed">
-                            <Grid>
+                            <Grid x:Name="PrettyGraph_Grid" MouseDown="PrettyGraph_Grid_MouseDown">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
@@ -183,13 +184,23 @@
                                 <TextBox Grid.Column="1" Text="{Binding USEffectStrengthString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                                 <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding USEffectStrength}" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Fx Curve" VerticalAlignment="Center" ToolTip="This is the curve to apply to this effect." />
+                                <TextBox Grid.Column="1" Text="{Binding USCurveString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" x:Name="USCurve_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.25" Maximum="4.0" SmallChange="0.25" LargeChange="1" Value="{Binding USCurve}" ValueChanged="USCurve_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            </Grid>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <Grid Margin="0,5,0,0">
+                                    <Grid Margin="0,15,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="80"/>
                                             <ColumnDefinition Width="49"/>
@@ -217,16 +228,6 @@
                                 <Button Grid.Column="1" x:Name="UndersteerEffectMap_Button" Margin="10,0,0,0" Click="UndersteerEffectMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                     <Image Source="/u-button.png"/>
                                 </Button>
-                            </Grid>
-                            <Grid Margin="0,5,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Curve" VerticalAlignment="Center" ToolTip="This is the curve to apply to this effect." />
-                                <TextBox Grid.Column="1" Text="{Binding USCurveString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="USCurve_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.25" Maximum="4.0" SmallChange="0.25" LargeChange="1" Value="{Binding USCurve}" ValueChanged="USCurve_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
                         </StackPanel>
                     </GroupBox>
@@ -258,6 +259,16 @@
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Fx Curve" VerticalAlignment="Center" ToolTip="This is the curve to apply to this effect." />
+                                <TextBox Grid.Column="1" Text="{Binding OSCurveString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" x:Name="OSCurve_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.25" Maximum="4.0" SmallChange="0.25" LargeChange="1" Value="{Binding OSCurve}" ValueChanged="OSCurve_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            </Grid>
+                            <Grid Margin="0,15,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="49"/>
                                     <ColumnDefinition Width="41"/>
                                     <ColumnDefinition Width="*"/>
@@ -273,9 +284,9 @@
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Curve" VerticalAlignment="Center" ToolTip="This is the curve to apply to this effect." />
-                                <TextBox Grid.Column="1" Text="{Binding OSCurveString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="OSCurve_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.25" Maximum="4.0" SmallChange="0.25" LargeChange="1" Value="{Binding OSCurve}" ValueChanged="OSCurve_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                <Label Grid.Column="0" Content="Softness" VerticalAlignment="Center" ToolTip="This is the steering wheel angle to start softening up the effect, where zero is no softening." />
+                                <TextBox Grid.Column="1" Text="{Binding OSSoftnessString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" x:Name="OSSoftness_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="45" SmallChange="0.1" LargeChange="1" Value="{Binding OSSoftness}" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
                         </StackPanel>
                     </GroupBox>
@@ -705,6 +716,16 @@
                                 <CheckBox Content="Hide Tray Alert" IsChecked="{Binding HideTrayAlert}" Margin="20,0,0,0"/>
                             </StackPanel>
                             <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow}" Click="TopmostWindow_CheckBox_Click"/>
+                            <Grid Margin="0,15,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="110"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Window Opacity" VerticalAlignment="Center" ToolTip="This is how transparent to make the app window, so you can see things through it." />
+                                <TextBox Grid.Column="1" Text="{Binding WindowOpacityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider x:Name="WindowOpacity_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="25" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding WindowOpacity}" ValueChanged="WindowOpacity_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            </Grid>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Save File">
@@ -856,7 +877,8 @@
                     </TabItem>
                     <TabItem Header="Force Feedback" x:Name="Settings_ForceFeedback_TabItem">
                         <StackPanel Margin="10,10,10,10">
-                            <CheckBox x:Name="PlaybackSendToDevice_CheckBox" Content="Send Force Feedback Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}" Margin="0,0,0,20"/>
+                            <CheckBox Content="Invert DirectInput Magnitude" IsChecked="{Binding InvertDirectInputMagnitude}"/>
+                            <CheckBox Content="Send Force Feedback Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}" Margin="0,0,0,30"/>
                             <Label Content="The below slider sets the amount of force feedback clipping that is acceptable to you, when using the auto overall scale button." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>

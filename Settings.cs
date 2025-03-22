@@ -1074,6 +1074,55 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Oversteer softness */
+
+		private float _osSoftness = 10f;
+
+		public float OSSoftness
+		{
+			get => _osSoftness;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 45f );
+
+				if ( _osSoftness != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"OSSoftness changed - before {_osSoftness} now {value}" );
+
+					_osSoftness = value;
+
+					OnPropertyChanged();
+				}
+
+				OSSoftnessString = $"!{_osSoftness:F1}°";
+			}
+		}
+
+		private string _osSoftnessString = "10°";
+
+		public string OSSoftnessString
+		{
+			get => _osSoftnessString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _osSoftnessString != value )
+					{
+						_osSoftnessString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
 		/* Per-car/track/track config force feedback settings */
 
 		public class ForceFeedbackSettings
@@ -1106,6 +1155,7 @@ namespace MarvinsAIRA
 
 			public float OSStartYVelocity = 3f;
 			public float OSEndYVelocity = 8f;
+			public float OSSoftness = 10f;
 		}
 
 		public List<SteeringEffectsSettings> SteeringEffectsSettingsList { get; private set; } = [];
@@ -1885,6 +1935,55 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Window opacity */
+
+		private int _windowOpacity = 100;
+
+		public int WindowOpacity
+		{
+			get => _windowOpacity;
+
+			set
+			{
+				value = Math.Clamp( value, 25, 100 );
+
+				if ( _windowOpacity != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WindowOpacity changed - before {_windowOpacity} now {value}" );
+
+					_windowOpacity = value;
+
+					OnPropertyChanged();
+				}
+
+				WindowOpacityString = $"!{_windowOpacity}%";
+			}
+		}
+
+		private string _windowOpacityString = "100%";
+
+		public string WindowOpacityString
+		{
+			get => _windowOpacityString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _windowOpacityString != value )
+					{
+						_windowOpacityString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
 		#endregion
 
 		#region Settings tab - Save file tab
@@ -2559,6 +2658,27 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region Settings tab - Force feedback tab
+
+		private bool _invertDirectInputMagnitude = false;
+
+		public bool InvertDirectInputMagnitude
+		{
+			get => _invertDirectInputMagnitude;
+
+			set
+			{
+				if ( _invertDirectInputMagnitude != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"InvertDirectInputMagnitude changed - before {_invertDirectInputMagnitude} now {value}" );
+
+					_invertDirectInputMagnitude = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		private bool _playbackSendToDevice = true;
 

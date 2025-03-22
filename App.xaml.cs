@@ -53,6 +53,11 @@ namespace MarvinsAIRA
 
 			try
 			{
+				if ( !Directory.Exists( DocumentsFolder ) )
+				{
+					Directory.CreateDirectory( DocumentsFolder );
+				}
+
 				InitializeConsole();
 				InitializeSettings();
 				InitializeVoice();

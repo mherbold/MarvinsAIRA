@@ -1012,6 +1012,14 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private void PrettyGraph_Grid_MouseDown( object sender, MouseButtonEventArgs e )
+		{
+			var visibility = ( TogglePrettyGraph_Button.Visibility == Visibility.Visible ) ? Visibility.Collapsed : Visibility.Visible;
+
+			ForceFeedback_StackPanel.Visibility = visibility;
+			TogglePrettyGraph_Button.Visibility = visibility;
+		}
+
 		private void TogglePrettyGraph()
 		{
 			var app = (App) Application.Current;
@@ -1257,6 +1265,29 @@ namespace MarvinsAIRA
 			var checkBox = (CheckBox) sender;
 
 			Topmost = checkBox.IsChecked == true;
+		}
+
+		private void WindowOpacity_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			var app = (App) Application.Current;
+
+			if ( app.Settings.WindowOpacity == 100 )
+			{
+				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, WinApi.WS_POPUP | WinApi.WS_VISIBLE );
+				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, 0 );
+
+				Opacity = 1f;
+			}
+			else
+			{
+				WinApi.MARGINS margins = new() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+
+				WinApi.DwmExtendFrameIntoClientArea( _win_windowHandle, ref margins );
+				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, WinApi.WS_POPUP | WinApi.WS_VISIBLE );
+				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, WinApi.WS_EX_LAYERED | WinApi.WS_EX_TRANSPARENT );
+
+				Opacity = app.Settings.WindowOpacity / 100f;
+			}
 		}
 
 		#endregion
