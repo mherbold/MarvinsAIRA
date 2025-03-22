@@ -164,10 +164,7 @@ namespace MarvinsAIRA
 
 			_ffb_reinitializeNeeded = true;
 
-			for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
-			{
-				_ffb_autoScaleSteeringWheelTorqueBuffer[ i ] = 0f;
-			}
+			ResetAutoOverallScaleMetrics();
 
 			Dispatcher.BeginInvoke( () =>
 			{
@@ -438,6 +435,13 @@ namespace MarvinsAIRA
 				{
 					UpdateCurrentWetDryCondition();
 				}
+			}
+
+			// reset auto overall scale if we've moved on or off track
+
+			if ( _irsdk_isOnTrack != _irsdk_isOnTrackLastFrame )
+			{
+				ResetAutoOverallScaleMetrics();
 			}
 
 			// update the force feedback magnitudes

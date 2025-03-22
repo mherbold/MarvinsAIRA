@@ -59,8 +59,7 @@ namespace MarvinsAIRA
 		private float _ffb_announceDetailScaleTimer = 0f;
 		private float _ffb_announceLFEScaleTimer = 0f;
 
-		private readonly float[] _ffb_autoScaleSteeringWheelTorqueBuffer = new float[ 10000 ];
-		private int _ffb_autoScaleSteeringWheelTorqueBufferCount = 0;
+		private float _ffb_autoOverallScalePeakForceInNewtonMeters = 0f;
 
 		public readonly float[] _ffb_recordedSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 60 * 10 ];
 		public int _ffb_recordedSteeringWheelTorqueBufferIndex = 0;
@@ -120,7 +119,8 @@ namespace MarvinsAIRA
 		public float FFB_UndersteerAmountLinear { get => _ffb_understeerAmountLinear; }
 		public float FFB_OversteerAmount { get => _ffb_oversteerAmount; }
 		public float FFB_OversteerAmountLinear { get => _ffb_oversteerAmountLinear; }
-		public bool FFB_AutoScaleSteeringWheelTorqueBufferIsReady { get { return _ffb_autoScaleSteeringWheelTorqueBufferCount >= 2000; } }
+		public bool FFB_AutoOverallScaleIsReady { get => _ffb_autoOverallScalePeakForceInNewtonMeters > 1f; }
+		public float FFB_AutoOverallScalePeakForceInNewtonMeters { get => _ffb_autoOverallScalePeakForceInNewtonMeters; }
 
 		#endregion
 
@@ -397,30 +397,14 @@ namespace MarvinsAIRA
 			_ffb_reinitializeNeeded = true;
 		}
 
-		public void AutoOverallScale()
+		public void ResetAutoOverallScaleMetrics()
 		{
-			var calculatedOverallScale = 1f;
+			_ffb_autoOverallScalePeakForceInNewtonMeters = 0f;
+		}
 
-			for ( var i = 0; i < _ffb_autoScaleSteeringWheelTorqueBuffer.Length; i++ )
-			{
-				var rawSteeringWheelTorque = _ffb_autoScaleSteeringWheelTorqueBuffer[ i ];
-
-				if ( rawSteeringWheelTorque > 1f )
-				{
-					var scale = Settings.WheelMaxForce / ( ( 1f - ( Settings.AutoOverallScaleClipLimit / 100.0f ) ) * rawSteeringWheelTorque );
-
-					if ( scale < calculatedOverallScale )
-					{
-						calculatedOverallScale = scale;
-					}
-				}
-
-				_ffb_autoScaleSteeringWheelTorqueBuffer[ i ] = 0f;
-			}
-
-			_ffb_autoScaleSteeringWheelTorqueBufferCount = 0;
-
-			Settings.OverallScale = calculatedOverallScale * 100f;
+		public void DoAutoOverallScaleNow()
+		{
+			Settings.OverallScale = 100f * Settings.WheelMaxForce / _ffb_autoOverallScalePeakForceInNewtonMeters;
 
 			if ( Settings.OverallScale < 10f )
 			{
@@ -430,6 +414,8 @@ namespace MarvinsAIRA
 			{
 				Say( Settings.SayOverallScale, $"{Settings.OverallScale:F0}" );
 			}
+
+			ResetAutoOverallScaleMetrics();
 		}
 
 		private float UpdateScale( float scale, float direction )
@@ -528,9 +514,21 @@ namespace MarvinsAIRA
 				{
 					WriteLine( "AUTO-OVERALL-SCALE button pressed!", true );
 
-					if ( _ffb_autoScaleSteeringWheelTorqueBufferCount >= 2000 )
+					if ( FFB_AutoOverallScaleIsReady )
 					{
-						AutoOverallScale();
+						DoAutoOverallScaleNow();
+					}
+				}
+
+				buttonPresses = Settings.ClearAutoOverallScaleButtons.ClickCount;
+
+				if ( buttonPresses > 0 )
+				{
+					WriteLine( "CLEAR-AUTO-OVERALL-SCALE button pressed!", true );
+
+					if ( FFB_AutoOverallScaleIsReady )
+					{
+						ResetAutoOverallScaleMetrics();
 					}
 				}
 
@@ -1219,6 +1217,7 @@ namespace MarvinsAIRA
 			var normalizedOverallScaleSetting = Settings.OverallScale / 100f;
 			var normalizedDetailScaleSetting = Settings.DetailScale / 100f;
 			var normalizedLFEScaleSetting = Settings.LFEScale / 100f;
+			var normalizedAutoOverallScaleClipLimitSetting = Settings.AutoOverallScaleClipLimit / 100f;
 
 			// apply crash protection to overall and detail scale
 
@@ -1306,11 +1305,15 @@ namespace MarvinsAIRA
 					_ffb_runningSteeringWheelTorque = ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * normalizedDetailScaleSetting ) + ( _ffb_steadyStateWheelTorque * ( 1f - normalizedDetailScaleSetting ) );
 				}
 
+				var autoOverallScaleSample = _ffb_runningSteeringWheelTorque * ( 1f - normalizedAutoOverallScaleClipLimitSetting ) + ( _ffb_steadyStateWheelTorque * normalizedAutoOverallScaleClipLimitSetting );
+
 				// apply the speed scale
 
 				if ( processThisFrame )
 				{
 					_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale );
+
+					autoOverallScaleSample *= speedScale;
 				}
 
 				// mix in the low frequency effects
@@ -1319,7 +1322,9 @@ namespace MarvinsAIRA
 				{
 					if ( processThisFrame )
 					{
-						_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale );
+						var lfeSample = _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale;
+
+						_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) lfeSample;
 					}
 				}
 
@@ -1410,22 +1415,18 @@ namespace MarvinsAIRA
 
 				if ( processThisFrame )
 				{
-					if ( !_irsdk_onPitRoad && ( _irsdk_playerTrackSurface != IRSDKSharper.IRacingSdkEnum.TrkLoc.OffTrack ) )
+					if ( _ffb_playingBackNow || ( _irsdk_isOnTrack && !_irsdk_onPitRoad && ( _irsdk_playerTrackSurface != IRSDKSharper.IRacingSdkEnum.TrkLoc.OffTrack ) ) )
 					{
-						var absOutputWheelMagnitude = MathF.Abs( _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] );
+						autoOverallScaleSample = MathF.Abs( autoOverallScaleSample );
 
-						if ( absOutputWheelMagnitude > 0f )
+						if ( autoOverallScaleSample > 0f )
 						{
-							var autoScaleSteeringWheelTorqueBufferIndex = Math.Clamp( (int) ( _irsdk_lapDistPct * _ffb_autoScaleSteeringWheelTorqueBuffer.Length ), 0, _ffb_autoScaleSteeringWheelTorqueBuffer.Length - 1 );
+							var outputWheelMagnitudeInNm = autoOverallScaleSample / overallScaleToDirectInputUnits;
 
-							if ( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] == 0f )
+							if ( _ffb_autoOverallScalePeakForceInNewtonMeters < outputWheelMagnitudeInNm )
 							{
-								_ffb_autoScaleSteeringWheelTorqueBufferCount++;
+								_ffb_autoOverallScalePeakForceInNewtonMeters = outputWheelMagnitudeInNm;
 							}
-
-							var outputWheelMagnitudeInNm = absOutputWheelMagnitude / overallScaleToDirectInputUnits;
-
-							_ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ] = Math.Max( _ffb_autoScaleSteeringWheelTorqueBuffer[ autoScaleSteeringWheelTorqueBufferIndex ], outputWheelMagnitudeInNm );
 						}
 					}
 				}

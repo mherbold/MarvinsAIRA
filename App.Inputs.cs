@@ -118,6 +118,7 @@ namespace MarvinsAIRA
 			MappedButtons[] mappedButtonsList = [
 				Settings.ReinitForceFeedbackButtons,
 				Settings.AutoOverallScaleButtons,
+				Settings.ClearAutoOverallScaleButtons,
 				Settings.IncreaseOverallScaleButtons,
 				Settings.DecreaseOverallScaleButtons,
 				Settings.IncreaseDetailScaleButtons,

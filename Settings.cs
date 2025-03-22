@@ -215,6 +215,23 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private MappedButtons _clearAutoOverallScaleButtons = new();
+
+		public MappedButtons ClearAutoOverallScaleButtons
+		{
+			get => _clearAutoOverallScaleButtons;
+
+			set
+			{
+				if ( _clearAutoOverallScaleButtons != value )
+				{
+					_clearAutoOverallScaleButtons = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Detail scale */
 
 		private float _detailScale = 100f;
@@ -2701,7 +2718,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private int _autoOverallScaleClipLimit = 0;
+		private int _autoOverallScaleClipLimit = 25;
 
 		public int AutoOverallScaleClipLimit
 		{
@@ -2726,7 +2743,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _autoOverallScaleClipLimitString = "0%";
+		private string _autoOverallScaleClipLimitString = "25%";
 
 		public string AutoOverallScaleClipLimitString
 		{

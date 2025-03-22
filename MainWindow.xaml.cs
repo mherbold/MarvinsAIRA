@@ -410,7 +410,9 @@ namespace MarvinsAIRA
 
 									// Auto overall scale button
 
-									if ( app.FFB_AutoScaleSteeringWheelTorqueBufferIsReady )
+									AutoOverallScale_Button.Content = $"{app.FFB_AutoOverallScalePeakForceInNewtonMeters:F1} N⋅m";
+
+									if ( app.FFB_AutoOverallScaleIsReady )
 									{
 										AutoOverallScale_Button.IsEnabled = true;
 										AutoOverallScale_Button.BorderBrush = Brushes.Green;
@@ -901,7 +903,16 @@ namespace MarvinsAIRA
 
 			app.WriteLine( "AutoOverallScale_Button_Click called." );
 
-			app.AutoOverallScale();
+			app.DoAutoOverallScaleNow();
+		}
+
+		private void AutoOverallScale_Button_MouseRightButtonDown( object sender, MouseButtonEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "AutoOverallScale_Button_MouseRightButtonDown called." );
+
+			app.ResetAutoOverallScaleMetrics();
 		}
 
 		private void AutoOverallScaleMap_Button_Click( object sender, RoutedEventArgs e )
@@ -911,6 +922,15 @@ namespace MarvinsAIRA
 			app.WriteLine( "AutoOverallScaleMap_Button_Click called." );
 
 			ShowMapButtonsWindow( app.Settings.AutoOverallScaleButtons );
+		}
+
+		private void ClearAutoOverallScaleMap_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "ClearAutoOverallScaleMap_Button_Click called." );
+
+			ShowMapButtonsWindow( app.Settings.ClearAutoOverallScaleButtons );
 		}
 
 		private void DecreaseOverallScaleMap_Button_Click( object sender, RoutedEventArgs e )

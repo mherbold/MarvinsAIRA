@@ -19,6 +19,7 @@
   <ItemGroup>
     <None Remove="a-button.png" />
     <None Remove="ABS.wav" />
+    <None Remove="c-button.png" />
     <None Remove="click.wav" />
     <None Remove="icon.ico" />
     <None Remove="minus-button.png" />
@@ -53,6 +54,7 @@
   <ItemGroup>
     <Resource Include="a-button.png" />
     <Resource Include="abs.wav" />
+    <Resource Include="c-button.png" />
     <Resource Include="click.wav" />
     <Resource Include="icon.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

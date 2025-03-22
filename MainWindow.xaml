@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.59"
+        Title="Marvin's Awesome iRacing App v0.60"
         Height="Auto"
         Width="1000"
         Closing="Window_Closing"
@@ -78,18 +78,22 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
                             <TextBox Grid.Column="1" Text="{Binding OverallScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="0.1" LargeChange="10" Value="{Binding OverallScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
-                            <Button Grid.Column="3" x:Name="AutoOverallScale_Button" Margin="15,0,0,0" Content="AUTO" Click="AutoOverallScale_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" IsEnabled="False" />
+                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="0.1" LargeChange="10" Value="{Binding OverallScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            <Button Grid.Column="3" x:Name="AutoOverallScale_Button" Margin="15,0,0,0" Content="AUTO" Click="AutoOverallScale_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" IsEnabled="False" Width="80" MouseRightButtonDown="AutoOverallScale_Button_MouseRightButtonDown" />
                             <Button Grid.Column="4" x:Name="AutoOverallScaleMap_Button" Click="AutoOverallScaleMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0" Margin="5,0,0,0">
                                 <Image Source="/a-button.png"/>
                             </Button>
-                            <Button Grid.Column="5" x:Name="DecreaseOverallScaleMap_Button" Click="DecreaseOverallScaleMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="5" x:Name="ClearAutoOverallScaleMap_Button" Click="ClearAutoOverallScaleMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                <Image Source="/c-button.png"/>
+                            </Button>
+                            <Button Grid.Column="6" x:Name="DecreaseOverallScaleMap_Button" Click="DecreaseOverallScaleMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/minus-button.png"/>
                             </Button>
-                            <Button Grid.Column="6" x:Name="IncreaseOverallScaleMap_Button" Click="IncreaseOverallScaleMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                            <Button Grid.Column="7" x:Name="IncreaseOverallScaleMap_Button" Click="IncreaseOverallScaleMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
                                 <Image Source="/plus-button.png"/>
                             </Button>
                         </Grid>
@@ -879,16 +883,18 @@
                         <StackPanel Margin="10,10,10,10">
                             <CheckBox Content="Invert DirectInput Magnitude" IsChecked="{Binding InvertDirectInputMagnitude}"/>
                             <CheckBox Content="Send Force Feedback Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}" Margin="0,0,0,30"/>
-                            <Label Content="The below slider sets the amount of force feedback clipping that is acceptable to you, when using the auto overall scale button." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            <Label Content="The below slider controls how much clipping you want to allow when using the auto overall scale feature." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            <Label Content="All the way to the left means no clipping is tolerated." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            <Label Content="All the way to the right means to allow as much as 100% of the details to be clipped." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="120"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Clip Limit" VerticalAlignment="Center" ToolTip="This is how much clipping is considered acceptable when using the auto overall scale button." />
+                                <Label Grid.Column="0" Content="Clipping Tolerance" VerticalAlignment="Center" ToolTip="This is how much clipping is considered acceptable when using the auto overall scale button." />
                                 <TextBox Grid.Column="1" Text="{Binding AutoOverallScaleClipLimitString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="AutoOverallScaleClipLimit_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="50" SmallChange="1" LargeChange="5" Value="{Binding AutoOverallScaleClipLimit}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                <Slider Grid.Column="2" x:Name="AutoOverallScaleClipLimit_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" Value="{Binding AutoOverallScaleClipLimit}" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
                         </StackPanel>
                     </TabItem>

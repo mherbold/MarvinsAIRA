@@ -97,7 +97,7 @@ namespace MarvinsAIRA
 
 			_telemetry_data.wheelMax = Settings.WheelMaxForce;
 			_telemetry_data.overallScale = Settings.OverallScale / 100f;
-			_telemetry_data.overallScaleAutoReady = FFB_AutoScaleSteeringWheelTorqueBufferIsReady;
+			_telemetry_data.overallScaleAutoReady = FFB_AutoOverallScaleIsReady;
 			_telemetry_data.overallScaleAutoClipLimit = Settings.AutoOverallScaleClipLimit / 100f;
 			_telemetry_data.detailScale = Settings.DetailScale / 100f;
 			_telemetry_data.parkedScale = Settings.ParkedScale / 100f;
