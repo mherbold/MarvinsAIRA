@@ -8,18 +8,19 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.60"
+        Title="Marvin's Awesome iRacing App v0.61"
         Height="Auto"
         Width="1000"
-        Closing="Window_Closing"
-        Activated="Window_Activated"
-        SourceInitialized="Window_SourceInitialized"
         SizeToContent="Height"
         ResizeMode="CanMinimize"
         Icon="/icon.ico"
         WindowStartupLocation="CenterScreen"
         ui:WindowHelper.UseModernWindowStyle="True"
-        Closed="Window_Closed">
+        Activated="Window_Activated"
+        SourceInitialized="Window_SourceInitialized"
+        Closing="Window_Closing"
+        Closed="Window_Closed"
+        StateChanged="Window_StateChanged">
 
     <Window.DataContext>
         <local:Settings />

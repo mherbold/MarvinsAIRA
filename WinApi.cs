@@ -22,6 +22,12 @@ namespace MarvinsAIRA
 			public int Bottom;
 		}
 
+		public const ushort WM_SYSCOMMAND = 0x0112;
+		public const ushort WM_DEVICECHANGE = 0x0219;
+
+		public const ushort SC_MINIMIZE = 0xF020;
+		public const ushort SC_RESTORE = 0xF120;
+
 		public const int GWL_WNDPROC = -4;
 		public const int GWL_HINSTANCE = -6;
 		public const int GWL_HWNDPARENT = -8;
@@ -115,7 +121,10 @@ namespace MarvinsAIRA
 		[DllImport( "dwmapi.dll" )]
 		public static extern int DwmExtendFrameIntoClientArea( IntPtr hwnd, ref MARGINS margins );
 
+		[DllImport( "user32.dll", EntryPoint = "GetWindowLong" )]
+		public static extern IntPtr GetWindowLongPtr( IntPtr hWnd, int nIndex );
+
 		[DllImport( "user32.dll" )]
-		public static extern uint SetWindowLong( IntPtr hWnd, int nIndex, uint dwNewLong );
+		public static extern int SetWindowLong( IntPtr hWnd, int nIndex, uint dwNewLong );
 	}
 }

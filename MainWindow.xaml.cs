@@ -39,6 +39,8 @@ namespace MarvinsAIRA
 		private bool _win_dieNow = false;
 
 		private nint _win_windowHandle = 0;
+		private IntPtr _win_originalWindowStyle = 0;
+		private IntPtr _win_originalWindowExStyle = 0;
 
 		private readonly WriteableBitmap _win_oversteerBitmap = new( IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_DPI, IMAGE_DPI, PixelFormats.Bgra32, null );
 		private readonly byte[] _win_oversteerPixels = new byte[ IMAGE_STRIDE * IMAGE_HEIGHT ];
@@ -146,8 +148,12 @@ namespace MarvinsAIRA
 				var app = (App) Application.Current;
 
 				_win_windowHandle = new WindowInteropHelper( this ).Handle;
+				_win_originalWindowStyle = WinApi.GetWindowLongPtr( _win_windowHandle, WinApi.GWL_STYLE );
+				_win_originalWindowExStyle = WinApi.GetWindowLongPtr( _win_windowHandle, WinApi.GWL_EXSTYLE );
 
 				app.Initialize( _win_windowHandle );
+
+				UpdateWindowTransparency( false );
 
 				Oversteer_Image.Source = _win_oversteerBitmap;
 				Understeer_Image.Source = _win_understeerBitmap;
@@ -215,23 +221,35 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private void Window_StateChanged( object sender, EventArgs e )
+		{
+			if ( WindowState == WindowState.Normal )
+			{
+				UpdateWindowTransparency( false );
+			}
+		}
+
 		private void Window_SourceInitialized( object sender, EventArgs e )
 		{
 			var app = (App) Application.Current;
 
-			app.WriteLine( "Registering device change notification...", true );
+			app.WriteLine( "Registering custom window message handler...", true );
 
 			var source = PresentationSource.FromVisual( this ) as HwndSource;
 
 			source?.AddHook( WndProc );
 
-			RegisterDeviceChangeNotification();
+			app.WriteLine( "...custom window message handler registered." );
 
-			app.WriteLine( "...device change notification registered." );
+			RegisterDeviceChangeNotification();
 		}
 
 		private void RegisterDeviceChangeNotification()
 		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "Registering device change notification...", true );
+
 			var devBroadcastDeviceInterface = new DeviceChangeNotification.DEV_BROADCAST_DEVICEINTERFACE();
 
 			devBroadcastDeviceInterface.dbcc_size = Marshal.SizeOf( devBroadcastDeviceInterface );
@@ -247,6 +265,8 @@ namespace MarvinsAIRA
 
 			Marshal.PtrToStructure( devBroadcastDeviceInterfacePtr, devBroadcastDeviceInterface );
 			Marshal.FreeHGlobal( devBroadcastDeviceInterfacePtr );
+
+			app.WriteLine( "...device change notification registered." );
 		}
 
 		private void UnregisterDeviceChangeNotification()
@@ -256,48 +276,89 @@ namespace MarvinsAIRA
 
 		protected IntPtr WndProc( IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled )
 		{
-			if ( msg == DeviceChangeNotification.WM_DEVICECHANGE )
+			switch ( msg )
 			{
-				var nEventType = wParam.ToInt32();
-
-				if ( ( nEventType == DeviceChangeNotification.DBT_DEVICEARRIVAL ) || ( nEventType == DeviceChangeNotification.DBT_DEVICEREMOVECOMPLETE ) )
+				case WinApi.WM_SYSCOMMAND:
 				{
-					var broadcastHdr = new DeviceChangeNotification.DEV_BROADCAST_HDR();
-
-					Marshal.PtrToStructure( lParam, broadcastHdr );
-
-					if ( broadcastHdr.dbch_devicetype == DeviceChangeNotification.DBT_DEVTYP_DEVICEINTERFACE )
+					if ( _win_initialized )
 					{
-						var devBroadcastDeviceInterface1 = new DeviceChangeNotification.DEV_BROADCAST_DEVICEINTERFACE_1();
-
-						Marshal.PtrToStructure( lParam, devBroadcastDeviceInterface1 );
-
-						string devicePath = new string( devBroadcastDeviceInterface1.dbcc_name );
-
-						int pos = devicePath.IndexOf( (char) 0 );
-
-						if ( pos != -1 )
+						if ( ( wParam & 0xFFF0 ) == WinApi.SC_MINIMIZE )
 						{
-							devicePath = devicePath[ ..pos ];
+							UpdateWindowTransparency( true );
 						}
-
-						var app = (App) Application.Current;
-
-						if ( nEventType == DeviceChangeNotification.DBT_DEVICEREMOVECOMPLETE )
-						{
-							app.WriteLine( $"Device {devicePath} was removed!" );
-						}
-						else if ( nEventType == DeviceChangeNotification.DBT_DEVICEARRIVAL )
-						{
-							app.WriteLine( $"Device {devicePath} was added!" );
-						}
-
-						_win_inputReinitTimer = 2f;
 					}
+
+					break;
+				}
+
+				case WinApi.WM_DEVICECHANGE:
+				{
+					var nEventType = wParam.ToInt32();
+
+					if ( ( nEventType == DeviceChangeNotification.DBT_DEVICEARRIVAL ) || ( nEventType == DeviceChangeNotification.DBT_DEVICEREMOVECOMPLETE ) )
+					{
+						var broadcastHdr = new DeviceChangeNotification.DEV_BROADCAST_HDR();
+
+						Marshal.PtrToStructure( lParam, broadcastHdr );
+
+						if ( broadcastHdr.dbch_devicetype == DeviceChangeNotification.DBT_DEVTYP_DEVICEINTERFACE )
+						{
+							var devBroadcastDeviceInterface1 = new DeviceChangeNotification.DEV_BROADCAST_DEVICEINTERFACE_1();
+
+							Marshal.PtrToStructure( lParam, devBroadcastDeviceInterface1 );
+
+							string devicePath = new string( devBroadcastDeviceInterface1.dbcc_name );
+
+							int pos = devicePath.IndexOf( (char) 0 );
+
+							if ( pos != -1 )
+							{
+								devicePath = devicePath[ ..pos ];
+							}
+
+							var app = (App) Application.Current;
+
+							if ( nEventType == DeviceChangeNotification.DBT_DEVICEREMOVECOMPLETE )
+							{
+								app.WriteLine( $"Device {devicePath} was removed!" );
+							}
+							else if ( nEventType == DeviceChangeNotification.DBT_DEVICEARRIVAL )
+							{
+								app.WriteLine( $"Device {devicePath} was added!" );
+							}
+
+							_win_inputReinitTimer = 2f;
+						}
+					}
+
+					break;
 				}
 			}
 
 			return IntPtr.Zero;
+		}
+
+		private void UpdateWindowTransparency( bool forceOpaque )
+		{
+			var app = (App) Application.Current;
+
+			if ( ( app.Settings.WindowOpacity == 100 ) || forceOpaque )
+			{
+				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, (uint) _win_originalWindowStyle );
+				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, (uint) _win_originalWindowExStyle );
+
+				Opacity = 1f;
+			}
+			else
+			{
+				WinApi.MARGINS margins = new() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+
+				_ = WinApi.DwmExtendFrameIntoClientArea( _win_windowHandle, ref margins );
+				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, WinApi.WS_POPUP | WinApi.WS_VISIBLE );
+				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, WinApi.WS_EX_LAYERED | WinApi.WS_EX_TRANSPARENT );
+
+				Opacity = app.Settings.WindowOpacity / 100f;
+			}
 		}
 
 		#endregion
@@ -1289,24 +1350,9 @@ namespace MarvinsAIRA
 
 		private void WindowOpacity_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
-			var app = (App) Application.Current;
-
-			if ( app.Settings.WindowOpacity == 100 )
+			if ( _win_initialized )
 			{
-				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, WinApi.WS_POPUP | WinApi.WS_VISIBLE );
-				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, 0 );
-
-				Opacity = 1f;
-			}
-			else
-			{
-				WinApi.MARGINS margins = new() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
-
-				WinApi.DwmExtendFrameIntoClientArea( _win_windowHandle, ref margins );
-				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, WinApi.WS_POPUP | WinApi.WS_VISIBLE );
-				WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, WinApi.WS_EX_LAYERED | WinApi.WS_EX_TRANSPARENT );
-
-				Opacity = app.Settings.WindowOpacity / 100f;
+				UpdateWindowTransparency( false );
 			}
 		}
 

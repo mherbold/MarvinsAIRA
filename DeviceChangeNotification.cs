@@ -9,8 +9,6 @@ namespace MarvinsAIRA
 
 		public static readonly Guid USB_HID_GUID = new( "4d1e55b2-f16f-11cf-88cb-001111000030" );
 
-		public const ushort WM_DEVICECHANGE = 0x0219;
-		
 		public const ushort DBT_DEVICEARRIVAL = 0x8000;
 		public const ushort DBT_DEVICEREMOVECOMPLETE = 0x8004;
 		public const ushort DBT_DEVTYP_DEVICEINTERFACE = 0x0005;
