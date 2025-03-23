@@ -1164,7 +1164,7 @@ namespace MarvinsAIRA
 
 				understeerFrequency = Math.Max( 0.25f, _ffb_understeerAmountLinear );
 
-				_ffb_understeerAmount = MathF.Pow( _ffb_understeerAmountLinear, Settings.USCurve );
+				_ffb_understeerAmount = MathF.Sign( _irsdk_steeringWheelAngle ) * MathF.Pow( _ffb_understeerAmountLinear, Settings.USCurve );
 			}
 			else
 			{
@@ -1176,19 +1176,26 @@ namespace MarvinsAIRA
 
 			var oversteerFrequency = 0f;
 
-			if ( MathF.Sign( _irsdk_steeringWheelAngle ) != MathF.Sign( _irsdk_velocityY ) )
+			if ( _irsdk_velocityX > 0f )
 			{
 				_ffb_oversteerAmountLinear = Math.Clamp( ( MathF.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
 
 				oversteerFrequency = Math.Max( 0.25f, _ffb_oversteerAmountLinear );
 
-				_ffb_oversteerAmount = MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
+				_ffb_oversteerAmount = -MathF.Sign( _irsdk_velocityY ) * MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
 
-				if ( Settings.OSSoftness >= 0.1f )
+				// apply softness if counter-steering
+
+				if ( MathF.Sign( _irsdk_steeringWheelAngle ) == MathF.Sign( _irsdk_velocityY ) )
 				{
-					var softnessInRadians = Settings.OSSoftness * MathF.PI / 180f;
+					if ( Settings.OSSoftness >= 1f )
+					{
+						var fadeDistanceInRadians = Settings.OSSoftness * MathF.PI / 180f;
 
-					_ffb_oversteerAmount *= 1f - Math.Clamp( ( softnessInRadians - MathF.Abs( _irsdk_steeringWheelAngle ) ) / softnessInRadians, 0f, 1f ); ;
+						var fadeAmount = Math.Clamp( ( fadeDistanceInRadians - MathF.Abs( _irsdk_steeringWheelAngle ) ) / fadeDistanceInRadians, 0f, 1f );
+
+						_ffb_oversteerAmount *= fadeAmount;
+					}
 				}
 			}
 			else
@@ -1218,6 +1225,8 @@ namespace MarvinsAIRA
 			var normalizedDetailScaleSetting = Settings.DetailScale / 100f;
 			var normalizedLFEScaleSetting = Settings.LFEScale / 100f;
 			var normalizedAutoOverallScaleClipLimitSetting = Settings.AutoOverallScaleClipLimit / 100f;
+			var normalizedUndersteerEffectStrength = Settings.USEffectStrength / 100f;
+			var normalizedOversteerEffectStrength = Settings.OSEffectStrength / 100f;
 
 			// apply crash protection to overall and detail scale
 
@@ -1228,8 +1237,8 @@ namespace MarvinsAIRA
 
 			var overallScaleToDirectInputUnits = normalizedOverallScaleSetting * newtonMetersToDirectInputUnits;
 			var detailScaleToDirectInputUnits = overallScaleToDirectInputUnits + overallScaleToDirectInputUnits * ( normalizedDetailScaleSetting - 1f );
-			var understeerEffectScaleToDirectInputUnits = (int) ( ( Settings.USEffectStrength / 100f ) * DI_FFNOMINALMAX );
-			var oversteerEffectScaleToDirectInputUnits = (int) ( ( Settings.OSEffectStrength / 100f ) * DI_FFNOMINALMAX );
+			var understeerEffectScaleToDirectInputUnits = (int) ( normalizedUndersteerEffectStrength * DI_FFNOMINALMAX );
+			var oversteerEffectScaleToDirectInputUnits = (int) ( normalizedOversteerEffectStrength * DI_FFNOMINALMAX );
 			var lfeScale = normalizedLFEScaleSetting * DI_FFNOMINALMAX;
 
 			// make a copy of the lfe read index so it doesn't change in the middle of this update (its updated in another thread)
@@ -1361,21 +1370,17 @@ namespace MarvinsAIRA
 						}
 						else if ( Settings.USEffectStyle == 1 )
 						{
-							var waveAmplitude = _ffb_understeerEffectWaveAngle / ( MathF.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+							var waveAmplitude = _ffb_understeerEffectWaveAngle / ( MathF.PI * 2f );
 
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
 						}
 						else if ( Settings.USEffectStyle == 2 )
 						{
-							var waveAmplitude = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
-
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_steadyStateWheelTorque * MathF.Abs( _ffb_understeerAmount ) * normalizedUndersteerEffectStrength );
 						}
 						else if ( Settings.USEffectStyle == 3 )
 						{
-							var waveAmplitude = ( ( _irsdk_steeringWheelAngle >= 0f ) ? -1f : 1f );
-
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
 						}
 
 						// oversteer effects
@@ -1388,21 +1393,17 @@ namespace MarvinsAIRA
 						}
 						else if ( Settings.OSEffectStyle == 1 )
 						{
-							var waveAmplitude = _ffb_oversteerEffectWaveAngle / ( MathF.PI * 2f ) * ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
+							var waveAmplitude = _ffb_oversteerEffectWaveAngle / ( MathF.PI * 2f );
 
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
 						}
 						else if ( Settings.OSEffectStyle == 2 )
 						{
-							var waveAmplitude = ( ( _irsdk_steeringWheelAngle >= 0f ) ? 1f : -1f );
-
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_steadyStateWheelTorque * MathF.Abs( _ffb_oversteerAmount ) * normalizedOversteerEffectStrength );
 						}
 						else if ( Settings.OSEffectStyle == 3 )
 						{
-							var waveAmplitude = ( ( _irsdk_steeringWheelAngle >= 0f ) ? -1f : 1f );
-
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
+							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
 						}
 					}
 				}

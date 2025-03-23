@@ -1093,7 +1093,7 @@ namespace MarvinsAIRA
 
 		/* Oversteer softness */
 
-		private float _osSoftness = 10f;
+		private float _osSoftness = 90f;
 
 		public float OSSoftness
 		{
@@ -1101,7 +1101,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 0f, 45f );
+				value = Math.Clamp( value, 1f, 180f );
 
 				if ( _osSoftness != value )
 				{
@@ -1118,7 +1118,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _osSoftnessString = "10°";
+		private string _osSoftnessString = "90°";
 
 		public string OSSoftnessString
 		{

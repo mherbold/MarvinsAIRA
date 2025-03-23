@@ -48,6 +48,8 @@ namespace MarvinsAIRA
 		public bool lfeToFFBEnabled;
 		public bool windSimulatorEnabled;
 		public bool spotterEnabled;
+
+		public float overallScaleAutoPeak;
 	}
 
 	public partial class App : Application
@@ -132,6 +134,8 @@ namespace MarvinsAIRA
 			_telemetry_data.lfeToFFBEnabled = Settings.LFEToFFBEnabled;
 			_telemetry_data.windSimulatorEnabled = Settings.WindSimulatorEnabled;
 			_telemetry_data.spotterEnabled = Settings.SpotterEnabled;
+
+			_telemetry_data.overallScaleAutoPeak = _ffb_autoOverallScalePeakForceInNewtonMeters;
 
 			_telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
 		}

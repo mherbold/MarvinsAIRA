@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.62"
+        Title="Marvin's Awesome iRacing App v0.63"
         Height="Auto"
         Width="1000"
         SizeToContent="Height"
@@ -291,7 +291,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Label Grid.Column="0" Content="Softness" VerticalAlignment="Center" ToolTip="This is the steering wheel angle to start softening up the effect, where zero is no softening." />
                                 <TextBox Grid.Column="1" Text="{Binding OSSoftnessString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="OSSoftness_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="45" SmallChange="0.1" LargeChange="1" Value="{Binding OSSoftness}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                <Slider Grid.Column="2" x:Name="OSSoftness_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="180" SmallChange="1" LargeChange="5" Value="{Binding OSSoftness}" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
                         </StackPanel>
                     </GroupBox>
