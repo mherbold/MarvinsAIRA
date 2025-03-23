@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.61"
+        Title="Marvin's Awesome iRacing App v0.62"
         Height="Auto"
         Width="1000"
         SizeToContent="Height"
@@ -1394,21 +1394,27 @@
             </TabItem>
             <TabItem>
                 <TabItem.Header>
-                    <Label Content="Console" VerticalAlignment="Center" />
-                </TabItem.Header>
-                <StackPanel Margin="10,10,10,10">
-                    <TextBox x:Name="Console_TextBox" Text="" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="320" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="11"/>
-                </StackPanel>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
                     <Label Content="Help" VerticalAlignment="Center" />
                 </TabItem.Header>
                 <StackPanel Margin="10,10,10,10">
                     <Button x:Name="SeeHelpDocumentation_Button" HorizontalAlignment="Stretch" Content="See the Documentation" Click="SeeHelpDocumentation_Button_Click" />
                     <Button x:Name="GoToIracingForumThread_Button" HorizontalAlignment="Stretch" Content="Go to the iRacing Forum Thread" Click="GoToIRacingForumThread_Button_Click" Margin="0,5,0,0" />
+                    <TextBox x:Name="Console_TextBox" Text="" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="200" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="11" Margin="0,5,0,0"/>
                     <Button x:Name="SendMarvinYourConsoleLog_Button" HorizontalAlignment="Stretch" Content="Send Marvin Your Console Log" Click="SendMarvinYourConsoleLog_Button_Click" Margin="0,5,0,0" />
                     <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Justify" Margin="0,5,0,0">You must have an iRacing Forums account to use the above button. When you click on the button, your console log will be copied to the Windows clipboard. A browser window will be opened, taking you to the iRacing Forum New Message page. Type in a short description of the problem, and then hit Ctrl+V on a blank line, to paste your console log into the message.</TextBlock>
+                </StackPanel>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <Label Content="Contribute" VerticalAlignment="Center" />
+                </TabItem.Header>
+                <StackPanel Margin="10,10,10,10">
+                    <Label Content="There are a couple of ways you can contribute to the development of this app! If you are a programmer, you can contribute code." FontWeight="DemiBold" HorizontalAlignment="Center" />
+                    <Button x:Name="GoToGitHub_Button" HorizontalAlignment="Stretch" Content="Go to the GitHub repository" Click="GoToGitHub_Button_Click" Margin="0,5,0,0" />
+                    <Label Content="Or, you can buy me a coffee! This app is completely free, but donations make me feel warm and fuzzy and motivate me to keep this up." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,15,0,0" />
+                    <Button x:Name="GoToBuyMeACoffee_Button" HorizontalAlignment="Stretch" Content="Buy me a coffee!" Click="GoToBuyMeACoffee_Button_Click" Margin="0,5,0,0" />
+                    <Label Content="❤️❤️❤️ A huge thank you to everybody who supported MAIRA! ❤️❤️❤️" FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,15,0,0" />
+                    <TextBox x:Name="Supporters_TextBox" Text="Testing" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="200" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="0,5,0,0" Padding="15,15,30,15" FontSize="18"/>
                 </StackPanel>
             </TabItem>
         </TabControl>

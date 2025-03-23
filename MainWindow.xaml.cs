@@ -217,6 +217,14 @@ namespace MarvinsAIRA
 				_win_bootMeUp.TargetUser = BootMeUp.TargetUsers.CurrentUser;
 				_win_bootMeUp.Enabled = app.Settings.StartWithWindows;
 
+				// supporters textbox
+
+				string[] supporterList = [ "Bruno Cerdeira Santos", "Chad McNeese", "Diogo Xavier Olivera", "Robert JL Henry", "Alberto Rama", "Andreas Mauchle", "Camron Frederick", "Christian Scherf", "Erin Andrusak", "f1iq.bsky.social", "Flavio A Mendes", "G. Balla", "Joachim Osbeck", "Jonathan E Marshall", "Maksym Palazov", "Panayiotis Papaioannou", "Paolo", "Rick", "Robert Perry", "Roy Medawar", "Shane Cochran", "Simon A Todd", "Stuart H Ware", "V A Parnell Jr MD", "Yafar Abdala.", "Ari D Sherwood", "Ba Anh Vu", "Brendan Hobbart", "Dan", "Dave Cam", "M C Hastrich", "Mitchell Bowen", "Ryan Feltrin", "Steven Slater", "Alan King", "Jakub Trinkl", "Robert Watson", "Sascha", "Travis Rhoads", "John Ebersole", "Rowly", "@fuelpodcast", "@G83MIKE", "@sidgeracing", "Ade", "Alan", "Binesh Lad", "Carlos Mancuso", "Chad Buchanan", "Christian Elsinger", "Daniel König", "Didier Porte", "Hugo", "João Carriço", "Kevin Burke", "Kevin J Fanning", "Marco", "Marcus Iglesias de Souza Oliveira", "Marin Marinov", "Mark G", "Mark R McLewee", "Marshall", "Michael Buckley", "Mikey Polard", "MR A M HALL", "Patrick Rochadel", "Sean Symes", "Shawn L Parrish", "Spieler Ralf", "Stephane THIBAUT", "T", "William Daily Jr", "Yamine Taieb", "Matt Swift", "Adrian G Rubio", "Ahmad El Baba", "Alberto", "Alexander Socher", "ARMracing", "Austin Elliott", "Chase", "Crispin Williamson", "Grimaldi Jean", "Grimax Racing", "GUIDOTTI", "Halan Williams", "Jeroni Fajardo", "John Millet", "Karl Thoroddsen", "Lufino", "Markus Kathan", "Massimo Martiglia", "Michie", "Mr Kurt Nicholson", "Nicholas Williams", "Ole", "Olly", "Omar Carlet", "parmand", "Rene Vorwerk", "Serge Montembault", "Shane Gleeson", "Stanislav Boldyryev", "Steven Barker", "Tom Weston", "Tripp Lanier", "Joy Perez", "Rodrigo Ribeiro R S lima", "Sebastian", "Yann LE DOUSSAL", "Jeremy", "Knosby", "Luka", "Miguel Angel Casado González", "and to all of the others who have chosen to remain anonymous." ];
+
+				Supporters_TextBox.Text = "Thank you to " + string.Join( ", ", supporterList );
+
+				//
+
 				_win_initialized = true;
 			}
 		}
@@ -351,9 +359,6 @@ namespace MarvinsAIRA
 			}
 			else
 			{
-				WinApi.MARGINS margins = new() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
-
-				_ = WinApi.DwmExtendFrameIntoClientArea( _win_windowHandle, ref margins );
 				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, WinApi.WS_POPUP | WinApi.WS_VISIBLE );
 				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, WinApi.WS_EX_LAYERED | WinApi.WS_EX_TRANSPARENT );
 
@@ -1550,6 +1555,42 @@ namespace MarvinsAIRA
 			Clipboard.SetText( $"\r\n\r\n\t{text}\r\n" );
 
 			string url = "https://forums.iracing.com/messages/add/Marvin%20Herbold";
+
+			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
+			{
+				CreateNoWindow = true
+			};
+
+			Process.Start( processStartInfo );
+		}
+
+		#endregion
+
+		#region Contribute tab
+
+		private void GoToGitHub_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "GoToGitHub_Button_Click called." );
+
+			string url = "https://github.com/mherbold/MarvinsAIRA";
+
+			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
+			{
+				CreateNoWindow = true
+			};
+
+			Process.Start( processStartInfo );
+		}
+
+		private void GoToBuyMeACoffee_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "GoToBuyMeACoffee_Button_Click called." );
+
+			string url = "https://buymeacoffee.com/marvinherbold";
 
 			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
 			{

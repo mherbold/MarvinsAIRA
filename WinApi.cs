@@ -126,5 +126,8 @@ namespace MarvinsAIRA
 
 		[DllImport( "user32.dll" )]
 		public static extern int SetWindowLong( IntPtr hWnd, int nIndex, uint dwNewLong );
+
+		[DllImport( "dwmapi.dll" )]
+		public static extern int DwmIsCompositionEnabled( out bool enabled );
 	}
 }
