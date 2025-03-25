@@ -206,6 +206,8 @@ namespace MarvinsAIRA
 					{
 						app.WriteLine( "Minimizing the window to the taskbar." );
 
+						UpdateWindowTransparency( true );
+
 						WindowState = WindowState.Minimized;
 					}
 				}
