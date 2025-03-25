@@ -831,7 +831,7 @@ namespace MarvinsAIRA
 					Settings.OSStartYVelocity = 3f;
 					Settings.OSEndYVelocity = 8f;
 
-					Settings.OSSoftness = 10f;
+					Settings.OSSoftness = 90f;
 				}
 
 				_settings_pauseSerialization = false;
@@ -1188,7 +1188,7 @@ namespace MarvinsAIRA
 
 				if ( MathF.Sign( _irsdk_steeringWheelAngle ) == MathF.Sign( _irsdk_velocityY ) )
 				{
-					if ( Settings.OSSoftness >= 1f )
+					if ( ( Settings.OSSoftness >= 1f ) && ( Settings.OSSoftness <= 179f ) )
 					{
 						var fadeDistanceInRadians = Settings.OSSoftness * MathF.PI / 180f;
 

@@ -400,7 +400,7 @@ namespace MarvinsAIRA
 
 			// calculate g force
 
-			if ( deltaTime > 0 )
+			if ( ( deltaTime > 0 ) && ( _irsdk_lapDistPct - _irsdk_lapDistPctLastFrame ) > -0.001f )
 			{
 				_irsdk_gForce = MathF.Abs( _irsdk_velocity - _irsdk_velocityLastFrame ) / deltaTime / IRSDK_ONE_G;
 			}

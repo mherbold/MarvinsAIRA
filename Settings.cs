@@ -436,7 +436,7 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				FrequencyString = $"{1000.0f / ( 18 - _frequency ):F2} Hz";
+				FrequencyString = $"!{1000.0f / ( 18 - _frequency ):F2} Hz";
 			}
 		}
 
@@ -448,11 +448,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _frequencyString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_frequencyString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _frequencyString != value )
+					{
+						_frequencyString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -1114,7 +1119,14 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				OSSoftnessString = $"!{_osSoftness:F1}°";
+				if ( _osSoftness > 179f )
+				{
+					OSSoftnessString = "!OFF";
+				}
+				else
+				{
+					OSSoftnessString = $"!{_osSoftness:F0}°";
+				}
 			}
 		}
 
@@ -1172,7 +1184,7 @@ namespace MarvinsAIRA
 
 			public float OSStartYVelocity = 3f;
 			public float OSEndYVelocity = 8f;
-			public float OSSoftness = 10f;
+			public float OSSoftness = 90f;
 		}
 
 		public List<SteeringEffectsSettings> SteeringEffectsSettingsList { get; private set; } = [];
@@ -2216,7 +2228,7 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				WheelMinValueString = _wheelMinValue.ToString();
+				WheelMinValueString = $"!{_wheelMinValue}";
 			}
 		}
 
@@ -2228,11 +2240,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _wheelMinValueString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_wheelMinValueString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _wheelMinValueString != value )
+					{
+						_wheelMinValueString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -2256,7 +2273,8 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				WheelCenterValueString = _wheelCenterValue.ToString();
+				WheelCenterValueString = $"!{_wheelCenterValue}";
+
 			}
 		}
 
@@ -2268,11 +2286,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _wheelCenterValueString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_wheelCenterValueString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _wheelCenterValueString != value )
+					{
+						_wheelCenterValueString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
@@ -2296,7 +2319,7 @@ namespace MarvinsAIRA
 					OnPropertyChanged();
 				}
 
-				WheelMaxValueString = _wheelMaxValue.ToString();
+				WheelMaxValueString = $"!{_wheelMaxValue}";
 			}
 		}
 
@@ -2308,11 +2331,16 @@ namespace MarvinsAIRA
 
 			set
 			{
-				if ( _wheelMaxValueString != value )
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
 				{
-					_wheelMaxValueString = value;
+					value = value[ 1.. ];
 
-					OnPropertyChanged();
+					if ( _wheelMaxValueString != value )
+					{
+						_wheelMaxValueString = value;
+
+						OnPropertyChanged();
+					}
 				}
 			}
 		}
