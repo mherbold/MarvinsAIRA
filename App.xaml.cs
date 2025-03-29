@@ -45,7 +45,9 @@ namespace MarvinsAIRA
 			}
 
 			DisableThrottling();
-		}
+
+            Exit += App_Exit; //hook to the app exiting event
+        }
 
 		public void Initialize( nint windowHandle )
 		{
