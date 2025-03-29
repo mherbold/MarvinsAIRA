@@ -75,7 +75,18 @@ namespace MarvinsAIRA
 			InitializeComponent();
 
 			Instance = this;
-		}
+
+			var app = (App)Application.Current;
+			app.CheckForUpdates(this, () =>
+			{
+				MessageBoxResult result = MessageBox.Show($"Version {app.versionNumberAvalible} is available. Do you want to download It?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+				if (result == MessageBoxResult.Yes)
+				{
+					app.DownloadUpdate(this);
+				};
+			});
+		
+        }
 
 		private void Window_Closing( object sender, CancelEventArgs e )
 		{
@@ -1725,6 +1736,21 @@ namespace MarvinsAIRA
 			_win_oversteerBitmap.WritePixels( new Int32Rect( 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT ), _win_oversteerPixels, IMAGE_STRIDE, 0, 0 );
 		}
 
-		#endregion
-	}
+        #endregion
+
+        private void ForceCheckForUpdate_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var app = (App)Application.Current;
+			app.CheckForUpdates(this);
+        }
+
+        private void UpdateInfo_Label_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+			if (e.LeftButton == MouseButtonState.Pressed)
+			{
+                var app = (App)Application.Current;
+				app.DownloadUpdate(this);
+            }
+        }
+    }
 }
