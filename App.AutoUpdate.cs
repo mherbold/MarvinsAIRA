@@ -32,7 +32,10 @@ namespace MarvinsAIRA
         {
             if (_downloadedUpdate) //if we have already downloaded the update
             {
+                
+
                 window.Close();
+
                 return;
             }
                 
