@@ -1657,11 +1657,6 @@ namespace MarvinsAIRA
 
 				if ( ( app._ffb_constantForceEffectParameters != null ) && ( app._ffb_constantForceEffect != null ) )
 				{
-					if ( app.Settings.InvertDirectInputMagnitude )
-					{
-						magnitude = -magnitude;
-					}
-
 					( (ConstantForce) app._ffb_constantForceEffectParameters.Parameters ).Magnitude = magnitude;
 
 					try

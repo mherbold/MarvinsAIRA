@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Xml.Serialization;
 
 using SharpDX.DirectInput;
 
@@ -20,7 +21,10 @@ namespace MarvinsAIRA
 		{
 			public MappedButton Button1 { get; set; } = new();
 			public MappedButton Button2 { get; set; } = new();
+
+			[XmlIgnore]
 			public bool Button1Held { get; set; } = false;
+			[XmlIgnore]
 			public int ClickCount { get; set; } = 0;
 		}
 
@@ -120,6 +124,7 @@ namespace MarvinsAIRA
 
 		private string _wheelMaxForceString = "10 N⋅m";
 
+		[XmlIgnore]
 		public string WheelMaxForceString
 		{
 			get => _wheelMaxForceString;
@@ -176,6 +181,7 @@ namespace MarvinsAIRA
 
 		private string _overallScaleString = "10%";
 
+		[XmlIgnore]
 		public string OverallScaleString
 		{
 			get => _overallScaleString;
@@ -268,6 +274,7 @@ namespace MarvinsAIRA
 
 		private string _detailScaleString = "100%";
 
+		[XmlIgnore]
 		public string DetailScaleString
 		{
 			get => _detailScaleString;
@@ -393,6 +400,7 @@ namespace MarvinsAIRA
 
 		private string _parkedScaleString = "25%";
 
+		[XmlIgnore]
 		public string ParkedScaleString
 		{
 			get => _parkedScaleString;
@@ -442,6 +450,7 @@ namespace MarvinsAIRA
 
 		private string _frequencyString = "500 Hz";
 
+		[XmlIgnore]
 		public string FrequencyString
 		{
 			get => _frequencyString;
@@ -567,6 +576,7 @@ namespace MarvinsAIRA
 
 		private string _usEffectStrengthString = "15%";
 
+		[XmlIgnore]
 		public string USEffectStrengthString
 		{
 			get => _usEffectStrengthString;
@@ -616,6 +626,7 @@ namespace MarvinsAIRA
 
 		private string _usStartYawRateFactorLeftString = "120";
 
+		[XmlIgnore]
 		public string USStartYawRateFactorLeftString
 		{
 			get => _usStartYawRateFactorLeftString;
@@ -665,6 +676,7 @@ namespace MarvinsAIRA
 
 		private string _usEndYawRateFactorLeftString = "180";
 
+		[XmlIgnore]
 		public string USEndYawRateFactorLeftString
 		{
 			get => _usEndYawRateFactorLeftString;
@@ -714,6 +726,7 @@ namespace MarvinsAIRA
 
 		private string _usStartYawRateFactorRightString = "120";
 
+		[XmlIgnore]
 		public string USStartYawRateFactorRightString
 		{
 			get => _usStartYawRateFactorRightString;
@@ -763,6 +776,7 @@ namespace MarvinsAIRA
 
 		private string _usEndYawRateFactorRightString = "180";
 
+		[XmlIgnore]
 		public string USEndYawRateFactorRightString
 		{
 			get => _usEndYawRateFactorRightString;
@@ -812,6 +826,7 @@ namespace MarvinsAIRA
 
 		private string _usCurveString = "1.5";
 
+		[XmlIgnore]
 		public string USCurveString
 		{
 			get => _usCurveString;
@@ -929,6 +944,7 @@ namespace MarvinsAIRA
 
 		private string _osEffectStrengthString = "30%";
 
+		[XmlIgnore]
 		public string OSEffectStrengthString
 		{
 			get => _osEffectStrengthString;
@@ -959,7 +975,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 0f, 30f );
+				value = Math.Clamp( value, 0f, 50f );
 
 				if ( _osStartYVelocity != value )
 				{
@@ -978,6 +994,7 @@ namespace MarvinsAIRA
 
 		private string _osStartYVelocityString = "3.0";
 
+		[XmlIgnore]
 		public string OSStartYVelocityString
 		{
 			get => _osStartYVelocityString;
@@ -1008,7 +1025,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 0f, 30f );
+				value = Math.Clamp( value, 0f, 50f );
 
 				if ( _osEndYVelocity != value )
 				{
@@ -1027,6 +1044,7 @@ namespace MarvinsAIRA
 
 		private string _osEndYVelocityString = "8.0";
 
+		[XmlIgnore]
 		public string OSEndYVelocityString
 		{
 			get => _osEndYVelocityString;
@@ -1076,6 +1094,7 @@ namespace MarvinsAIRA
 
 		private string _osCurveString = "1.5";
 
+		[XmlIgnore]
 		public string OSCurveString
 		{
 			get => _osCurveString;
@@ -1132,6 +1151,7 @@ namespace MarvinsAIRA
 
 		private string _osSoftnessString = "90°";
 
+		[XmlIgnore]
 		public string OSSoftnessString
 		{
 			get => _osSoftnessString;
@@ -1275,6 +1295,7 @@ namespace MarvinsAIRA
 
 		private string _lfeScaleString = "50%";
 
+		[XmlIgnore]
 		public string LFEScaleString
 		{
 			get => _lfeScaleString;
@@ -1649,6 +1670,7 @@ namespace MarvinsAIRA
 		private string _windForceString7 = "70%";
 		private string _windForceString8 = "100%";
 
+		[XmlIgnore]
 		public string WindForceString1
 		{
 			get => _windForceString1;
@@ -1664,6 +1686,7 @@ namespace MarvinsAIRA
 			}
 		}
 
+		[XmlIgnore]
 		public string WindForceString2
 		{
 			get => _windForceString2;
@@ -1679,6 +1702,7 @@ namespace MarvinsAIRA
 			}
 		}
 
+		[XmlIgnore]
 		public string WindForceString3
 		{
 			get => _windForceString3;
@@ -1694,6 +1718,7 @@ namespace MarvinsAIRA
 			}
 		}
 
+		[XmlIgnore]
 		public string WindForceString4
 		{
 			get => _windForceString4;
@@ -1709,6 +1734,7 @@ namespace MarvinsAIRA
 			}
 		}
 
+		[XmlIgnore]
 		public string WindForceString5
 		{
 			get => _windForceString5;
@@ -1724,6 +1750,7 @@ namespace MarvinsAIRA
 			}
 		}
 
+		[XmlIgnore]
 		public string WindForceString6
 		{
 			get => _windForceString6;
@@ -1739,6 +1766,7 @@ namespace MarvinsAIRA
 			}
 		}
 
+		[XmlIgnore]
 		public string WindForceString7
 		{
 			get => _windForceString7;
@@ -1754,6 +1782,7 @@ namespace MarvinsAIRA
 			}
 		}
 
+		[XmlIgnore]
 		public string WindForceString8
 		{
 			get => _windForceString8;
@@ -1825,6 +1854,7 @@ namespace MarvinsAIRA
 
 		private string _spotterCalloutFrequencyString = "20/min";
 
+		[XmlIgnore]
 		public string SpotterCalloutFrequencyString
 		{
 			get => _spotterCalloutFrequencyString;
@@ -1993,6 +2023,7 @@ namespace MarvinsAIRA
 
 		private string _windowOpacityString = "100%";
 
+		[XmlIgnore]
 		public string WindowOpacityString
 		{
 			get => _windowOpacityString;
@@ -2197,6 +2228,7 @@ namespace MarvinsAIRA
 
 		private string _wheelAxisValueString = "0";
 
+		[XmlIgnore]
 		public string WheelAxisValueString
 		{
 			get => _wheelAxisValueString;
@@ -2234,6 +2266,7 @@ namespace MarvinsAIRA
 
 		private string _wheelMinValueString = "0";
 
+		[XmlIgnore]
 		public string WheelMinValueString
 		{
 			get => _wheelMinValueString;
@@ -2280,6 +2313,7 @@ namespace MarvinsAIRA
 
 		private string _wheelCenterValueString = "0";
 
+		[XmlIgnore]
 		public string WheelCenterValueString
 		{
 			get => _wheelCenterValueString;
@@ -2325,6 +2359,7 @@ namespace MarvinsAIRA
 
 		private string _wheelMaxValueString = "0";
 
+		[XmlIgnore]
 		public string WheelMaxValueString
 		{
 			get => _wheelMaxValueString;
@@ -2372,6 +2407,7 @@ namespace MarvinsAIRA
 
 		private string _autoCenterWheelStrengthString = "25%";
 
+		[XmlIgnore]
 		public string AutoCenterWheelStrengthString
 		{
 			get => _autoCenterWheelStrengthString;
@@ -2438,7 +2474,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private float _gForce = 4f;
+		private float _gForce = 6f;
 
 		public float GForce
 		{
@@ -2463,8 +2499,9 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _gForceString = "4.0 G";
+		private string _gForceString = "6.0 G";
 
+		[XmlIgnore]
 		public string GForceString
 		{
 			get => _gForceString;
@@ -2512,6 +2549,7 @@ namespace MarvinsAIRA
 
 		private string _crashDurationString = "4.0 sec";
 
+		[XmlIgnore]
 		public string CrashDurationString
 		{
 			get => _crashDurationString;
@@ -2561,6 +2599,7 @@ namespace MarvinsAIRA
 
 		private string _crashProtectionOverallScaleString = "100%";
 
+		[XmlIgnore]
 		public string CrashProtectionOverallScaleString
 		{
 			get => _crashProtectionOverallScaleString;
@@ -2633,6 +2672,7 @@ namespace MarvinsAIRA
 
 		private string _softLockStrengthString = "35%";
 
+		[XmlIgnore]
 		public string SoftLockStrengthString
 		{
 			get => _softLockStrengthString;
@@ -2680,6 +2720,7 @@ namespace MarvinsAIRA
 
 		private string _softLockMarginString = "20°";
 
+		[XmlIgnore]
 		public string SoftLockMarginString
 		{
 			get => _softLockMarginString;
@@ -2703,27 +2744,6 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region Settings tab - Force feedback tab
-
-		private bool _invertDirectInputMagnitude = false;
-
-		public bool InvertDirectInputMagnitude
-		{
-			get => _invertDirectInputMagnitude;
-
-			set
-			{
-				if ( _invertDirectInputMagnitude != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"InvertDirectInputMagnitude changed - before {_invertDirectInputMagnitude} now {value}" );
-
-					_invertDirectInputMagnitude = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
 
 		private bool _playbackSendToDevice = true;
 
@@ -2773,6 +2793,7 @@ namespace MarvinsAIRA
 
 		private string _autoOverallScaleClipLimitString = "25%";
 
+		[XmlIgnore]
 		public string AutoOverallScaleClipLimitString
 		{
 			get => _autoOverallScaleClipLimitString;
@@ -2786,6 +2807,54 @@ namespace MarvinsAIRA
 					if ( _autoOverallScaleClipLimitString != value )
 					{
 						_autoOverallScaleClipLimitString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		private int _testMagnitude = 0;
+
+		public int TestMagnitude
+		{
+			get => _testMagnitude;
+
+			set
+			{
+				value = Math.Clamp( value, -10000, 10000 );
+
+				if ( _testMagnitude != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"TestMagnitude changed - before {_testMagnitude} now {value}" );
+
+					_testMagnitude = value;
+
+					OnPropertyChanged();
+				}
+
+				TestMagnitudeString = $"!{_testMagnitude}";
+			}
+		}
+
+		private string _testMagnitudeStringString = "0";
+
+		[XmlIgnore]
+		public string TestMagnitudeString
+		{
+			get => _testMagnitudeStringString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _testMagnitudeStringString != value )
+					{
+						_testMagnitudeStringString = value;
 
 						OnPropertyChanged();
 					}

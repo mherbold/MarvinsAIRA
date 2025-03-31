@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.65"
+        Title="Marvin's Awesome iRacing App v0.66"
         Height="Auto"
         Width="1000"
         SizeToContent="Height"
@@ -281,7 +281,7 @@
                                 <Label Grid.Column="0" Content="Y Velocity" VerticalAlignment="Center" ToolTip="This is the oversteer effect Y velocity." />
                                 <TextBox Grid.Column="1" Text="{Binding OSStartYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
                                 <TextBox Grid.Column="2" Text="{Binding OSEndYVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="2,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" MinWidth="0" IsTabStop="False" IsReadOnly="True"/>
-                                <xctk:RangeSlider x:Name="OSYVelocity_RangeSlider" Grid.Column="3" Margin="10,0,0,0" Maximum="30" VerticalAlignment="Center" HigherValue="{Binding OSEndYVelocity}" LowerValue="{Binding OSStartYVelocity}" Step="0.1" />
+                                <xctk:RangeSlider x:Name="OSYVelocity_RangeSlider" Grid.Column="3" Margin="10,0,0,0" Maximum="50" VerticalAlignment="Center" HigherValue="{Binding OSEndYVelocity}" LowerValue="{Binding OSStartYVelocity}" Step="0.1" />
                             </Grid>
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
@@ -882,7 +882,6 @@
                     </TabItem>
                     <TabItem Header="Force Feedback" x:Name="Settings_ForceFeedback_TabItem">
                         <StackPanel Margin="10,10,10,10">
-                            <CheckBox Content="Invert DirectInput Magnitude" IsChecked="{Binding InvertDirectInputMagnitude}"/>
                             <CheckBox Content="Send Force Feedback Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}" Margin="0,0,0,30"/>
                             <Label Content="The below slider controls how much clipping you want to allow when using the auto overall scale feature." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                             <Label Content="All the way to the left means no clipping is tolerated." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
@@ -896,6 +895,19 @@
                                 <Label Grid.Column="0" Content="Clipping Tolerance" VerticalAlignment="Center" ToolTip="This is how much clipping is considered acceptable when using the auto overall scale button." />
                                 <TextBox Grid.Column="1" Text="{Binding AutoOverallScaleClipLimitString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                                 <Slider Grid.Column="2" x:Name="AutoOverallScaleClipLimit_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" Value="{Binding AutoOverallScaleClipLimit}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            </Grid>
+                            <Label Content="The below slider is only intended to help us figure out the issue with EMC wheels." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,30,0,10"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Test Magnitude" VerticalAlignment="Center" ToolTip="This is the magnitude to send to your wheel when the test button is held down." />
+                                <TextBox Grid.Column="1" Text="{Binding TestMagnitudeString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                <Slider Grid.Column="2" x:Name="TestMagnitude_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="-10000" Maximum="10000" SmallChange="100" LargeChange="500" Value="{Binding TestMagnitude}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                <Button Grid.Column="3" x:Name="TestMagnitude_Button" Margin="15,0,10,0" Content="TEST" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" MouseLeave="TestMagnitude_Button_MouseLeave" PreviewMouseLeftButtonDown="TestMagnitude_Button_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="TestMagnitude_Button_PreviewMouseLeftButtonUp" />
                             </Grid>
                         </StackPanel>
                     </TabItem>

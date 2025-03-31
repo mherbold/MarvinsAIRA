@@ -10,6 +10,7 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <PackageIcon>icon.png</PackageIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>0.66</Version>
   </PropertyGroup>
 
   <ItemGroup>

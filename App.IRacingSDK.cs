@@ -23,13 +23,14 @@ namespace MarvinsAIRA
 
 		private IRacingSdk _irsdk = new();
 
-		private IRacingSdkDatum? _irsdk_brakeDatum = null;
 		private IRacingSdkDatum? _irsdk_brakeABSactiveDatum = null;
+		private IRacingSdkDatum? _irsdk_brakeDatum = null;
 		private IRacingSdkDatum? _irsdk_carLeftRightDatum = null;
 		private IRacingSdkDatum? _irsdk_clutchDatum = null;
 		private IRacingSdkDatum? _irsdk_displayUnitsDatum = null;
 		private IRacingSdkDatum? _irsdk_gearDatum = null;
 		private IRacingSdkDatum? _irsdk_isOnTrackDatum = null;
+		private IRacingSdkDatum? _irsdk_lapDistDatum = null;
 		private IRacingSdkDatum? _irsdk_lapDistPctDatum = null;
 		private IRacingSdkDatum? _irsdk_latAccelDatum = null;
 		private IRacingSdkDatum? _irsdk_longAccelDatum = null;
@@ -65,6 +66,7 @@ namespace MarvinsAIRA
 		public int _irsdk_displayUnits = 0;
 		public int _irsdk_gear = 0;
 		public bool _irsdk_isOnTrack = false;
+		public float _irsdk_lapDist = 0f;
 		public float _irsdk_lapDistPct = 0f;
 		public float _irsdk_latAccel = 0f;
 		public float _irsdk_longAccel = 0f;
@@ -97,6 +99,7 @@ namespace MarvinsAIRA
 
 		public bool _irsdk_brakeABSactiveLastFrame = false;
 		public bool _irsdk_isOnTrackLastFrame = false;
+		public float _irsdk_lapDistLastFrame = 0f;
 		public float _irsdk_lapDistPctLastFrame = 0f;
 		public bool _irsdk_steeringFFBEnabledLastFrame = false;
 		public bool _irsdk_weatherDeclaredWetLastFrame = false;
@@ -199,6 +202,7 @@ namespace MarvinsAIRA
 			_irsdk_displayUnits = 0;
 			_irsdk_gear = 0;
 			_irsdk_isOnTrack = false;
+			_irsdk_lapDist = 0f;
 			_irsdk_lapDistPct = 0f;
 			_irsdk_latAccel = 0f;
 			_irsdk_longAccel = 0f;
@@ -236,6 +240,7 @@ namespace MarvinsAIRA
 
 			_irsdk_brakeABSactiveLastFrame = false;
 			_irsdk_isOnTrackLastFrame = false;
+			_irsdk_lapDistLastFrame = 0f;
 			_irsdk_lapDistPctLastFrame = 0f;
 			_irsdk_steeringFFBEnabledLastFrame = false;
 			_irsdk_weatherDeclaredWetLastFrame = false;
@@ -320,6 +325,7 @@ namespace MarvinsAIRA
 				_irsdk_displayUnitsDatum = _irsdk.Data.TelemetryDataProperties[ "DisplayUnits" ];
 				_irsdk_gearDatum = _irsdk.Data.TelemetryDataProperties[ "Gear" ];
 				_irsdk_isOnTrackDatum = _irsdk.Data.TelemetryDataProperties[ "IsOnTrack" ];
+				_irsdk_lapDistDatum = _irsdk.Data.TelemetryDataProperties[ "LapDist" ];
 				_irsdk_lapDistPctDatum = _irsdk.Data.TelemetryDataProperties[ "LapDistPct" ];
 				_irsdk_latAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LatAccel" ];
 				_irsdk_longAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LongAccel" ];
@@ -354,6 +360,7 @@ namespace MarvinsAIRA
 
 			_irsdk_brakeABSactiveLastFrame = _irsdk_brakeABSactive;
 			_irsdk_isOnTrackLastFrame = _irsdk_isOnTrack;
+			_irsdk_lapDistLastFrame = _irsdk_lapDist;
 			_irsdk_lapDistPctLastFrame = _irsdk_lapDistPct;
 			_irsdk_steeringFFBEnabledLastFrame = _irsdk_steeringFFBEnabled;
 			_irsdk_weatherDeclaredWetLastFrame = _irsdk_weatherDeclaredWet;
@@ -368,6 +375,7 @@ namespace MarvinsAIRA
 			_irsdk_displayUnits = _irsdk.Data.GetInt( _irsdk_displayUnitsDatum );
 			_irsdk_gear = _irsdk.Data.GetInt( _irsdk_gearDatum );
 			_irsdk_isOnTrack = _irsdk.Data.GetBool( _irsdk_isOnTrackDatum );
+			_irsdk_lapDist = _irsdk.Data.GetFloat( _irsdk_lapDistDatum );
 			_irsdk_lapDistPct = _irsdk.Data.GetFloat( _irsdk_lapDistPctDatum );
 			_irsdk_latAccel = _irsdk.Data.GetFloat( _irsdk_latAccelDatum );
 			_irsdk_longAccel = _irsdk.Data.GetFloat( _irsdk_longAccelDatum );
@@ -400,7 +408,7 @@ namespace MarvinsAIRA
 
 			// calculate g force
 
-			if ( ( deltaTime > 0 ) && ( _irsdk_lapDistPct - _irsdk_lapDistPctLastFrame ) > -0.001f )
+			if ( ( deltaTime > 0 ) && MathF.Abs( _irsdk_lapDist - _irsdk_lapDistLastFrame ) < 5f )
 			{
 				_irsdk_gForce = MathF.Abs( _irsdk_velocity - _irsdk_velocityLastFrame ) / deltaTime / IRSDK_ONE_G;
 			}

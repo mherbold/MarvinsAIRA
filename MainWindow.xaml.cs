@@ -37,6 +37,7 @@ namespace MarvinsAIRA
 		private bool _win_pauseInputProcessing = false;
 		private bool _win_absTestPlaying = false;
 		private bool _win_dieNow = false;
+		private bool _win_sendTestMagnitude = false;
 
 		private nint _win_windowHandle = 0;
 		private IntPtr _win_originalWindowStyle = 0;
@@ -88,6 +89,8 @@ namespace MarvinsAIRA
 				if ( !_win_dieNow )
 				{
 					e.Cancel = true;
+
+					UpdateWindowTransparency( true );
 
 					Hide();
 
@@ -361,8 +364,10 @@ namespace MarvinsAIRA
 			}
 			else
 			{
-				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, WinApi.WS_POPUP | WinApi.WS_VISIBLE );
-				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, WinApi.WS_EX_LAYERED | WinApi.WS_EX_TRANSPARENT );
+				// WinApi.WS_POPUP | WinApi.WS_VISIBLE
+
+				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_STYLE, (uint) _win_originalWindowStyle & ~( WinApi.WS_DLGFRAME ) );
+				_ = WinApi.SetWindowLong( _win_windowHandle, WinApi.GWL_EXSTYLE, (uint) _win_originalWindowExStyle | WinApi.WS_EX_LAYERED | WinApi.WS_EX_TRANSPARENT );
 
 				Opacity = app.Settings.WindowOpacity / 100f;
 			}
@@ -389,6 +394,8 @@ namespace MarvinsAIRA
 			WinApi.SetForegroundWindow( _win_windowHandle );
 
 			ShowInTaskbar = true;
+
+			UpdateWindowTransparency( false );
 		}
 
 		private void ExitApp_MenuItem_Click( object sender, RoutedEventArgs e )
@@ -460,6 +467,13 @@ namespace MarvinsAIRA
 								}
 
 								_win_sendForceFeedbackTestSignalCounter--;
+							}
+
+							// test magnitude
+
+							if ( _win_sendTestMagnitude )
+							{
+								app.UpdateConstantForce( [ app.Settings.TestMagnitude ] );
 							}
 
 							// gui
@@ -1409,7 +1423,7 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Settings tab - Wheel tab
+		#region Settings tab - Auto centering tab
 
 		private void SetWheelMinValue_Button_Click( object sender, RoutedEventArgs e )
 		{
@@ -1430,6 +1444,25 @@ namespace MarvinsAIRA
 			var app = (App) Application.Current;
 
 			app.Settings.WheelMaxValue = app.Input_CurrentWheelPosition;
+		}
+
+		#endregion
+
+		#region Settings tab - Force feedback
+
+		private void TestMagnitude_Button_PreviewMouseLeftButtonDown( object sender, MouseButtonEventArgs e )
+		{
+			_win_sendTestMagnitude = true;
+		}
+
+		private void TestMagnitude_Button_PreviewMouseLeftButtonUp( object sender, MouseButtonEventArgs e )
+		{
+			_win_sendTestMagnitude = false;
+		}
+
+		private void TestMagnitude_Button_MouseLeave( object sender, MouseEventArgs e )
+		{
+			_win_sendTestMagnitude = false;
 		}
 
 		#endregion
