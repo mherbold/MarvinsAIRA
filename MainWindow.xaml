@@ -723,6 +723,17 @@
                             <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow}" Click="TopmostWindow_CheckBox_Click"/>
                             <Grid Margin="0,15,0,0">
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="170"/>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="490"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" x:Name="ForceCheckUpdate_Button" Click="ForceCheckForUpdate_Button_Click">Force Check For Update</Button>
+
+                                <Label Grid.Column="1" x:Name="UpdateInfo_Label" HorizontalAlignment="Center" VerticalAlignment="Center" MouseDown="UpdateInfo_Label_MouseDown"></Label>
+                                <ProgressBar Grid.Column="2" x:Name="UpdateCheck_ProgressBar" />
+                            </Grid>
+                            <Grid Margin="0,15,0,0">
+                                <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="110"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
@@ -1438,6 +1449,7 @@
             <StatusBarItem x:Name="CurrentTrack_StatusBarItem" Content="No Track" Foreground="Gray"/>
             <Separator Margin="8,2,8,2" />
             <StatusBarItem x:Name="CurrentTrackCondition_StatusBarItem" Content="" Foreground="Gray"/>
+            <StatusBarItem x:Name="DownloadPer_StatusBarItem" Content="" Foreground="Gray"/>
             <StatusBarItem HorizontalAlignment="Right" Padding="0,0,0,0">
                 <ui:ToggleSwitch x:Name="Advanced_ToggleSwitch" OffContent="Advanced" OnContent="Advanced" Toggled="Advanced_ToggleSwitch_Toggled" IsOn="{Binding Advanced}" Width="120" RenderTransformOrigin="0.5,0.5" >
                     <ui:ToggleSwitch.RenderTransform>
