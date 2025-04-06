@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 using SharpDX.DirectInput;
+using YamlDotNet.Core.Tokens;
 
 namespace MarvinsAIRA
 {
@@ -947,13 +948,15 @@ namespace MarvinsAIRA
 								}
 							}
 
-							UpdateConstantForce( [ forceMagnitude ] );
-						}
+							
+								UpdateConstantForce( [forceMagnitude] );
+							
+                        }
 					}
 				}
 			}
 		}
-
+		int f = 0;
 		public bool TogglePrettyGraph()
 		{
 			_ffb_drawPrettyGraph = !_ffb_drawPrettyGraph;
@@ -988,14 +991,19 @@ namespace MarvinsAIRA
 			}
 		}
 
+		public bool SetupMinForce = false;
+		int _minForceFlip = 0;
+		
 		public void UpdateConstantForce( int[] forceMagnitudeList )
 		{
-			for ( var i = 0; i < _ffb_outputWheelMagnitudeBuffer.Length; i++ )
-			{
-				var value = forceMagnitudeList[ i % forceMagnitudeList.Length ];
+			
+			
+				for (var i = 0; i < _ffb_outputWheelMagnitudeBuffer.Length; i++)
+				{
+					var value = forceMagnitudeList[i % forceMagnitudeList.Length];
 
-				_ffb_outputWheelMagnitudeBuffer[ i ] = value;
-			}
+					_ffb_outputWheelMagnitudeBuffer[i] = value;
+                }
 
 			_ffb_updatesToSkip = 6;
 			_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
@@ -1432,9 +1440,47 @@ namespace MarvinsAIRA
 					}
 				}
 
-				// update the pretty graph
 
-				if ( _ffb_drawPrettyGraph )
+                //min force stuff
+
+                if (SetupMinForce)
+                {
+					for (var i = 0; i < _ffb_outputWheelMagnitudeBuffer.Length; i++)
+					{
+						if (_minForceFlip > 8)
+							_ffb_outputWheelMagnitudeBuffer[i] = Settings.MinForce;
+						else
+							_ffb_outputWheelMagnitudeBuffer[i] = -Settings.MinForce;
+						if (_minForceFlip > 16)
+							_minForceFlip = 0;
+						_minForceFlip++;
+                    }
+                }
+				else
+				{
+                    if (Settings.MinForce > 0)
+                    {
+						for (var i = 0; i < _ffb_outputWheelMagnitudeBuffer.Length; i++)
+						{
+							int dir = Math.Sign(_ffb_outputWheelMagnitudeBuffer[i]);
+
+                            _ffb_outputWheelMagnitudeBuffer[i] -= Settings.MinForce * dir;
+
+							if (Math.Abs(_ffb_outputWheelMagnitudeBuffer[i]) < Settings.MinForce)
+                                _ffb_outputWheelMagnitudeBuffer[i] = 0;
+
+							_ffb_outputWheelMagnitudeBuffer[i] = _ffb_outputWheelMagnitudeBuffer[i] + Settings.MinForce * dir;
+						}
+                    }
+                    
+
+                }
+
+
+
+                // update the pretty graph
+
+                if ( _ffb_drawPrettyGraph )
 				{
 					var forceFeedbackMaxToPixelBufferHeightScale = DI_FFNOMINALMAX * 2f / ( FFB_PIXELS_BUFFER_HEIGHT - 40f );
 					var halfPixelBufferHeight = FFB_PIXELS_BUFFER_HEIGHT / 2f;

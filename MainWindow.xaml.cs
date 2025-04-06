@@ -1627,10 +1627,11 @@ namespace MarvinsAIRA
 				ParkedScale_Grid.Visibility = visibility;
 				Frequency_Grid.Visibility = visibility;
 				PrettyGraph_StackPanel.Visibility = visibility;
+				MinForceString_Grid.Visibility = visibility;
 
-				// settings tab
+                // settings tab
 
-				Settings_Devices_TabItem.Visibility = visibility;
+                Settings_Devices_TabItem.Visibility = visibility;
 				Settings_ForceFeedback_TabItem.Visibility = visibility;
 				Settings_SteeringEffects_TabItem.Visibility = visibility;
 				Settings_AutoCenterWheel_TabItem.Visibility = visibility;
@@ -1725,6 +1726,19 @@ namespace MarvinsAIRA
 			_win_oversteerBitmap.WritePixels( new Int32Rect( 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT ), _win_oversteerPixels, IMAGE_STRIDE, 0, 0 );
 		}
 
-		#endregion
-	}
+        #endregion
+
+        private void CheckMinForce_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var app = (App)Application.Current;
+
+			app.SetupMinForce = !app.SetupMinForce;
+
+			Button b = sender as Button;
+            if (app.SetupMinForce)
+                b.Content = "STOP TESTING";
+            else
+                b.Content = "TEST MIN FORCE";
+        }
+    }
 }
