@@ -107,13 +107,11 @@ namespace MarvinsAIRA
 
 								if ( downloadUpdate )
 								{
-									var downloadUrl = $"http://herboldracing.com/files/MarvinsAIRA-Setup-{getCurrentVersionResponse.currentVersion}.exe";
-
-									WriteLine( $"...downloading update from {downloadUrl}..." );
+									WriteLine( $"...downloading update from {getCurrentVersionResponse.downloadUrl}..." );
 
 									mainWindow.UpdateInfo_StatusBarItem.Content = $"Downloading update...";
 
-									var httpResponseMessage = await httpClient.GetAsync( downloadUrl, HttpCompletionOption.ResponseHeadersRead );
+									var httpResponseMessage = await httpClient.GetAsync( getCurrentVersionResponse.downloadUrl, HttpCompletionOption.ResponseHeadersRead );
 
 									httpResponseMessage.EnsureSuccessStatusCode();
 
