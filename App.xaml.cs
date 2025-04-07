@@ -60,6 +60,7 @@ namespace MarvinsAIRA
 
 				InitializeConsole();
 				InitializeSettings();
+				InitializeService();
 				InitializeVoice();
 				InitializeSounds();
 				InitializeInputs( windowHandle );

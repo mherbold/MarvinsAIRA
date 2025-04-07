@@ -2044,6 +2044,52 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Check for updates */
+
+		private bool _checkForUpdates = true;
+
+		public bool CheckForUpdates
+		{
+			get => _checkForUpdates;
+
+			set
+			{
+				if ( _checkForUpdates != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"CheckForUpdates changed - before {_checkForUpdates} now {value}" );
+
+					_checkForUpdates = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Automatically download updates */
+
+		private bool _automaticallyDownloadUpdates = false;
+
+		public bool AutomaticallyDownloadUpdates
+		{
+			get => _automaticallyDownloadUpdates;
+
+			set
+			{
+				if ( _automaticallyDownloadUpdates != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"AutomaticallyDownloadUpdates changed - before {_automaticallyDownloadUpdates} now {value}" );
+
+					_automaticallyDownloadUpdates = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		#endregion
 
 		#region Settings tab - Save file tab
@@ -3356,6 +3402,27 @@ namespace MarvinsAIRA
 			}
 
 			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( name ) );
+		}
+
+		#endregion
+
+		#region Version functions
+
+		public string Version
+		{
+			get
+			{
+				var mainWindow = MarvinsAIRA.MainWindow.Instance;
+
+				if ( mainWindow != null )
+				{
+					return MainWindow.GetVersion();
+				}
+				else
+				{
+					return string.Empty;
+				}
+			}
 		}
 
 		#endregion

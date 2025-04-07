@@ -37,7 +37,8 @@ namespace MarvinsAIRA
 		private bool _win_pauseInputProcessing = false;
 		private bool _win_absTestPlaying = false;
 		private bool _win_dieNow = false;
-		private bool _win_sendTestMagnitude = false;
+
+		private string? _win_installerFilePath = null;
 
 		private nint _win_windowHandle = 0;
 		private IntPtr _win_originalWindowStyle = 0;
@@ -76,6 +77,21 @@ namespace MarvinsAIRA
 			InitializeComponent();
 
 			Instance = this;
+		}
+
+		public static string GetVersion()
+		{
+			var systemVersion = Assembly.GetExecutingAssembly().GetName().Version;
+
+			return systemVersion?.ToString() ?? string.Empty;
+		}
+
+		public void CloseAndLaunchInstaller( string installerFilePath )
+		{
+			_win_dieNow = true;
+			_win_installerFilePath = installerFilePath;
+
+			Close();
 		}
 
 		private void Window_Closing( object sender, CancelEventArgs e )
@@ -142,9 +158,19 @@ namespace MarvinsAIRA
 			app.Stop();
 
 			Instance = null;
+
+			if ( _win_installerFilePath != null )
+			{
+				var processStartInfo = new ProcessStartInfo( _win_installerFilePath )
+				{
+					UseShellExecute = true
+				};
+
+				Process.Start( processStartInfo );
+			}
 		}
 
-		private void Window_Activated( object sender, EventArgs e )
+		private async void Window_Activated( object sender, EventArgs e )
 		{
 			if ( !_win_initialized )
 			{
@@ -231,6 +257,17 @@ namespace MarvinsAIRA
 				//
 
 				_win_initialized = true;
+
+				// set window title
+
+				Title = Title + " " + GetVersion();
+
+				// check for updates
+
+				if ( app.Settings.CheckForUpdates )
+				{
+					await app.CheckForUpdates( false );
+				}
 			}
 		}
 
@@ -467,13 +504,6 @@ namespace MarvinsAIRA
 								}
 
 								_win_sendForceFeedbackTestSignalCounter--;
-							}
-
-							// test magnitude
-
-							if ( _win_sendTestMagnitude )
-							{
-								app.UpdateConstantForce( [ app.Settings.TestMagnitude ] );
 							}
 
 							// gui
@@ -1377,6 +1407,15 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private async void CheckForUpdateNow_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "CheckForUpdateNow_Button_Click called." );
+
+			await app.CheckForUpdates( true );
+		}
+
 		#endregion
 
 		#region Settings tab - Save file tab
@@ -1444,25 +1483,6 @@ namespace MarvinsAIRA
 			var app = (App) Application.Current;
 
 			app.Settings.WheelMaxValue = app.Input_CurrentWheelPosition;
-		}
-
-		#endregion
-
-		#region Settings tab - Force feedback
-
-		private void TestMagnitude_Button_PreviewMouseLeftButtonDown( object sender, MouseButtonEventArgs e )
-		{
-			_win_sendTestMagnitude = true;
-		}
-
-		private void TestMagnitude_Button_PreviewMouseLeftButtonUp( object sender, MouseButtonEventArgs e )
-		{
-			_win_sendTestMagnitude = false;
-		}
-
-		private void TestMagnitude_Button_MouseLeave( object sender, MouseEventArgs e )
-		{
-			_win_sendTestMagnitude = false;
 		}
 
 		#endregion
@@ -1626,6 +1646,22 @@ namespace MarvinsAIRA
 			app.WriteLine( "GoToBuyMeACoffee_Button_Click called." );
 
 			string url = "https://buymeacoffee.com/marvinherbold";
+
+			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
+			{
+				CreateNoWindow = true
+			};
+
+			Process.Start( processStartInfo );
+		}
+
+		private void EtsyStore_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "EtsyStore_Button_Click called." );
+
+			string url = "https://www.etsy.com/listing/1896548281/marvins-awesome-iracing-app-logo";
 
 			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
 			{

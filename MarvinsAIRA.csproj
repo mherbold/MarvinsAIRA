@@ -10,7 +10,6 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <PackageIcon>icon.png</PackageIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>0.66</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -82,5 +81,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <PropertyGroup>
+    <Version>
+      1.0.$([MSBuild]::Subtract($([System.Math]::Floor($([MSBuild]::Divide($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)))), 20180)).$([MSBuild]::Divide($([MSBuild]::Modulo($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)), 60))
+    </Version>
+  </PropertyGroup>
 
 </Project>

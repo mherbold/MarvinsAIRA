@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Marvin's Awesome iRacing App v0.66"
+        Title="Marvin's Awesome iRacing App"
         Height="Auto"
         Width="1000"
         SizeToContent="Height"
@@ -731,6 +731,11 @@
                                 <TextBox Grid.Column="1" Text="{Binding WindowOpacityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                                 <Slider x:Name="WindowOpacity_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="25" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding WindowOpacity}" ValueChanged="WindowOpacity_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
+                            <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                                <CheckBox Content="Check For Updates on Startup" IsChecked="{Binding CheckForUpdates}"/>
+                                <Button Grid.Column="2" x:Name="CheckForUpdateNow_Button" Margin="15,0,0,0" Content="CHECK NOW" Click="CheckForUpdateNow_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
+                            </StackPanel>
+                            <CheckBox Content="Automatically Download Updates" IsChecked="{Binding AutomaticallyDownloadUpdates}"/>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Save File">
@@ -897,18 +902,6 @@
                                 <Slider Grid.Column="2" x:Name="AutoOverallScaleClipLimit_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" Value="{Binding AutoOverallScaleClipLimit}" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
                             <Label Content="The below slider is only intended to help us figure out the issue with EMC wheels." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,30,0,10"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Test Magnitude" VerticalAlignment="Center" ToolTip="This is the magnitude to send to your wheel when the test button is held down." />
-                                <TextBox Grid.Column="1" Text="{Binding TestMagnitudeString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="TestMagnitude_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="-10000" Maximum="10000" SmallChange="100" LargeChange="500" Value="{Binding TestMagnitude}" PreviewKeyDown="Slider_PreviewKeyDown" />
-                                <Button Grid.Column="3" x:Name="TestMagnitude_Button" Margin="15,0,10,0" Content="TEST" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" MouseLeave="TestMagnitude_Button_MouseLeave" PreviewMouseLeftButtonDown="TestMagnitude_Button_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="TestMagnitude_Button_PreviewMouseLeftButtonUp" />
-                            </Grid>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Steering Effects" x:Name="Settings_SteeringEffects_TabItem">
@@ -1425,6 +1418,8 @@
                     <Button x:Name="GoToGitHub_Button" HorizontalAlignment="Stretch" Content="Go to the GitHub repository" Click="GoToGitHub_Button_Click" Margin="0,5,0,0" />
                     <Label Content="Or, you can buy me a coffee! This app is completely free, but donations make me feel warm and fuzzy and motivate me to keep this up." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,15,0,0" />
                     <Button x:Name="GoToBuyMeACoffee_Button" HorizontalAlignment="Stretch" Content="Buy me a coffee!" Click="GoToBuyMeACoffee_Button_Click" Margin="0,5,0,0" />
+                    <Label Content="Or, you can buy a 3D print of the MAIRA logo!" FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,15,0,0" />
+                    <Button x:Name="EtsyStore_Button" HorizontalAlignment="Stretch" Content="Go to my Etsy Store" Click="EtsyStore_Button_Click" Margin="0,5,0,0" />
                     <Label Content="❤️❤️❤️ A huge thank you to everybody who supported MAIRA! ❤️❤️❤️" FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,15,0,0" />
                     <TextBox x:Name="Supporters_TextBox" Text="Testing" IsReadOnly="True" FontWeight="Medium" TextWrapping="Wrap" IsUndoEnabled="False" Height="200" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="0,5,0,0" Padding="15,15,30,15" FontSize="18"/>
                 </StackPanel>
@@ -1438,6 +1433,8 @@
             <StatusBarItem x:Name="CurrentTrack_StatusBarItem" Content="No Track" Foreground="Gray"/>
             <Separator Margin="8,2,8,2" />
             <StatusBarItem x:Name="CurrentTrackCondition_StatusBarItem" Content="" Foreground="Gray"/>
+            <Separator x:Name="UpdateInfo_Separator" Margin="8,2,8,2" Visibility="Collapsed"/>
+            <StatusBarItem x:Name="UpdateInfo_StatusBarItem" Content="" Visibility="Collapsed"/>
             <StatusBarItem HorizontalAlignment="Right" Padding="0,0,0,0">
                 <ui:ToggleSwitch x:Name="Advanced_ToggleSwitch" OffContent="Advanced" OnContent="Advanced" Toggled="Advanced_ToggleSwitch_Toggled" IsOn="{Binding Advanced}" Width="120" RenderTransformOrigin="0.5,0.5" >
                     <ui:ToggleSwitch.RenderTransform>

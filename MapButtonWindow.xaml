@@ -10,7 +10,7 @@
         Height="Auto"
         Width="600"
         SizeToContent="Height"
-        ResizeMode="CanMinimize"
+        ResizeMode="NoResize"
         Icon="/icon.ico"
         WindowStartupLocation="CenterOwner"
         Activated="Window_Activated"

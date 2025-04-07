@@ -1,6 +1,9 @@
+#define ApplicationName 'C:\Users\marvi\Documents\GitHub\MarvinsAIRA\bin\publish\MarvinsAIRA.exe'
+#define ApplicationVersion GetFileVersion(ApplicationName)
+
 [Setup]
 AppName=Marvin's Awesome iRacing App
-AppVersion=0.66
+AppVersion={#ApplicationVersion}
 AppCopyright=Created by Marvin Herbold
 AppPublisher=Marvin Herbold
 AppPublisherURL=
@@ -10,7 +13,7 @@ DefaultGroupName=MarvinsAIRA
 UninstallDisplayIcon={app}\MarvinsAIRA.exe
 Compression=lzma2
 SolidCompression=yes
-OutputBaseFilename=MarvinsAIRA-Setup
+OutputBaseFilename=MarvinsAIRA-Setup-{#ApplicationVersion}
 OutputDir=userdocs:MarvinsAIRA
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
