@@ -50,6 +50,8 @@ namespace MarvinsAIRA
 		public bool spotterEnabled;
 
 		public float overallScaleAutoPeak;
+
+		public bool curbProtectionEngaged;
 	}
 
 	public partial class App : Application
@@ -136,6 +138,8 @@ namespace MarvinsAIRA
 			_telemetry_data.spotterEnabled = Settings.SpotterEnabled;
 
 			_telemetry_data.overallScaleAutoPeak = _ffb_autoOverallScalePeakForceInNewtonMeters;
+
+			_telemetry_data.curbProtectionEngaged = _ffb_curbProtectionTimer > 0f;
 
 			_telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
 		}

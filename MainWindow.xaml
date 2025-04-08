@@ -625,6 +625,8 @@
                         <StackPanel Grid.Column="10">
                             <Label Content="Peak G Force" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                             <Label x:Name="PeakGForce_Label" Content="0 G" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
+                            <Label Content="Peak Shock Velocity" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                            <Label x:Name="PeakShockVelocity_Label" Content="0 m/s" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="0,0,0,18" />
                         </StackPanel>
                     </Grid>
                     <Grid HorizontalAlignment="Center" Margin="0,10,0,0">
@@ -829,39 +831,78 @@
                             </Grid>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Crash Protection" x:Name="Settings_CrashProtection_TabItem">
-                        <StackPanel Margin="10,10,10,10">
-                            <CheckBox x:Name="EnableCrashProtection_CheckBox" Content="Enable Crash Protection" IsChecked="{Binding EnableCrashProtection}"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="G-Force" VerticalAlignment="Center" ToolTip="This is much G-Force your car needs to sustain before it is considered in a crash." />
-                                <TextBox Grid.Column="1" Text="{Binding GForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="GForce_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" Value="{Binding GForce}" PreviewKeyDown="Slider_PreviewKeyDown" />
-                            </Grid>
-                            <Grid Margin="0,10,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="Duration" VerticalAlignment="Center" ToolTip="This is how long, in seconds, to reduce forces on your steering wheel." />
-                                <TextBox Grid.Column="1" Text="{Binding CrashDurationString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="CrashDuration_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" Value="{Binding CrashDuration}" PreviewKeyDown="Slider_PreviewKeyDown" />
-                            </Grid>
-                            <Grid Margin="0,10,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="OS Reduction" VerticalAlignment="Center" ToolTip="This is how much to reduce your overall scale by, while the crash protection is active." />
-                                <TextBox Grid.Column="1" Text="{Binding CrashProtectionOverallScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
-                                <Slider Grid.Column="2" x:Name="CrashProtectionOverallScale_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" Value="{Binding CrashProtectionOverallScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
-                            </Grid>
+                    <TabItem Header="Shock Protection" x:Name="Settings_ShockProtection_TabItem">
+                        <StackPanel>
+                            <GroupBox Header="Crash Protection">
+                                <StackPanel Margin="10,10,10,10">
+                                    <CheckBox x:Name="EnableCrashProtection_CheckBox" Content="Enable Crash Protection" IsChecked="{Binding EnableCrashProtection}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="G-Force" VerticalAlignment="Center" ToolTip="This is much G-Force your car needs to sustain before it is considered in a crash." />
+                                        <TextBox Grid.Column="1" Text="{Binding GForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" x:Name="GForce_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" Value="{Binding GForce}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                    </Grid>
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Duration" VerticalAlignment="Center" ToolTip="This is how long, in seconds, to reduce forces on your steering wheel." />
+                                        <TextBox Grid.Column="1" Text="{Binding CrashDurationString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" x:Name="CrashDuration_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="10" SmallChange="0.1" LargeChange="1" Value="{Binding CrashDuration}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                    </Grid>
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="OS Reduction" VerticalAlignment="Center" ToolTip="This is how much to reduce your overall scale by, while the crash protection is active." />
+                                        <TextBox Grid.Column="1" Text="{Binding CrashProtectionOverallScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" x:Name="CrashProtectionOverallScale_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" Value="{Binding CrashProtectionOverallScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Curb Protection">
+                                <StackPanel Margin="10,10,10,10">
+                                    <CheckBox x:Name="EnableCurbProtection_CheckBox" Content="Enable Curb Protection" IsChecked="{Binding EnableCurbProtection}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Shock velocity" VerticalAlignment="Center" ToolTip="This is the minimum velocity at which your shocks needs to travel before triggering this protection." />
+                                        <TextBox Grid.Column="1" Text="{Binding ShockVelocityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" x:Name="ShockVelocity_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.01" Maximum="2" SmallChange="0.01" LargeChange="0.1" Value="{Binding ShockVelocity}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                    </Grid>
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Duration" VerticalAlignment="Center" ToolTip="This is how long, in seconds, to reduce forces on your steering wheel." />
+                                        <TextBox Grid.Column="1" Text="{Binding CurbProtectionDurationString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" x:Name="CurbProtectionDuration_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.1" Maximum="1" SmallChange="0.1" LargeChange="1" Value="{Binding CurbProtectionDuration}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                    </Grid>
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="DS Reduction" VerticalAlignment="Center" ToolTip="This is how much to reduce your detail scale by, while the curb protection is active." />
+                                        <TextBox Grid.Column="1" Text="{Binding CurbProtectionDetailScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                                        <Slider Grid.Column="2" x:Name="CurbProtectionDetailScale_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" Value="{Binding CurbProtectionDetailScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Soft Lock" x:Name="Settings_SoftLock_TabItem">

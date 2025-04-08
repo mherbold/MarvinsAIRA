@@ -727,6 +727,10 @@ namespace MarvinsAIRA
 
 									PeakGForce_Label.Content = $"{app.FFB_PeakGForce:F1} G";
 
+									// Shock velocity (last 2 seconds)
+
+									PeakShockVelocity_Label.Content = $"{app.FFB_PeakShockVel:F2} m/s";
+
 									// Oversteer amount
 
 									var oversteerAmount = MathF.Abs( app.FFB_OversteerAmount );
@@ -1703,7 +1707,7 @@ namespace MarvinsAIRA
 				Settings_ForceFeedback_TabItem.Visibility = visibility;
 				Settings_SteeringEffects_TabItem.Visibility = visibility;
 				Settings_AutoCenterWheel_TabItem.Visibility = visibility;
-				Settings_CrashProtection_TabItem.Visibility = visibility;
+				Settings_ShockProtection_TabItem.Visibility = visibility;
 				Settings_SoftLock_TabItem.Visibility = visibility;
 				Settings_Voice_SayLFEScale_Grid.Visibility = visibility;
 				Settings_Voice_SpotterCarLeftRight_GroupBox.Visibility = visibility;

@@ -2568,7 +2568,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private float _crashDuration = 4f;
+		private float _crashDuration = 1f;
 
 		public float CrashDuration
 		{
@@ -2576,7 +2576,7 @@ namespace MarvinsAIRA
 
 			set
 			{
-				value = Math.Clamp( value, 1f, 10f );
+				value = Math.Clamp( value, 0.1f, 10f );
 
 				if ( _crashDuration != value )
 				{
@@ -2593,7 +2593,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _crashDurationString = "4.0 sec";
+		private string _crashDurationString = "1.0 sec";
 
 		[XmlIgnore]
 		public string CrashDurationString
@@ -2659,6 +2659,177 @@ namespace MarvinsAIRA
 					if ( _crashProtectionOverallScaleString != value )
 					{
 						_crashProtectionOverallScaleString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Settings tab - Curb protection tab
+
+		private bool _enableCurbProtection = false;
+
+		public bool EnableCurbProtection
+		{
+			get => _enableCurbProtection;
+
+			set
+			{
+				if ( _enableCurbProtection != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"EnableCurbProtection changed - before {_enableCurbProtection} now {value}" );
+
+					_enableCurbProtection = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private float _shockVelocity = 1f;
+
+		public float ShockVelocity
+		{
+			get => _shockVelocity;
+
+			set
+			{
+				value = Math.Clamp( value, 0.01f, 2f );
+
+				if ( _shockVelocity != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"ShockVelocity changed - before {_shockVelocity} now {value}" );
+
+					_shockVelocity = value;
+
+					OnPropertyChanged();
+				}
+
+				ShockVelocityString = $"!{(float) _shockVelocity:F2} m/s";
+			}
+		}
+
+		private string _shockVelocityString = "0.50 m/s";
+
+		[XmlIgnore]
+		public string ShockVelocityString
+		{
+			get => _shockVelocityString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _shockVelocityString != value )
+					{
+						_shockVelocityString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		private float _curbProtectionDuration = 0.5f;
+
+		public float CurbProtectionDuration
+		{
+			get => _curbProtectionDuration;
+
+			set
+			{
+				value = Math.Clamp( value, 0.1f, 1f );
+
+				if ( _curbProtectionDuration != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"CurbProtectionDuration changed - before {_curbProtectionDuration} now {value}" );
+
+					_curbProtectionDuration = value;
+
+					OnPropertyChanged();
+				}
+
+				CurbProtectionDurationString = $"!{(float) _curbProtectionDuration:F1} sec";
+			}
+		}
+
+		private string _curbProtectionDurationString = "0.5 sec";
+
+		[XmlIgnore]
+		public string CurbProtectionDurationString
+		{
+			get => _curbProtectionDurationString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _curbProtectionDurationString != value )
+					{
+						_curbProtectionDurationString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Curb protection detail scale */
+
+		private float _curbProtectionDetailScale = 80f;
+
+		public float CurbProtectionDetailScale
+		{
+			get => _curbProtectionDetailScale;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _curbProtectionDetailScale != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"CurbProtectionDetailScale changed - before {_curbProtectionDetailScale:F0} now {value:F0}" );
+
+					_curbProtectionDetailScale = value;
+
+					OnPropertyChanged();
+				}
+
+				CurbProtectionDetailScaleString = $"!{_curbProtectionDetailScale:F0}%";
+			}
+		}
+
+		private string _curbProtectionDetailScaleString = "80%";
+
+		[XmlIgnore]
+		public string CurbProtectionDetailScaleString
+		{
+			get => _curbProtectionDetailScaleString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _curbProtectionDetailScaleString != value )
+					{
+						_curbProtectionDetailScaleString = value;
 
 						OnPropertyChanged();
 					}

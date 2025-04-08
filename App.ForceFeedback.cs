@@ -91,6 +91,10 @@ namespace MarvinsAIRA
 		private int _ffb_gForceBufferIndex = 0;
 		private float _ffb_peakGForce = 0f;
 
+		private readonly float[] _ffb_shockVelBuffer = new float[ 120 ];
+		private int _ffb_shockVelBufferIndex = 0;
+		private float _ffb_peakShockVel = 0f;
+
 		private float _ffb_yawRateFactorInstant = 0f;
 		private float _ffb_yawRateFactorAverage = 0f;
 		private readonly float[] _ffb_yawRateFactorBuffer = new float[ 120 ];
@@ -107,12 +111,16 @@ namespace MarvinsAIRA
 		private float _ffb_crashProtectionTimer = 0f;
 		private float _ffb_crashProtectionScale = 1f;
 
+		private float _ffb_curbProtectionTimer = 0f;
+		private float _ffb_curbProtectionScale = 1f;
+
 		private int _ffb_centerWheelForce = 0;
 
 		public bool FFB_Initialized { get => _ffb_initialized; }
 		public float FFB_ClippedTimer { get => _ffb_clippedTimer; }
 		public int FFB_LastMagnitudeSentToWheel { get => _ffb_lastMagnitudeSentToWheel; }
 		public float FFB_PeakGForce { get => _ffb_peakGForce; }
+		public float FFB_PeakShockVel { get => _ffb_peakShockVel; }
 		public float FFB_YawRateFactorInstant { get => _ffb_yawRateFactorInstant; }
 		public float FFB_YawRateFactorAverage { get => _ffb_yawRateFactorAverage; }
 		public float FFB_UndersteerAmount { get => _ffb_understeerAmount; }
@@ -1048,6 +1056,28 @@ namespace MarvinsAIRA
 
 			_ffb_peakGForce = peakGForce;
 
+			// keep track of peak shock velocity over the last two seconds
+
+			var maxShockVel = 0f;
+
+			for ( var i = 0; i < IRSDK_360HZ_SAMPLES_PER_FRAME; i++ )
+			{
+				maxShockVel = MathF.Max( MathF.Abs( _irsdk_lfShockVel_ST[ i ] ), Math.Max( MathF.Abs( _irsdk_rfShockVel_ST[ i ] ), Math.Max( MathF.Abs( _irsdk_lrShockVel_ST[ i ] ), MathF.Abs( _irsdk_rrShockVel_ST[ i ] ) ) ) );
+			}
+
+			_ffb_shockVelBuffer[ _ffb_shockVelBufferIndex ] = maxShockVel;
+
+			_ffb_shockVelBufferIndex = ( _ffb_shockVelBufferIndex + 1 ) % _ffb_shockVelBuffer.Length;
+
+			var peakShockVel = 0f;
+
+			for ( var i = 0; i < _ffb_shockVelBuffer.Length; i++ )
+			{
+				peakShockVel = Math.Max( peakShockVel, _ffb_shockVelBuffer[ i ] );
+			}
+
+			_ffb_peakShockVel = peakShockVel;
+
 			// stop here if force feedback is not enabled
 
 			if ( !Settings.ForceFeedbackEnabled )
@@ -1147,6 +1177,27 @@ namespace MarvinsAIRA
 				_ffb_crashProtectionScale = ( _ffb_crashProtectionScale * 0.99f ) + ( 1f * 0.01f );
 			}
 
+			// curb protection processing
+
+			if ( Settings.EnableCurbProtection )
+			{
+				if ( MathF.Abs( maxShockVel ) >= Settings.ShockVelocity )
+				{
+					_ffb_curbProtectionTimer = Settings.CurbProtectionDuration;
+				}
+			}
+
+			if ( _ffb_curbProtectionTimer > 0f )
+			{
+				_ffb_curbProtectionScale = 1f - Settings.CurbProtectionDetailScale / 100f;
+
+				_ffb_curbProtectionTimer = Math.Max( 0f, _ffb_curbProtectionTimer - ( 1f / _irsdk_tickRate ) );
+			}
+			else
+			{
+				_ffb_curbProtectionScale = ( _ffb_curbProtectionScale * 0.99f ) + ( 1f * 0.01f );
+			}
+
 			// understeer effect
 
 			var understeerFrequency = 0f;
@@ -1231,7 +1282,7 @@ namespace MarvinsAIRA
 			// apply crash protection to overall and detail scale
 
 			normalizedOverallScaleSetting = ( normalizedOverallScaleSetting * ( 1f - Settings.CrashProtectionOverallScale / 100f ) * ( 1f - _ffb_crashProtectionScale ) ) + ( normalizedOverallScaleSetting * _ffb_crashProtectionScale );
-			normalizedDetailScaleSetting *= _ffb_crashProtectionScale;
+			normalizedDetailScaleSetting *= _ffb_crashProtectionScale * _ffb_curbProtectionScale;
 
 			// map scales into DI units (detail scale will be the same as the overall scale if detail scale slider is set to 100%)
 
