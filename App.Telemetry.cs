@@ -52,6 +52,9 @@ namespace MarvinsAIRA
 		public float overallScaleAutoPeak;
 
 		public bool curbProtectionEngaged;
+
+		public float ffbSteadyState;
+		public float shockVelocity;
 	}
 
 	public partial class App : Application
@@ -102,10 +105,12 @@ namespace MarvinsAIRA
 			_telemetry_data.wheelMax = Settings.WheelMaxForce;
 			_telemetry_data.overallScale = Settings.OverallScale / 100f;
 			_telemetry_data.overallScaleAutoReady = FFB_AutoOverallScaleIsReady;
+			_telemetry_data.overallScaleAutoPeak = _ffb_autoOverallScalePeakForceInNewtonMeters;
 			_telemetry_data.overallScaleAutoClipLimit = Settings.AutoOverallScaleClipLimit / 100f;
 			_telemetry_data.detailScale = Settings.DetailScale / 100f;
 			_telemetry_data.parkedScale = Settings.ParkedScale / 100f;
 			_telemetry_data.frequency = 1000f / ( 18 - Settings.Frequency );
+
 			_telemetry_data.understeerFxStyle = Settings.USEffectStyle;
 			_telemetry_data.understeerFxStrength = Settings.USEffectStrength / 100f;
 			_telemetry_data.understeerFxCurve = Settings.USCurve;
@@ -113,23 +118,28 @@ namespace MarvinsAIRA
 			_telemetry_data.understeerYRFactorLEnd = Settings.USEndYawRateFactorLeft;
 			_telemetry_data.understeerYRFactorRStart = Settings.USStartYawRateFactorRight;
 			_telemetry_data.understeerYRFactorREnd = Settings.USEndYawRateFactorRight;
+			_telemetry_data.understeerAmount = _ffb_understeerAmount;
 
 			_telemetry_data.oversteerFxStyle = Settings.OSEffectStyle;
 			_telemetry_data.oversteerFxStrength = Settings.OSEffectStrength / 100f;
 			_telemetry_data.oversteerFxCurve = Settings.OSCurve;
 			_telemetry_data.oversteerYVelocityStart = Settings.OSStartYVelocity;
 			_telemetry_data.oversteerYVelocityEnd = Settings.OSEndYVelocity;
+			_telemetry_data.oversteerAmount = _ffb_oversteerAmount;
 
 			_telemetry_data.lfeScale = Settings.LFEScale / 100f;
 
 			_telemetry_data.ffbInAmount = _irsdk_steeringWheelTorque_ST[ 0 ];
 			_telemetry_data.ffbOutAmount = _ffb_outputWheelMagnitudeBuffer[ 0 ];
+			_telemetry_data.ffbSteadyState = _ffb_rawSteadyStateWheelTorque;
 			_telemetry_data.ffbClipping = _ffb_clippedTimer > 0f;
+
 			_telemetry_data.yawRateFactor = _ffb_yawRateFactorInstant;
 			_telemetry_data.gForce = _irsdk_gForce;
-			_telemetry_data.understeerAmount = _ffb_understeerAmount;
-			_telemetry_data.oversteerAmount = _ffb_oversteerAmount;
+			_telemetry_data.shockVelocity = _ffb_currentShockVel;
+
 			_telemetry_data.crashProtectionEngaged = _ffb_crashProtectionTimer > 0f;
+			_telemetry_data.curbProtectionEngaged = _ffb_curbProtectionTimer > 0f;
 
 			_telemetry_data.forceFeedbackEnabled = Settings.ForceFeedbackEnabled;
 			_telemetry_data.steeringEffectsEnabled = Settings.SteeringEffectsEnabled;
@@ -137,9 +147,6 @@ namespace MarvinsAIRA
 			_telemetry_data.windSimulatorEnabled = Settings.WindSimulatorEnabled;
 			_telemetry_data.spotterEnabled = Settings.SpotterEnabled;
 
-			_telemetry_data.overallScaleAutoPeak = _ffb_autoOverallScalePeakForceInNewtonMeters;
-
-			_telemetry_data.curbProtectionEngaged = _ffb_curbProtectionTimer > 0f;
 
 			_telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
 		}

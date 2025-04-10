@@ -94,6 +94,7 @@ namespace MarvinsAIRA
 		private readonly float[] _ffb_shockVelBuffer = new float[ 120 ];
 		private int _ffb_shockVelBufferIndex = 0;
 		private float _ffb_peakShockVel = 0f;
+		private float _ffb_currentShockVel = 0f;
 
 		private float _ffb_yawRateFactorInstant = 0f;
 		private float _ffb_yawRateFactorAverage = 0f;
@@ -1070,6 +1071,8 @@ namespace MarvinsAIRA
 				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_rrShockVel_ST[ i ] ) );
 			}
 
+			_ffb_currentShockVel = maxShockVel;
+
 			_ffb_shockVelBuffer[ _ffb_shockVelBufferIndex ] = maxShockVel;
 
 			_ffb_shockVelBufferIndex = ( _ffb_shockVelBufferIndex + 1 ) % _ffb_shockVelBuffer.Length;
@@ -1341,9 +1344,9 @@ namespace MarvinsAIRA
 
 				// calculate raw steady state wheel torque
 
-				_ffb_rawSteadyStateWheelTorque += limitedDeltaSteeringWheelTorque;
+				var rawSteadyStateWheelTorque = _ffb_rawSteadyStateWheelTorque + limitedDeltaSteeringWheelTorque;
 
-				_ffb_rawSteadyStateWheelTorque = ( _ffb_rawSteadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * 0.1f );
+				_ffb_rawSteadyStateWheelTorque = ( rawSteadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * 0.1f );
 
 				// calculate scaled steady state wheel torque
 
