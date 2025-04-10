@@ -1062,7 +1062,12 @@ namespace MarvinsAIRA
 
 			for ( var i = 0; i < IRSDK_360HZ_SAMPLES_PER_FRAME; i++ )
 			{
-				maxShockVel = MathF.Max( MathF.Abs( _irsdk_lfShockVel_ST[ i ] ), Math.Max( MathF.Abs( _irsdk_rfShockVel_ST[ i ] ), Math.Max( MathF.Abs( _irsdk_lrShockVel_ST[ i ] ), MathF.Abs( _irsdk_rrShockVel_ST[ i ] ) ) ) );
+				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_cfShockVel_ST[ i ] ) );
+				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_crShockVel_ST[ i ] ) );
+				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_lfShockVel_ST[ i ] ) );
+				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_lrShockVel_ST[ i ] ) );
+				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_rfShockVel_ST[ i ] ) );
+				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_rrShockVel_ST[ i ] ) );
 			}
 
 			_ffb_shockVelBuffer[ _ffb_shockVelBufferIndex ] = maxShockVel;

@@ -26,7 +26,9 @@ namespace MarvinsAIRA
 		private IRacingSdkDatum? _irsdk_brakeABSactiveDatum = null;
 		private IRacingSdkDatum? _irsdk_brakeDatum = null;
 		private IRacingSdkDatum? _irsdk_carLeftRightDatum = null;
+		private IRacingSdkDatum? _irsdk_cfShockVel_STDatum = null;
 		private IRacingSdkDatum? _irsdk_clutchDatum = null;
+		private IRacingSdkDatum? _irsdk_crShockVel_STDatum = null;
 		private IRacingSdkDatum? _irsdk_displayUnitsDatum = null;
 		private IRacingSdkDatum? _irsdk_gearDatum = null;
 		private IRacingSdkDatum? _irsdk_isOnTrackDatum = null;
@@ -66,7 +68,9 @@ namespace MarvinsAIRA
 		public bool _irsdk_brakeABSactive = false;
 		public float _irsdk_brake = 0f;
 		public IRacingSdkEnum.CarLeftRight _irsdk_carLeftRight = 0;
+		public float[] _irsdk_cfShockVel_ST = new float[ IRSDK_360HZ_SAMPLES_PER_FRAME ];
 		public float _irsdk_clutch = 1f;
+		public float[] _irsdk_crShockVel_ST = new float[ IRSDK_360HZ_SAMPLES_PER_FRAME ];
 		public int _irsdk_displayUnits = 0;
 		public int _irsdk_gear = 0;
 		public bool _irsdk_isOnTrack = false;
@@ -232,9 +236,11 @@ namespace MarvinsAIRA
 
 			for ( var i = 0; i < IRSDK_360HZ_SAMPLES_PER_FRAME; i++ )
 			{
+				_irsdk_cfShockVel_ST[ i ] = 0f;
+				_irsdk_crShockVel_ST[ i ] = 0f;
 				_irsdk_lfShockVel_ST[ i ] = 0f;
-				_irsdk_rfShockVel_ST[ i ] = 0f;
 				_irsdk_lrShockVel_ST[ i ] = 0f;
+				_irsdk_rfShockVel_ST[ i ] = 0f;
 				_irsdk_rrShockVel_ST[ i ] = 0f;
 
 				_irsdk_steeringWheelTorque_ST[ i ] = 0f;
@@ -276,6 +282,8 @@ namespace MarvinsAIRA
 			UpdateCurrentWetDryCondition();
 
 			Say( Settings.SayDisconnected, null, false, false );
+
+			_irsdk_telemetryDataInitialized = false;
 
 			Dispatcher.BeginInvoke( () =>
 			{
@@ -340,15 +348,11 @@ namespace MarvinsAIRA
 				_irsdk_lapDistDatum = _irsdk.Data.TelemetryDataProperties[ "LapDist" ];
 				_irsdk_lapDistPctDatum = _irsdk.Data.TelemetryDataProperties[ "LapDistPct" ];
 				_irsdk_latAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LatAccel" ];
-				_irsdk_lfShockVel_STDatum = _irsdk.Data.TelemetryDataProperties[ "LFshockVel_ST" ];
 				_irsdk_longAccelDatum = _irsdk.Data.TelemetryDataProperties[ "LongAccel" ];
-				_irsdk_lrShockVel_STDatum = _irsdk.Data.TelemetryDataProperties[ "LRshockVel_ST" ];
 				_irsdk_onPitRoadDatum = _irsdk.Data.TelemetryDataProperties[ "OnPitRoad" ];
 				_irsdk_playerCarIdxDatum = _irsdk.Data.TelemetryDataProperties[ "PlayerCarIdx" ];
 				_irsdk_playerTrackSurfaceDatum = _irsdk.Data.TelemetryDataProperties[ "PlayerTrackSurface" ];
-				_irsdk_rfShockVel_STDatum = _irsdk.Data.TelemetryDataProperties[ "RFshockVel_ST" ];
 				_irsdk_rpmDatum = _irsdk.Data.TelemetryDataProperties[ "RPM" ];
-				_irsdk_rrShockVel_STDatum = _irsdk.Data.TelemetryDataProperties[ "RRshockVel_ST" ];
 				_irsdk_sessionFlagsDatum = _irsdk.Data.TelemetryDataProperties[ "SessionFlags" ];
 				_irsdk_speedDatum = _irsdk.Data.TelemetryDataProperties[ "Speed" ];
 				_irsdk_steeringFFBEnabled_Datum = _irsdk.Data.TelemetryDataProperties[ "SteeringFFBEnabled" ];
@@ -361,6 +365,14 @@ namespace MarvinsAIRA
 				_irsdk_velocityYDatum = _irsdk.Data.TelemetryDataProperties[ "VelocityY" ];
 				_irsdk_weatherDeclaredWetDatum = _irsdk.Data.TelemetryDataProperties[ "WeatherDeclaredWet" ];
 				_irsdk_yawRateDatum = _irsdk.Data.TelemetryDataProperties[ "YawRate" ];
+
+
+				_irsdk.Data.TelemetryDataProperties.TryGetValue( "CFshockVel_ST", out _irsdk_cfShockVel_STDatum );
+				_irsdk.Data.TelemetryDataProperties.TryGetValue( "CRshockVel_ST", out _irsdk_crShockVel_STDatum );
+				_irsdk.Data.TelemetryDataProperties.TryGetValue( "LRshockVel_ST", out _irsdk_lfShockVel_STDatum );
+				_irsdk.Data.TelemetryDataProperties.TryGetValue( "LRshockVel_ST", out _irsdk_lrShockVel_STDatum );
+				_irsdk.Data.TelemetryDataProperties.TryGetValue( "RFshockVel_ST", out _irsdk_rfShockVel_STDatum );
+				_irsdk.Data.TelemetryDataProperties.TryGetValue( "RRshockVel_ST", out _irsdk_rrShockVel_STDatum );
 
 				_irsdk_telemetryDataInitialized = true;
 
@@ -411,10 +423,35 @@ namespace MarvinsAIRA
 			_irsdk_weatherDeclaredWet = _irsdk.Data.GetBool( _irsdk_weatherDeclaredWetDatum );
 			_irsdk_yawRate = _irsdk.Data.GetFloat( _irsdk_yawRateDatum );
 
-			_irsdk.Data.GetFloatArray( _irsdk_rrShockVel_STDatum, _irsdk_rrShockVel_ST, 0, _irsdk_rrShockVel_ST.Length );
-			_irsdk.Data.GetFloatArray( _irsdk_rfShockVel_STDatum, _irsdk_rfShockVel_ST, 0, _irsdk_rfShockVel_ST.Length );
-			_irsdk.Data.GetFloatArray( _irsdk_lrShockVel_STDatum, _irsdk_lrShockVel_ST, 0, _irsdk_lrShockVel_ST.Length );
-			_irsdk.Data.GetFloatArray( _irsdk_lfShockVel_STDatum, _irsdk_lfShockVel_ST, 0, _irsdk_lfShockVel_ST.Length );
+			if ( _irsdk_cfShockVel_STDatum != null )
+			{
+				_irsdk.Data.GetFloatArray( _irsdk_cfShockVel_STDatum, _irsdk_cfShockVel_ST, 0, _irsdk_cfShockVel_ST.Length );
+			}
+
+			if ( _irsdk_crShockVel_STDatum != null )
+			{
+				_irsdk.Data.GetFloatArray( _irsdk_crShockVel_STDatum, _irsdk_crShockVel_ST, 0, _irsdk_crShockVel_ST.Length );
+			}
+
+			if ( _irsdk_lfShockVel_STDatum != null )
+			{
+				_irsdk.Data.GetFloatArray( _irsdk_lfShockVel_STDatum, _irsdk_lfShockVel_ST, 0, _irsdk_lfShockVel_ST.Length );
+			}
+
+			if ( _irsdk_lrShockVel_STDatum != null )
+			{
+				_irsdk.Data.GetFloatArray( _irsdk_lrShockVel_STDatum, _irsdk_lrShockVel_ST, 0, _irsdk_lrShockVel_ST.Length );
+			}
+
+			if ( _irsdk_rfShockVel_STDatum != null )
+			{
+				_irsdk.Data.GetFloatArray( _irsdk_rfShockVel_STDatum, _irsdk_rfShockVel_ST, 0, _irsdk_rfShockVel_ST.Length );
+			}
+
+			if ( _irsdk_rrShockVel_STDatum != null )
+			{
+				_irsdk.Data.GetFloatArray( _irsdk_rrShockVel_STDatum, _irsdk_rrShockVel_ST, 0, _irsdk_rrShockVel_ST.Length );
+			}
 
 			_irsdk.Data.GetFloatArray( _irsdk_steeringWheelTorque_STDatum, _irsdk_steeringWheelTorque_ST, 0, _irsdk_steeringWheelTorque_ST.Length );
 

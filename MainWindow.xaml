@@ -942,7 +942,6 @@
                                 <TextBox Grid.Column="1" Text="{Binding AutoOverallScaleClipLimitString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                                 <Slider Grid.Column="2" x:Name="AutoOverallScaleClipLimit_Slider" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" Value="{Binding AutoOverallScaleClipLimit}" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
-                            <Label Content="The below slider is only intended to help us figure out the issue with EMC wheels." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,30,0,10"/>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Steering Effects" x:Name="Settings_SteeringEffects_TabItem">
