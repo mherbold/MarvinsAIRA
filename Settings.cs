@@ -2691,7 +2691,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private float _shockVelocity = 1f;
+		private float _shockVelocity = 0.5f;
 
 		public float ShockVelocity
 		{
