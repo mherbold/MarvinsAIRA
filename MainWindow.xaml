@@ -126,6 +126,20 @@
                             <TextBox Grid.Column="1" Text="{Binding ParkedScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                             <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding ParkedScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
                         </Grid>
+                        <Grid Margin="0,5,0,0" x:Name="MinForceString_Grid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="140"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Min Force" VerticalAlignment="Center" ToolTip="The minium force to make the wheel move" />
+                            <TextBox Grid.Column="1" Text="{Binding MinForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="1500" SmallChange="1" LargeChange="10" Value="{Binding MinForce}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            <Button Grid.Column="3" Margin="10,0,0,0" Click="CheckMinForce_Button_Click"  BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" MinWidth="32" MinHeight="32" Padding="0,0,0,0">
+                                TEST MIN FORCE
+                            </Button>
+                        </Grid>
                         <Grid Margin="0,5,0,0" x:Name="Frequency_Grid">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80"/>
