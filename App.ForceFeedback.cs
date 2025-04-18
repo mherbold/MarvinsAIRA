@@ -157,7 +157,7 @@ namespace MarvinsAIRA
 
 			DeviceInstance? forceFeedbackDeviceInstance = null;
 
-			DeviceType[] deviceTypeArray = [ DeviceType.Driving, DeviceType.FirstPerson, DeviceType.Joystick, DeviceType.Gamepad ];
+			DeviceType[] deviceTypeArray = [ DeviceType.Keyboard, DeviceType.Joystick, DeviceType.Gamepad, DeviceType.Driving, DeviceType.Flight, DeviceType.FirstPerson, DeviceType.ControlDevice, DeviceType.ScreenPointer, DeviceType.Remote, DeviceType.Supplemental ];
 
 			if ( Settings.SelectedFFBDeviceGuid == Guid.Empty )
 			{
@@ -165,14 +165,17 @@ namespace MarvinsAIRA
 
 				foreach ( var deviceType in deviceTypeArray )
 				{
-					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.ForceFeedback | DeviceEnumerationFlags.AttachedOnly );
+					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
 
-					forceFeedbackDeviceInstance = deviceInstanceList.FirstOrDefault();
-
-					if ( forceFeedbackDeviceInstance != null )
+					foreach ( var joystickDeviceInstance in deviceInstanceList )
 					{
-						Settings.SelectedFFBDeviceGuid = forceFeedbackDeviceInstance.InstanceGuid;
-						break;
+						var hasForceFeedback = joystickDeviceInstance.ForceFeedbackDriverGuid != Guid.Empty;
+
+						if ( hasForceFeedback )
+						{
+							Settings.SelectedFFBDeviceGuid = joystickDeviceInstance.InstanceGuid;
+							break;
+						}
 					}
 				}
 			}
@@ -184,13 +187,13 @@ namespace MarvinsAIRA
 				{
 					bool deviceFound = false;
 
-					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.ForceFeedback | DeviceEnumerationFlags.AttachedOnly );
+					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
 
-					foreach ( var deviceInstance in deviceInstanceList )
+					foreach ( var joystickDeviceInstance in deviceInstanceList )
 					{
-						if ( deviceInstance.InstanceGuid == Settings.SelectedFFBDeviceGuid )
+						if ( joystickDeviceInstance.InstanceGuid == Settings.SelectedFFBDeviceGuid )
 						{
-							forceFeedbackDeviceInstance = deviceInstance;
+							forceFeedbackDeviceInstance = joystickDeviceInstance;
 							deviceFound = true;
 							break;
 						}

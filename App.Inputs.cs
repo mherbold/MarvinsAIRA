@@ -71,7 +71,7 @@ namespace MarvinsAIRA
 							ffbDeviceList.Add( joystickDeviceInstance.InstanceGuid, joystickDeviceInstance.ProductName );
 						}
 
-						WriteLine( $"...this devices identifies as Type: {joystickDeviceInstance.Type}, Subtype: {joystickDeviceInstance.Subtype}, Has FF: {hasForceFeedback}..., GUID: {joystickDeviceInstance.InstanceGuid}" );
+						WriteLine( $"...this devices identifies as Type: {joystickDeviceInstance.Type}, Subtype: {joystickDeviceInstance.Subtype}, Has FF: {hasForceFeedback}, GUID: {joystickDeviceInstance.InstanceGuid}..." );
 
 						WriteLine( $"...creating joystick type interface..." );
 

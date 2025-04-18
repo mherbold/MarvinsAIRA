@@ -20,7 +20,7 @@
         SourceInitialized="Window_SourceInitialized"
         Closing="Window_Closing"
         Closed="Window_Closed"
-        StateChanged="Window_StateChanged">
+        StateChanged="Window_StateChanged" LocationChanged="Window_LocationChanged">
 
     <Window.DataContext>
         <local:Settings />

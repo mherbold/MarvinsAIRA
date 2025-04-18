@@ -182,6 +182,12 @@ namespace MarvinsAIRA
 
 				app.Initialize( _win_windowHandle );
 
+				if ( ( app.Settings.WindowPositionX != -1f ) && ( app.Settings.WindowPositionY != -1f ) )
+				{
+					Left = app.Settings.WindowPositionX;
+					Top = app.Settings.WindowPositionY;
+				}
+
 				UpdateWindowTransparency( false );
 
 				Oversteer_Image.Source = _win_oversteerBitmap;
@@ -276,6 +282,20 @@ namespace MarvinsAIRA
 			if ( WindowState == WindowState.Normal )
 			{
 				UpdateWindowTransparency( false );
+			}
+		}
+
+		private void Window_LocationChanged( object sender, EventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				if ( ( Left >= 0 ) && ( Top >= 0 ) )
+				{
+					var app = (App) Application.Current;
+
+					app.Settings.WindowPositionX = (float) Left;
+					app.Settings.WindowPositionY = (float) Top;
+				}
 			}
 		}
 

@@ -28,6 +28,52 @@ namespace MarvinsAIRA
 			public int ClickCount { get; set; } = 0;
 		}
 
+		#region General
+
+		private float _windowPositionX = -1f;
+
+		public float WindowPositionX
+		{
+			get => _windowPositionX;
+
+			set
+			{
+				if ( _windowPositionX != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WindowPositionX changed - before {_windowPositionX} now {value}" );
+
+					_windowPositionX = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private float _windowPositionY = -1f;
+
+		public float WindowPositionY
+		{
+			get => _windowPositionY;
+
+			set
+			{
+				if ( _windowPositionY != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"WindowPositionY changed - before {_windowPositionY} now {value}" );
+
+					_windowPositionY = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		#region Force feedback tab
 
 		/* Force feedback enabled */
@@ -2632,7 +2678,7 @@ namespace MarvinsAIRA
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"CrashProtectionOverallScale changed - before {_crashProtectionOverallScale:F0} now {value:F0}" );
+					app.WriteLine( $"CrashProtectionOverallScale changed - before {_crashProtectionOverallScale} now {value}" );
 
 					_crashProtectionOverallScale = value;
 
@@ -2803,7 +2849,7 @@ namespace MarvinsAIRA
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"CurbProtectionDetailScale changed - before {_curbProtectionDetailScale:F0} now {value:F0}" );
+					app.WriteLine( $"CurbProtectionDetailScale changed - before {_curbProtectionDetailScale} now {value}" );
 
 					_curbProtectionDetailScale = value;
 
