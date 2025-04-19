@@ -55,6 +55,8 @@ namespace MarvinsAIRA
 
 		public float ffbSteadyState;
 		public float shockVelocity;
+		public float lfeInAmount;
+		public float lfeOutAmount;
 	}
 
 	public partial class App : Application
@@ -128,9 +130,11 @@ namespace MarvinsAIRA
 			_telemetry_data.oversteerAmount = _ffb_oversteerAmount;
 
 			_telemetry_data.lfeScale = Settings.LFEScale / 100f;
+			_telemetry_data.lfeInAmount = _ffb_lfeInAmount;
+			_telemetry_data.lfeOutAmount = _ffb_lfeOutAmount;
 
-			_telemetry_data.ffbInAmount = _irsdk_steeringWheelTorque_ST[ 0 ];
-			_telemetry_data.ffbOutAmount = _ffb_outputWheelMagnitudeBuffer[ 0 ];
+			_telemetry_data.ffbInAmount = _ffb_inAmount;
+			_telemetry_data.ffbOutAmount = _ffb_outAmount;
 			_telemetry_data.ffbSteadyState = _ffb_rawSteadyStateWheelTorque;
 			_telemetry_data.ffbClipping = _ffb_clippedTimer > 0f;
 

@@ -71,6 +71,11 @@ namespace MarvinsAIRA
 		private int _ffb_resetOutputWheelMagnitudeBufferTimerNow = 0;
 		private int _ffb_lastMagnitudeSentToWheel = 0;
 
+		private float _ffb_inAmount = 0f;
+		private int _ffb_outAmount = 0;
+		private float _ffb_lfeInAmount = 0f;
+		private float _ffb_lfeOutAmount = 0f;
+
 		private bool _ffb_startCooldownNow = false;
 		private float _ffb_magnitudeCoolDownTimer = 0f;
 		private int _ffb_lastNonCooldownMagnitudeSentToWheel = 0;
@@ -165,6 +170,8 @@ namespace MarvinsAIRA
 
 				foreach ( var deviceType in deviceTypeArray )
 				{
+					bool deviceFound = false;
+
 					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
 
 					foreach ( var joystickDeviceInstance in deviceInstanceList )
@@ -174,8 +181,15 @@ namespace MarvinsAIRA
 						if ( hasForceFeedback )
 						{
 							Settings.SelectedFFBDeviceGuid = joystickDeviceInstance.InstanceGuid;
+							forceFeedbackDeviceInstance = joystickDeviceInstance;
+							deviceFound = true;
 							break;
 						}
+					}
+
+					if ( deviceFound )
+					{
+						break;
 					}
 				}
 			}
@@ -1314,6 +1328,18 @@ namespace MarvinsAIRA
 				_ffb_outputWheelMagnitudeBuffer[ 0 ] = _ffb_outputWheelMagnitudeBuffer[ 6 ];
 			}
 
+			// for telemetry
+
+			var inAmountAbs = 0f;
+			var inAmount = 0f;
+			var outAmountAbs = 0;
+			var outAmount = 0;
+
+			var lfeInAmountAbs = 0f;
+			var lfeInAmount = 0f;
+			var lfeOutAmountAbs = 0f;
+			var lfeOutAmount = 0f;
+
 			// go through each sample
 
 			for ( var x = 0; x < steeringWheelTorque_ST.Length; x++ )
@@ -1325,6 +1351,16 @@ namespace MarvinsAIRA
 				// get the next steering wheel torque sample (it is in Newton-meters)
 
 				var currentSteeringWheelTorque = steeringWheelTorque_ST[ x ];
+
+				// for telemetry
+
+				var currentSteeringWheelTorqueAbs = MathF.Abs( currentSteeringWheelTorque );
+
+				if ( currentSteeringWheelTorqueAbs > inAmountAbs )
+				{
+					inAmountAbs = currentSteeringWheelTorqueAbs;
+					inAmount = currentSteeringWheelTorque;
+				}
 
 				// save the original steering wheel torque (for playback feature)
 
@@ -1393,7 +1429,25 @@ namespace MarvinsAIRA
 				{
 					if ( processThisFrame )
 					{
-						var lfeSample = _lfe_magnitude[ lfeMagnitudeIndex, x ] * lfeScale;
+						var lfeMagnitude = _lfe_magnitude[ lfeMagnitudeIndex, x ];
+
+						var lfeMagnitudeAbs = Math.Abs( lfeMagnitude );
+
+						if ( lfeMagnitudeAbs > lfeInAmountAbs )
+						{
+							lfeInAmountAbs = lfeMagnitudeAbs;
+							lfeInAmount = lfeMagnitude;
+						}
+
+						var lfeSample = lfeMagnitude * lfeScale;
+
+						var lfeSampleAbs = Math.Abs( lfeSample );
+
+						if ( lfeSampleAbs > lfeOutAmountAbs )
+						{
+							lfeOutAmountAbs = lfeSampleAbs;
+							lfeOutAmount = lfeSample;
+						}
 
 						_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) lfeSample;
 					}
@@ -1595,7 +1649,24 @@ namespace MarvinsAIRA
 						_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] = 0;
 					}
 				}
+
+				// for telemetry
+
+				var outputWheelMagnitudeBufferAbs = Math.Abs( _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] );
+
+				if ( outputWheelMagnitudeBufferAbs > outAmountAbs )
+				{
+					outAmountAbs = outputWheelMagnitudeBufferAbs;
+					outAmount = _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ];
+				}
 			}
+
+			// for telemetry
+
+			_ffb_inAmount = inAmount;
+			_ffb_outAmount = outAmount;
+			_ffb_lfeInAmount = lfeInAmount;
+			_ffb_lfeOutAmount= lfeOutAmount;
 
 			// update the pretty graph
 
