@@ -467,9 +467,58 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Frequency */
+        /* min Force */
 
-		private int _frequency = 16;
+        private int _minForce = 25;
+
+        public int MinForce
+        {
+            get => _minForce;
+
+            set
+            {
+                value = Math.Clamp(value, 0, 1500);
+
+                if (_minForce != value)
+                {
+                    var app = (App)Application.Current;
+
+                    app.WriteLine($"ParkedScale changed - before {_minForce} now {value}");
+
+                    _minForce = value;
+
+                    OnPropertyChanged();
+                }
+
+                MinForceString = $"!{_minForce}";
+            }
+        }
+
+        private string _minForceString = "25";
+
+        public string MinForceString
+        {
+            get => _minForceString;
+
+            set
+            {
+                if ((value.Length > 0) && (value[0] == '!'))
+                {
+                    value = value[1..];
+
+                    if (_minForceString != value)
+                    {
+                        _minForceString = value;
+
+                        OnPropertyChanged();
+                    }
+                }
+            }
+        }
+
+        /* Frequency */
+
+        private int _frequency = 16;
 
 		public int Frequency
 		{
