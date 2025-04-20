@@ -45,6 +45,7 @@ namespace MarvinsAIRA
 		private IRacingSdkDatum? _irsdk_rpmDatum = null;
 		private IRacingSdkDatum? _irsdk_rrShockVel_STDatum = null;
 		private IRacingSdkDatum? _irsdk_sessionFlagsDatum = null;
+		private IRacingSdkDatum? _irsdk_sessionNumDatum = null;
 		private IRacingSdkDatum? _irsdk_speedDatum = null;
 		private IRacingSdkDatum? _irsdk_steeringFFBEnabled_Datum = null;
 		private IRacingSdkDatum? _irsdk_steeringWheelAngleDatum = null;
@@ -87,6 +88,7 @@ namespace MarvinsAIRA
 		public float _irsdk_rpm = 0f;
 		public float[] _irsdk_rrShockVel_ST = new float[ IRSDK_360HZ_SAMPLES_PER_FRAME ];
 		public IRacingSdkEnum.Flags _irsdk_sessionFlags = 0;
+		public int _irsdk_sessionNum = -1;
 		public float _irsdk_speed = 0f;
 		public bool _irsdk_steeringFFBEnabled = false;
 		public float _irsdk_steeringWheelAngle = 0f;
@@ -113,6 +115,7 @@ namespace MarvinsAIRA
 		public bool _irsdk_isOnTrackLastFrame = false;
 		public float _irsdk_lapDistLastFrame = 0f;
 		public float _irsdk_lapDistPctLastFrame = 0f;
+		public int _irsdk_sessionNumLastFrame = -1;
 		public bool _irsdk_steeringFFBEnabledLastFrame = false;
 		public bool _irsdk_weatherDeclaredWetLastFrame = false;
 
@@ -191,6 +194,18 @@ namespace MarvinsAIRA
 					mainWindow.Connection_StatusBarItem.Foreground = Brushes.ForestGreen;
 
 					mainWindow.SimulatorNotRunning_Label.Visibility = Visibility.Hidden;
+
+					if ( Settings.PauseWhenSimulatorIsNotRunning )
+					{
+						if ( Settings.ForceFeedbackEnabled == false )
+						{
+							WriteLine( "Automatically enabling FFB since iRacing simulator is running." );
+
+							Settings.ForceFeedbackEnabled = true;
+
+							mainWindow.ReinitializeForceFeedback();
+						}
+					}
 				}
 			} );
 		}
@@ -223,6 +238,7 @@ namespace MarvinsAIRA
 			_irsdk_playerTrackSurface = IRacingSdkEnum.TrkLoc.NotInWorld;
 			_irsdk_rpm = 0f;
 			_irsdk_sessionFlags = 0;
+			_irsdk_sessionNum = -1;
 			_irsdk_speed = 0f;
 			_irsdk_steeringFFBEnabled = false;
 			_irsdk_steeringWheelAngle = 0f;
@@ -260,6 +276,7 @@ namespace MarvinsAIRA
 			_irsdk_isOnTrackLastFrame = false;
 			_irsdk_lapDistLastFrame = 0f;
 			_irsdk_lapDistPctLastFrame = 0f;
+			_irsdk_sessionNumLastFrame = -1;
 			_irsdk_steeringFFBEnabledLastFrame = false;
 			_irsdk_weatherDeclaredWetLastFrame = false;
 
@@ -354,6 +371,7 @@ namespace MarvinsAIRA
 				_irsdk_playerTrackSurfaceDatum = _irsdk.Data.TelemetryDataProperties[ "PlayerTrackSurface" ];
 				_irsdk_rpmDatum = _irsdk.Data.TelemetryDataProperties[ "RPM" ];
 				_irsdk_sessionFlagsDatum = _irsdk.Data.TelemetryDataProperties[ "SessionFlags" ];
+				_irsdk_sessionNumDatum = _irsdk.Data.TelemetryDataProperties[ "SessionNum" ];
 				_irsdk_speedDatum = _irsdk.Data.TelemetryDataProperties[ "Speed" ];
 				_irsdk_steeringFFBEnabled_Datum = _irsdk.Data.TelemetryDataProperties[ "SteeringFFBEnabled" ];
 				_irsdk_steeringWheelAngleDatum = _irsdk.Data.TelemetryDataProperties[ "SteeringWheelAngle" ];
@@ -390,6 +408,7 @@ namespace MarvinsAIRA
 			_irsdk_isOnTrackLastFrame = _irsdk_isOnTrack;
 			_irsdk_lapDistLastFrame = _irsdk_lapDist;
 			_irsdk_lapDistPctLastFrame = _irsdk_lapDistPct;
+			_irsdk_sessionNumLastFrame = _irsdk_sessionNum;
 			_irsdk_steeringFFBEnabledLastFrame = _irsdk_steeringFFBEnabled;
 			_irsdk_weatherDeclaredWetLastFrame = _irsdk_weatherDeclaredWet;
 
@@ -412,6 +431,7 @@ namespace MarvinsAIRA
 			_irsdk_playerTrackSurface = (IRacingSdkEnum.TrkLoc) _irsdk.Data.GetInt( _irsdk_playerTrackSurfaceDatum );
 			_irsdk_rpm = _irsdk.Data.GetFloat( _irsdk_rpmDatum );
 			_irsdk_sessionFlags = (IRacingSdkEnum.Flags) _irsdk.Data.GetBitField( _irsdk_sessionFlagsDatum );
+			_irsdk_sessionNum = _irsdk.Data.GetInt( _irsdk_sessionNumDatum );
 			_irsdk_speed = _irsdk.Data.GetFloat( _irsdk_speedDatum );
 			_irsdk_steeringFFBEnabled = _irsdk.Data.GetBool( _irsdk_steeringFFBEnabled_Datum );
 			_irsdk_steeringWheelAngle = _irsdk.Data.GetFloat( _irsdk_steeringWheelAngleDatum );
@@ -479,6 +499,13 @@ namespace MarvinsAIRA
 			// pause session info updates if we are in a replay or off the track
 
 			_irsdk.PauseSessionInfoUpdates = _irsdk_isOnTrack || ( _irsdk_simMode == "replay" );
+
+			// if the session number has changed then we want to resume session info updates
+
+			if ( _irsdk_sessionNum != _irsdk_sessionNumLastFrame )
+			{
+				_irsdk.PauseSessionInfoUpdates = false;
+			}
 
 			// ABS tone
 

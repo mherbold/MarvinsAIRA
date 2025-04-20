@@ -256,7 +256,7 @@ namespace MarvinsAIRA
 
 				// supporters textbox
 
-				string[] supporterList = [ "Bruno Cerdeira Santos", "Chad McNeese", "Diogo Xavier Olivera", "Robert JL Henry", "Alberto Rama", "Andreas Mauchle", "Camron Frederick", "Christian Scherf", "Erin Andrusak", "f1iq.bsky.social", "Flavio A Mendes", "G. Balla", "Joachim Osbeck", "Jonathan E Marshall", "Maksym Palazov", "Panayiotis Papaioannou", "Paolo", "Rick", "Robert Perry", "Roy Medawar", "Shane Cochran", "Simon A Todd", "Stuart H Ware", "V A Parnell Jr MD", "Yafar Abdala.", "Ari D Sherwood", "Ba Anh Vu", "Brendan Hobbart", "Dan", "Dave Cam", "M C Hastrich", "Mitchell Bowen", "Ryan Feltrin", "Steven Slater", "Alan King", "Jakub Trinkl", "Robert Watson", "Sascha", "Travis Rhoads", "John Ebersole", "Rowly", "@fuelpodcast", "@G83MIKE", "@sidgeracing", "Ade", "Alan", "Binesh Lad", "Carlos Mancuso", "Chad Buchanan", "Christian Elsinger", "Daniel König", "Didier Porte", "Hugo", "João Carriço", "Kevin Burke", "Kevin J Fanning", "Marco", "Marcus Iglesias de Souza Oliveira", "Marin Marinov", "Mark G", "Mark R McLewee", "Marshall", "Michael Buckley", "Mikey Polard", "MR A M HALL", "Patrick Rochadel", "Sean Symes", "Shawn L Parrish", "Spieler Ralf", "Stephane THIBAUT", "T", "William Daily Jr", "Yamine Taieb", "Matt Swift", "Adrian G Rubio", "Ahmad El Baba", "Alberto", "Alexander Socher", "ARMracing", "Austin Elliott", "Chase", "Crispin Williamson", "Grimaldi Jean", "Grimax Racing", "GUIDOTTI", "Halan Williams", "Jeroni Fajardo", "John Millet", "Karl Thoroddsen", "Lufino", "Markus Kathan", "Massimo Martiglia", "Michie", "Mr Kurt Nicholson", "Nicholas Williams", "Ole", "Olly", "Omar Carlet", "parmand", "Rene Vorwerk", "Serge Montembault", "Shane Gleeson", "Stanislav Boldyryev", "Steven Barker", "Tom Weston", "Tripp Lanier", "Joy Perez", "Rodrigo Ribeiro R S lima", "Sebastian", "Yann LE DOUSSAL", "Jeremy", "Knosby", "Luka", "Miguel Angel Casado González", "and to all of the others who have chosen to remain anonymous." ];
+				string[] supporterList = [ "@lucciano.netto", "Bruno Cerdeira Santos", "DIOGO XAVIER OLIVEIRA", "Herbert Heissenberger", "Robert JL Henry", "Chad McNeese", "Marcos Martins de Souza", "Erin Andrusak", "Matthew Davids", "Travis Boudreaux", "f1iq.bsky.social", "Tomáš Šulek", "Alberto Rama", "Andreas Mauchle", "@azmath16", "Camron Frederick", "@broch_evans", "Christian Scherf", "Chao Du", "Tyler Hagan", "Shane Cochran", "Flavio A Mendes", "G. Balla", "Greg Ogilvie", "Jeff Fritscher", "Jonathan E Marshall", "Maksym Palazov", "Robert Perry", "Nelson Rivera", "Nash Milincic", "Joachim Osbeck", "Paolo", "Panayiotis Papaioannou", "Rony Issak", "Rick", "Simon A Todd", "stuart h ware", "Timothy Craig", "Maciej Tonderski", "V A Parnell Jr MD", "Yafar Abdala.", "Ari D Sherwood", "Brendan Hobbart", "Dave Cam", "Dan", "steven slater", "Mitchell Bowen", "M C Hastrich", "Ryan Feltrin", "Ba Anh Vu", "Alan King", "Jakub Trinkl", "John Cherry", "Ryan Bath", "Travis Rhoads", "Robert Watson", "Sascha", "John Ebersole", "Rowly", "William Daily Jr", "didier porte", "Alan", "MR A M HALL", "Binesh Lad", "Michael Buckley", "Carlos Mancuso", "Chad Buchanan", "Christian Elsinger", "Daniel R", "David", "Dirk Ehrhardt", "Daniel König", "Geert Van Laere", "Glen D Blanchard DDS", "Greg Obrigavitch", "hamilton smith", "Hugo", "Sean Symes", "illuminodie", "João Carriço", "Julian", "Kevin Burke", "marcus iglesias de souza oliveira", "@joeyladouceur", "Marco", "Mark Fleming", "Marin Marinov", "Marshall", "Mark G", "@G83MIKE", "Mikey Polard", "Mark R McLewee", "Kevin J Fanning", "Patrick Rochadel", "John McCallion", "Sergio Junior", "Shawn L Parrish", "@sidgeracing", "@fuelpodcast", "Stephane THIBAUT", "T", "Johan Grankvist", "Ade", "Timothy Moore", "YAMINE TAIEB", "Matt Swift", "BorkulusRift", "Ahmad El Baba", "ARMracing", "Chase", "Crispin Williamson", "Alberto", "Grimaldi Jean", "@eliassomo97", "FABIO R QUEIROZ", "Adrian G Rubio", "Grimax Racing", "Halan Williams", "GUIDOTTI", "Jeroni Fajardo", "Peynado", "Karl Thoroddsen", "Mr Kurt Nicholson", "Alexander Socher", "candido martinez", "Markus Kathan", "Massimo Martiglia", "Michie", "John Millet", "@millsdo", "Nicholas Williams", "Noah Rusk", "Ole", "Olly", "Omar Carlet", "S.Schels", "Rene Vorwerk", "Robert Gerke", "Sergio Macias", "Shane Gleeson", "AUSTIN ELLIOTT", "Stanislav Boldyryev", "Steven Barker", "Lufino", "Tom Weston", "Tripp Lanier", "CRISTIAN VILLENA SANCHEZ", "zdenek.kaska@gmail.com", "joy perez", "JOAO BATISTA", "Rodrigo Ribeiro R S lima", "Sebastian", "Yann LE DOUSSAL", "Elprimartin", "Enrico castellano", "EatisLee", "SEBASTIAO FERREIRA", "jeremy", "Knosby", "Luka", "Miguel Angel Casado González", "and to all of the others who have chosen to remain anonymous." ];
 
 				Supporters_TextBox.Text = "Thank you to " + string.Join( ", ", supporterList );
 
@@ -509,6 +509,20 @@ namespace MarvinsAIRA
 							app.UpdateLogitech();
 							app.UpdateTelemetry();
 							app.ProcessChatMessageQueue();
+
+							// pause ffb when simulator is not running feature
+
+							if ( app.Settings.PauseWhenSimulatorIsNotRunning && ( app._irsdk_connected == false ) )
+							{
+								if ( app.FFB_Initialized && !app.FFB_IsCoolingDown )
+								{
+									app.WriteLine( "Automatically disabling FFB since iRacing simulator is not running." );
+
+									app.Settings.ForceFeedbackEnabled = false;
+
+									app.StopForceFeedback();
+								}
+							}
 
 							// test signal
 
@@ -916,6 +930,16 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region Force feedback tab
+
+		public void ReinitializeForceFeedback()
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.InitializeForceFeedback( _win_windowHandle );
+			}
+		}
 
 		private void ForceFeedback_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
@@ -1429,6 +1453,13 @@ namespace MarvinsAIRA
 			{
 				UpdateWindowTransparency( false );
 			}
+		}
+
+		private void PauseWhenSimulatorIsNotRunning_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			var checkBox = (CheckBox) sender;
+
+			var pauseWhenSimulatorIsNotRunning = checkBox.IsChecked == true;
 		}
 
 		private async void CheckForUpdateNow_Button_Click( object sender, RoutedEventArgs e )

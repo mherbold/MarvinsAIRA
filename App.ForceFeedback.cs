@@ -135,6 +135,7 @@ namespace MarvinsAIRA
 		public float FFB_OversteerAmountLinear { get => _ffb_oversteerAmountLinear; }
 		public bool FFB_AutoOverallScaleIsReady { get => _ffb_autoOverallScalePeakForceInNewtonMeters > 1f; }
 		public float FFB_AutoOverallScalePeakForceInNewtonMeters { get => _ffb_autoOverallScalePeakForceInNewtonMeters; }
+		public bool FFB_IsCoolingDown { get => _ffb_startCooldownNow || _ffb_magnitudeCoolDownTimer > 0f; }
 
 		#endregion
 

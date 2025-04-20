@@ -723,7 +723,7 @@
                                 <CheckBox Content="Hide Tray Alert" IsChecked="{Binding HideTrayAlert}" Margin="20,0,0,0"/>
                             </StackPanel>
                             <CheckBox x:Name="TopmostWindow_CheckBox" Content="Topmost Window" IsChecked="{Binding TopmostWindow}" Click="TopmostWindow_CheckBox_Click"/>
-                            <Grid Margin="0,15,0,0">
+                            <Grid Margin="0,20,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="110"/>
                                     <ColumnDefinition Width="90"/>
@@ -733,7 +733,8 @@
                                 <TextBox Grid.Column="1" Text="{Binding WindowOpacityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                                 <Slider x:Name="WindowOpacity_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="25" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding WindowOpacity}" ValueChanged="WindowOpacity_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
-                            <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                            <CheckBox x:Name="PauseWhenSimulatorIsNotRunning_CheckBox" Content="Automatically Disable Force Feedback When iRacing Simulator Is Not Running (and re-enable when it is)" IsChecked="{Binding PauseWhenSimulatorIsNotRunning}" Click="PauseWhenSimulatorIsNotRunning_CheckBox_Click" Margin="0,20,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                 <CheckBox Content="Check For Updates on Startup" IsChecked="{Binding CheckForUpdates}"/>
                                 <Button Grid.Column="2" x:Name="CheckForUpdateNow_Button" Margin="15,0,0,0" Content="CHECK NOW" Click="CheckForUpdateNow_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
                             </StackPanel>

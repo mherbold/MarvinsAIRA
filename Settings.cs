@@ -1925,6 +1925,29 @@ namespace MarvinsAIRA
 
 		#region Settings tab - App tab
 
+		/* Pause when iRacing is not running */
+
+		private bool _pauseWhenSimulatorIsNotRunning = true;
+
+		public bool PauseWhenSimulatorIsNotRunning
+		{
+			get => _pauseWhenSimulatorIsNotRunning;
+
+			set
+			{
+				if ( _pauseWhenSimulatorIsNotRunning != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PauseWhenSimulatorIsNotRunning changed - before {_pauseWhenSimulatorIsNotRunning} now {value}" );
+
+					_pauseWhenSimulatorIsNotRunning = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Start with Windows */
 
 		private bool _startWithWindows = false;
@@ -3418,8 +3441,8 @@ namespace MarvinsAIRA
 		private string _sayLoadOverallScale = "Overall :value:";
 		private string _sayLoadDetailScale = "Detail :value:";
 		private string _sayClipping = "";
-		private string _sayCrashProtectionOn = "Crash protection engaged";
-		private string _sayCrashProtectionOff = "Crash protection standing by";
+		private string _sayCrashProtectionOn = "FFB crash protection engaged";
+		private string _sayCrashProtectionOff = "FFB crash protection standing by";
 
 		private string _sayClear = "Clear";
 		private string _sayCarLeft = "Car left";
