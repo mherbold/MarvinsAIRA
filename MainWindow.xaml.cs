@@ -37,6 +37,8 @@ namespace MarvinsAIRA
 		private bool _win_pauseInputProcessing = false;
 		private bool _win_absTestPlaying = false;
 		private bool _win_dieNow = false;
+		private bool _win_wasConnectedToSimulator = false;
+		private bool _win_turnOffForceFeedback = false;
 
 		private string? _win_installerFilePath = null;
 
@@ -512,15 +514,31 @@ namespace MarvinsAIRA
 
 							// pause ffb when simulator is not running feature
 
-							if ( app.Settings.PauseWhenSimulatorIsNotRunning && ( app._irsdk_connected == false ) )
+							if ( _win_wasConnectedToSimulator && !app._irsdk_connected )
 							{
-								if ( app.FFB_Initialized && !app.FFB_IsCoolingDown )
+								_win_turnOffForceFeedback = true;
+							}
+
+							_win_wasConnectedToSimulator = app._irsdk_connected;
+
+							if ( _win_turnOffForceFeedback )
+							{
+								if ( app.Settings.PauseWhenSimulatorIsNotRunning && app.FFB_Initialized )
 								{
-									app.WriteLine( "Automatically disabling FFB since iRacing simulator is not running." );
+									if ( !app.FFB_IsCoolingDown )
+									{
+										app.WriteLine( "Automatically disabling FFB since iRacing simulator is not running." );
 
-									app.Settings.ForceFeedbackEnabled = false;
+										app.Settings.ForceFeedbackEnabled = false;
 
-									app.StopForceFeedback();
+										app.StopForceFeedback();
+
+										_win_turnOffForceFeedback = false;
+									}
+								}
+								else
+								{
+									_win_turnOffForceFeedback = false;
 								}
 							}
 
