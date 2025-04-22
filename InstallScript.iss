@@ -32,3 +32,10 @@ Source: "C:\Users\marvi\Documents\GitHub\MarvinsAIRASimHub\bin\release\MarvinsAI
 [Icons]
 Name: "{group}\MarvinsAIRA"; Filename: "{app}\MarvinsAIRA.exe"
 Name: "{userdesktop}\MarvinsAIRA"; Filename: "{app}\MarvinsAIRA.exe"; Tasks: desktopicon
+
+[Run]
+Filename: {app}\MarvinsAIRA.exe; Description: {cm:LaunchProgram,{cm:AppName}}; Flags: nowait postinstall skipifsilent
+
+[CustomMessages]
+AppName=Marvin's Awesome iRacing App
+LaunchProgram=Start Marvin's Awesome iRacing App

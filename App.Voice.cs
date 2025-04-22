@@ -39,6 +39,8 @@ namespace MarvinsAIRA
 			}
 
 			var installedVoices = _voice_speechSynthesizer.GetInstalledVoices();
+			var firstInstalledVoice = string.Empty;
+			var selectedVoiceFound = false;
 
 			SerializableDictionary<string, string> voiceList = [];
 
@@ -48,11 +50,21 @@ namespace MarvinsAIRA
 				{
 					voiceList.Add( installedVoice.VoiceInfo.Name, installedVoice.VoiceInfo.Description );
 
-					if ( Settings.SelectedVoice == string.Empty )
+					if ( firstInstalledVoice == string.Empty )
 					{
-						Settings.SelectedVoice = installedVoice.VoiceInfo.Name;
+						firstInstalledVoice = installedVoice.VoiceInfo.Name;
+					}
+
+					if ( Settings.SelectedVoice == installedVoice.VoiceInfo.Name )
+					{
+						selectedVoiceFound = true;
 					}
 				}
+			}
+
+			if ( !selectedVoiceFound )
+			{
+				Settings.SelectedVoice = firstInstalledVoice;
 			}
 
 			Settings.UpdateVoiceList( voiceList );

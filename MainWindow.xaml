@@ -84,7 +84,13 @@
                             <Label Grid.Column="0" Content="Overall Scale" VerticalAlignment="Center" ToolTip="This is the overall scale to convert from Newton-meters into DirectInput force feedback units." />
                             <TextBox Grid.Column="1" Text="{Binding OverallScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                             <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="1" Maximum="100" SmallChange="0.1" LargeChange="10" Value="{Binding OverallScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
-                            <Button Grid.Column="3" x:Name="AutoOverallScale_Button" Margin="15,0,0,0" Content="AUTO" Click="AutoOverallScale_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" IsEnabled="False" Width="80" MouseRightButtonDown="AutoOverallScale_Button_MouseRightButtonDown" />
+                            <Grid Grid.Column="3" Margin="15,0,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0"  Content="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="Right-click to clear, left-click to set overall scale slider." FontSize="10" Margin="0,-50,0,0" />
+                                <Button Grid.Row="0" x:Name="AutoOverallScale_Button" Content="AUTO" Click="AutoOverallScale_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" IsEnabled="False" Width="80" MouseRightButtonDown="AutoOverallScale_Button_MouseRightButtonDown" ToolTip="Right-click to clear, left-click to set overall scale slider." />
+                            </Grid>
                             <Button Grid.Column="4" x:Name="AutoOverallScaleMap_Button" Click="AutoOverallScaleMap_Button_Click" Background="{x:Null}" BorderBrush="{x:Null}" MinWidth="32" MinHeight="32" Padding="0,0,0,0" Margin="5,0,0,0">
                                 <Image Source="/a-button.png"/>
                             </Button>
@@ -763,6 +769,7 @@
                     <TabItem Header="Save File">
                         <StackPanel Margin="10,10,10,10">
                             <Label Content="These checkboxes apply only to the overall and detail scale sliders." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10" />
+                            <Label Content="Note: Steering effects are always saved per-car." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10" />
                             <CheckBox x:Name="SaveForEachWheel_CheckBox" Content="Save separate force feedback settings for each steering wheelbase device" IsChecked="{Binding SaveSettingsPerWheel}" Click="SaveForEachWheel_CheckBox_Click"/>
                             <CheckBox x:Name="SaveForEachCar_CheckBox" Content="Save separate force feedback settings for each car" IsChecked="{Binding SaveSettingsPerCar}" Click="SaveForEachCar_CheckBox_Click"/>
                             <CheckBox x:Name="SaveForEachTrack_CheckBox" Content="Save separate force feedback settings for each track" IsChecked="{Binding SaveSettingsPerTrack}" Click="SaveForEachTrack_CheckBox_Click"/>

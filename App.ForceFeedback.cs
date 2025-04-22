@@ -30,7 +30,7 @@ namespace MarvinsAIRA
 		public const int FFB_WRITEABLE_BITMAP_HEIGHT = 200;
 		public const int FFB_WRITEABLE_BITMAP_DPI = 96;
 
-		public const int FFB_PIXELS_BUFFER_WIDTH = FFB_WRITEABLE_BITMAP_WIDTH + 1;
+		public const int FFB_PIXELS_BUFFER_WIDTH = FFB_WRITEABLE_BITMAP_WIDTH;
 		public const int FFB_PIXELS_BUFFER_HEIGHT = 200;
 		public const int FFB_PIXELS_BUFFER_BYTES_PER_PIXEL = 4;
 		public const int FFB_PIXELS_BUFFER_STRIDE = FFB_PIXELS_BUFFER_WIDTH * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
@@ -1595,6 +1595,11 @@ namespace MarvinsAIRA
 					var clipPoint1 = 19;
 					var clipPoint2 = FFB_PIXELS_BUFFER_HEIGHT - 20;
 
+					var shockProtection1 = clipPoint1 + 1;
+					var shockProtection2 = clipPoint1 + 2;
+					var shockProtection3 = clipPoint2 - 1;
+					var shockProtection4 = clipPoint2 - 2;
+
 					var iY2 = (int) ( torqueNM * overallScale / torqueToPixelBufferScale + halfPixelBufferHeight ) + 1;
 					var iY1 = iY2 - 2;
 
@@ -1660,6 +1665,27 @@ namespace MarvinsAIRA
 								_ffb_pixels[ offset + 1 ] = 128;
 								_ffb_pixels[ offset + 2 ] = 0;
 							}
+							else if ( ( _ffb_crashProtectionTimer > 0f ) && ( ( y == shockProtection1 ) || ( y == shockProtection2 ) || ( y == shockProtection3 ) || ( y == shockProtection4 ) ) )
+							{
+								_ffb_pixels[ offset + 0 ] = 0;
+								_ffb_pixels[ offset + 1 ] = 255;
+								_ffb_pixels[ offset + 2 ] = 255;
+							}
+							else if ( ( _ffb_curbProtectionTimer > 0f ) && ( ( y == shockProtection1 ) || ( y == shockProtection2 ) || ( y == shockProtection3 ) || ( y == shockProtection4 ) ) )
+							{
+								if ( ( _irsdk_tickCount & 1 ) == 0)
+								{
+									_ffb_pixels[ offset + 0 ] = 0;
+									_ffb_pixels[ offset + 1 ] = 0;
+									_ffb_pixels[ offset + 2 ] = 255;
+								}
+								else
+								{
+									_ffb_pixels[ offset + 0 ] = 255;
+									_ffb_pixels[ offset + 1 ] = 255;
+									_ffb_pixels[ offset + 2 ] = 255;
+								}
+							}
 							else
 							{
 								_ffb_pixels[ offset + 0 ] = 64;
@@ -1689,21 +1715,6 @@ namespace MarvinsAIRA
 			_ffb_outTorqueNM = outTorqueNM;
 			_ffb_lfeInMagnitude = lfeInMagnitude;
 			_ffb_lfeOutTorqueNM = lfeOutTorqueNM;
-
-			// update the pretty graph
-
-			if ( _ffb_drawPrettyGraph )
-			{
-				for ( var y = 0; y < 200; y++ )
-				{
-					var offset = y * FFB_PIXELS_BUFFER_STRIDE + _ffb_prettyGraphCurrentX * FFB_PIXELS_BUFFER_BYTES_PER_PIXEL;
-
-					_ffb_pixels[ offset + 0 ] = 0;
-					_ffb_pixels[ offset + 1 ] = 128;
-					_ffb_pixels[ offset + 2 ] = 0;
-					_ffb_pixels[ offset + 3 ] = 255;
-				}
-			}
 		}
 
 		static private void MultimediaTimerEventCallback( uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2 )

@@ -541,14 +541,22 @@ namespace MarvinsAIRA
 			// update the force feedback magnitudes
 
 			UpdateForceFeedback();
+			UpdateTelemetry();
+
+			// run pretty graph at 30 FPS instead of 60
+
+			var mainWindow = MarvinsAIRA.MainWindow.Instance;
+
+			if ( ( _irsdk_tickCount & 1 ) == 0 )
+			{
+				mainWindow?.UpdatePrettyGraph();
+			}
 
 			// run other stuff at 20 FPS instead of 60
 
 			if ( _irsdk_tickCount - _irsdk_updateLoopTickCount >= 3 )
 			{
 				_irsdk_updateLoopTickCount = _irsdk_tickCount;
-
-				var mainWindow = MarvinsAIRA.MainWindow.Instance;
 
 				mainWindow?._win_autoResetEvent.Set();
 			}

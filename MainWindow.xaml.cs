@@ -57,7 +57,6 @@ namespace MarvinsAIRA
 		private int _win_keepThreadsAlive = 1;
 		private int _win_sendForceFeedbackTestSignalCounter = 0;
 
-		private float _win_guiUpdateTimer = 0;
 		private float _win_inputReinitTimer = 0;
 
 		private IntPtr _win_deviceChangeNotificationHandle = 0;
@@ -475,6 +474,8 @@ namespace MarvinsAIRA
 			if ( !app._irsdk_connected )
 			{
 				_win_autoResetEvent.Set();
+
+				UpdatePrettyGraph();
 			}
 		}
 
@@ -509,7 +510,6 @@ namespace MarvinsAIRA
 							app.UpdateWindSimulator();
 							app.UpdateSpotter( deltaTime );
 							app.UpdateLogitech();
-							app.UpdateTelemetry();
 							app.ProcessChatMessageQueue();
 
 							// pause ffb when simulator is not running feature
@@ -560,12 +560,6 @@ namespace MarvinsAIRA
 
 							// gui
 
-							_win_guiUpdateTimer -= deltaTime;
-
-							if ( _win_guiUpdateTimer <= 0f )
-							{
-								_win_guiUpdateTimer = 0.033f;
-
 								Dispatcher.BeginInvoke( () =>
 								{
 									// iRacing FFB warning
@@ -585,13 +579,6 @@ namespace MarvinsAIRA
 									{
 										AutoOverallScale_Button.IsEnabled = false;
 										AutoOverallScale_Button.BorderBrush = Brushes.DarkRed;
-									}
-
-									// Pretty graph
-
-									if ( app._ffb_drawPrettyGraph )
-									{
-										app._ffb_writeableBitmap?.WritePixels( new Int32Rect( 0, 0, App.FFB_WRITEABLE_BITMAP_WIDTH, App.FFB_WRITEABLE_BITMAP_HEIGHT ), app._ffb_pixels, App.FFB_PIXELS_BUFFER_STRIDE, 0, 0 );
 									}
 
 									// Recording status
@@ -836,7 +823,6 @@ namespace MarvinsAIRA
 										Understeer_EndYawRateFactor_Label.Content = $"YRF {app.Settings.USEndYawRateFactorRight}";
 									}
 								} );
-							}
 
 							// usb device changes
 
@@ -1871,6 +1857,32 @@ namespace MarvinsAIRA
 
 			_win_understeerBitmap.WritePixels( new Int32Rect( 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT ), _win_understeerPixels, IMAGE_STRIDE, 0, 0 );
 			_win_oversteerBitmap.WritePixels( new Int32Rect( 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT ), _win_oversteerPixels, IMAGE_STRIDE, 0, 0 );
+		}
+
+		public void UpdatePrettyGraph()
+		{
+			var app = (App) Application.Current;
+
+			if ( app._ffb_drawPrettyGraph )
+			{
+				Dispatcher.BeginInvoke( () =>
+				{
+					int leftX = app._ffb_prettyGraphCurrentX;
+					int leftWidth = App.FFB_PIXELS_BUFFER_WIDTH - leftX;
+					int rightX = 0;
+					int rightWidth = app._ffb_prettyGraphCurrentX - rightX;
+
+					if ( leftWidth > 0 )
+					{
+						app._ffb_writeableBitmap?.WritePixels( new Int32Rect( leftX, 0, leftWidth, App.FFB_WRITEABLE_BITMAP_HEIGHT ), app._ffb_pixels, App.FFB_PIXELS_BUFFER_STRIDE, 0, 0 );
+					}
+
+					if ( rightWidth > 0 )
+					{
+						app._ffb_writeableBitmap?.WritePixels( new Int32Rect( rightX, 0, rightWidth, App.FFB_WRITEABLE_BITMAP_HEIGHT ), app._ffb_pixels, App.FFB_PIXELS_BUFFER_STRIDE, leftWidth, 0 );
+					}
+				} );
+			}
 		}
 
 		#endregion
