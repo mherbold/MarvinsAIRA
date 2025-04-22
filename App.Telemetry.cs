@@ -35,7 +35,7 @@ namespace MarvinsAIRA
 		public float lfeScale;
 
 		public float ffbInAmount;
-		public int ffbOutAmount;
+		public float ffbOutAmount;
 		public bool ffbClipping;
 		public float yawRateFactor;
 		public float gForce;
@@ -107,7 +107,7 @@ namespace MarvinsAIRA
 			_telemetry_data.wheelMax = Settings.WheelMaxForce;
 			_telemetry_data.overallScale = Settings.OverallScale / 100f;
 			_telemetry_data.overallScaleAutoReady = FFB_AutoOverallScaleIsReady;
-			_telemetry_data.overallScaleAutoPeak = _ffb_autoOverallScalePeakForceInNewtonMeters;
+			_telemetry_data.overallScaleAutoPeak = _ffb_autoTorqueNM;
 			_telemetry_data.overallScaleAutoClipLimit = Settings.AutoOverallScaleClipLimit / 100f;
 			_telemetry_data.detailScale = Settings.DetailScale / 100f;
 			_telemetry_data.parkedScale = Settings.ParkedScale / 100f;
@@ -130,17 +130,17 @@ namespace MarvinsAIRA
 			_telemetry_data.oversteerAmount = _ffb_oversteerAmount;
 
 			_telemetry_data.lfeScale = Settings.LFEScale / 100f;
-			_telemetry_data.lfeInAmount = _ffb_lfeInAmount;
-			_telemetry_data.lfeOutAmount = _ffb_lfeOutAmount;
+			_telemetry_data.lfeInAmount = _ffb_lfeInMagnitude;
+			_telemetry_data.lfeOutAmount = _ffb_lfeOutTorqueNM;
 
-			_telemetry_data.ffbInAmount = _ffb_inAmount;
-			_telemetry_data.ffbOutAmount = _ffb_outAmount;
-			_telemetry_data.ffbSteadyState = _ffb_rawSteadyStateWheelTorque;
+			_telemetry_data.ffbInAmount = _ffb_inTorqueNM;
+			_telemetry_data.ffbOutAmount = _ffb_outTorqueNM;
+			_telemetry_data.ffbSteadyState = _ffb_rawSteadyStateTorqueNM;
 			_telemetry_data.ffbClipping = _ffb_clippedTimer > 0f;
 
 			_telemetry_data.yawRateFactor = _ffb_yawRateFactorInstant;
 			_telemetry_data.gForce = _irsdk_gForce;
-			_telemetry_data.shockVelocity = _ffb_currentShockVel;
+			_telemetry_data.shockVelocity = _ffb_maxShockVel;
 
 			_telemetry_data.crashProtectionEngaged = _ffb_crashProtectionTimer > 0f;
 			_telemetry_data.curbProtectionEngaged = _ffb_curbProtectionTimer > 0f;

@@ -284,6 +284,44 @@ namespace MarvinsAIRA
 			}
 		}
 
+		/* Decrease overall scale */
+
+		private MappedButtons _decreaseOverallScaleButtons = new();
+
+		public MappedButtons DecreaseOverallScaleButtons
+		{
+			get => _decreaseOverallScaleButtons;
+
+			set
+			{
+				if ( _decreaseOverallScaleButtons != value )
+				{
+					_decreaseOverallScaleButtons = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Increase overall scale */
+
+		private MappedButtons _increaseOverallScaleButtons = new();
+
+		public MappedButtons IncreaseOverallScaleButtons
+		{
+			get => _increaseOverallScaleButtons;
+
+			set
+			{
+				if ( _increaseOverallScaleButtons != value )
+				{
+					_increaseOverallScaleButtons = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		/* Detail scale */
 
 		private float _detailScale = 100f;
@@ -337,44 +375,6 @@ namespace MarvinsAIRA
 
 						OnPropertyChanged();
 					}
-				}
-			}
-		}
-
-		/* Decrease overall scale */
-
-		private MappedButtons _decreaseOverallScaleButtons = new();
-
-		public MappedButtons DecreaseOverallScaleButtons
-		{
-			get => _decreaseOverallScaleButtons;
-
-			set
-			{
-				if ( _decreaseOverallScaleButtons != value )
-				{
-					_decreaseOverallScaleButtons = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
-
-		/* Increase overall scale */
-
-		private MappedButtons _increaseOverallScaleButtons = new();
-
-		public MappedButtons IncreaseOverallScaleButtons
-		{
-			get => _increaseOverallScaleButtons;
-
-			set
-			{
-				if ( _increaseOverallScaleButtons != value )
-				{
-					_increaseOverallScaleButtons = value;
-
-					OnPropertyChanged();
 				}
 			}
 		}
@@ -467,39 +467,39 @@ namespace MarvinsAIRA
 			}
 		}
 
-		/* Frequency */
+		/* Min force */
 
-		private int _frequency = 16;
+		private float _minForce = 0f;
 
-		public int Frequency
+		public float MinForce
 		{
-			get => _frequency;
+			get => _minForce;
 
 			set
 			{
-				value = Math.Clamp( value, 2, 16 );
+				value = Math.Clamp( value, 0f, 2f );
 
-				if ( _frequency != value )
+				if ( _minForce != value )
 				{
 					var app = (App) Application.Current;
 
-					app.WriteLine( $"Frequency changed - before {_frequency} now {value}" );
+					app.WriteLine( $"MinForce changed - before {_minForce} now {value}" );
 
-					_frequency = value;
+					_minForce = value;
 
 					OnPropertyChanged();
 				}
 
-				FrequencyString = $"!{1000.0f / ( 18 - _frequency ):F2} Hz";
+				MinForceString = $"!{_minForce:F2} N⋅m";
 			}
 		}
 
-		private string _frequencyString = "500 Hz";
+		private string _minForceString = "0 N⋅m";
 
 		[XmlIgnore]
-		public string FrequencyString
+		public string MinForceString
 		{
-			get => _frequencyString;
+			get => _minForceString;
 
 			set
 			{
@@ -507,9 +507,109 @@ namespace MarvinsAIRA
 				{
 					value = value[ 1.. ];
 
-					if ( _frequencyString != value )
+					if ( _minForceString != value )
 					{
-						_frequencyString = value;
+						_minForceString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Max force */
+
+		private float _maxForce = 50f;
+
+		public float MaxForce
+		{
+			get => _maxForce;
+
+			set
+			{
+				value = Math.Clamp( value, 3f, 50f );
+
+				if ( _maxForce != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"MaxForce changed - before {_maxForce} now {value}" );
+
+					_maxForce = value;
+
+					OnPropertyChanged();
+				}
+
+				MaxForceString = $"!{_maxForce:F2} N⋅m";
+			}
+		}
+
+		private string _maxForceString = "50 N⋅m";
+
+		[XmlIgnore]
+		public string MaxForceString
+		{
+			get => _maxForceString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _maxForceString != value )
+					{
+						_maxForceString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* FFB curve */
+
+		private float _ffbCurve = 1f;
+
+		public float FFBCurve
+		{
+			get => _ffbCurve;
+
+			set
+			{
+				value = Math.Clamp( value, 0.5f, 2f );
+
+				if ( _ffbCurve != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"FFBCurve changed - before {_ffbCurve} now {value}" );
+
+					_ffbCurve = value;
+
+					OnPropertyChanged();
+				}
+
+				FFBCurveString = $"!{_ffbCurve:F2}";
+			}
+		}
+
+		private string _ffbCurveString = "1.00";
+
+		[XmlIgnore]
+		public string FFBCurveString
+		{
+			get => _ffbCurveString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _ffbCurveString != value )
+					{
+						_ffbCurveString = value;
 
 						OnPropertyChanged();
 					}
@@ -870,7 +970,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _usCurveString = "1.5";
+		private string _usCurveString = "1.50";
 
 		[XmlIgnore]
 		public string USCurveString
@@ -1138,7 +1238,7 @@ namespace MarvinsAIRA
 			}
 		}
 
-		private string _osCurveString = "1.5";
+		private string _osCurveString = "1.50";
 
 		[XmlIgnore]
 		public string OSCurveString
@@ -1924,29 +2024,6 @@ namespace MarvinsAIRA
 		#endregion
 
 		#region Settings tab - App tab
-
-		/* Pause when iRacing is not running */
-
-		private bool _pauseWhenSimulatorIsNotRunning = true;
-
-		public bool PauseWhenSimulatorIsNotRunning
-		{
-			get => _pauseWhenSimulatorIsNotRunning;
-
-			set
-			{
-				if ( _pauseWhenSimulatorIsNotRunning != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"PauseWhenSimulatorIsNotRunning changed - before {_pauseWhenSimulatorIsNotRunning} now {value}" );
-
-					_pauseWhenSimulatorIsNotRunning = value;
-
-					OnPropertyChanged();
-				}
-			}
-		}
 
 		/* Start with Windows */
 
@@ -3031,6 +3108,81 @@ namespace MarvinsAIRA
 
 		#region Settings tab - Force feedback tab
 
+		/* Frequency */
+
+		private int _frequency = 16;
+
+		public int Frequency
+		{
+			get => _frequency;
+
+			set
+			{
+				value = Math.Clamp( value, 2, 16 );
+
+				if ( _frequency != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"Frequency changed - before {_frequency} now {value}" );
+
+					_frequency = value;
+
+					OnPropertyChanged();
+				}
+
+				FrequencyString = $"!{1000.0f / ( 18 - _frequency ):F2} Hz";
+			}
+		}
+
+		private string _frequencyString = "500 Hz";
+
+		[XmlIgnore]
+		public string FrequencyString
+		{
+			get => _frequencyString;
+
+			set
+			{
+				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
+				{
+					value = value[ 1.. ];
+
+					if ( _frequencyString != value )
+					{
+						_frequencyString = value;
+
+						OnPropertyChanged();
+					}
+				}
+			}
+		}
+
+		/* Pause when iRacing is not running */
+
+		private bool _pauseWhenSimulatorIsNotRunning = true;
+
+		public bool PauseWhenSimulatorIsNotRunning
+		{
+			get => _pauseWhenSimulatorIsNotRunning;
+
+			set
+			{
+				if ( _pauseWhenSimulatorIsNotRunning != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PauseWhenSimulatorIsNotRunning changed - before {_pauseWhenSimulatorIsNotRunning} now {value}" );
+
+					_pauseWhenSimulatorIsNotRunning = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Send playback to device */
+
 		private bool _playbackSendToDevice = true;
 
 		public bool PlaybackSendToDevice
@@ -3051,6 +3203,8 @@ namespace MarvinsAIRA
 				}
 			}
 		}
+
+		/* Auto overall scale clip limit */
 
 		private int _autoOverallScaleClipLimit = 25;
 
@@ -3093,54 +3247,6 @@ namespace MarvinsAIRA
 					if ( _autoOverallScaleClipLimitString != value )
 					{
 						_autoOverallScaleClipLimitString = value;
-
-						OnPropertyChanged();
-					}
-				}
-			}
-		}
-
-		private int _testMagnitude = 0;
-
-		public int TestMagnitude
-		{
-			get => _testMagnitude;
-
-			set
-			{
-				value = Math.Clamp( value, -10000, 10000 );
-
-				if ( _testMagnitude != value )
-				{
-					var app = (App) Application.Current;
-
-					app.WriteLine( $"TestMagnitude changed - before {_testMagnitude} now {value}" );
-
-					_testMagnitude = value;
-
-					OnPropertyChanged();
-				}
-
-				TestMagnitudeString = $"!{_testMagnitude}";
-			}
-		}
-
-		private string _testMagnitudeStringString = "0";
-
-		[XmlIgnore]
-		public string TestMagnitudeString
-		{
-			get => _testMagnitudeStringString;
-
-			set
-			{
-				if ( ( value.Length > 0 ) && ( value[ 0 ] == '!' ) )
-				{
-					value = value[ 1.. ];
-
-					if ( _testMagnitudeStringString != value )
-					{
-						_testMagnitudeStringString = value;
 
 						OnPropertyChanged();
 					}

@@ -70,7 +70,7 @@
                             <TextBox Grid.Column="1" x:Name="WheelMaxForce_TextBox" Text="{Binding WheelMaxForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                             <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="50" SmallChange="0.1" LargeChange="1" Value="{Binding WheelMaxForce}" PreviewKeyDown="Slider_PreviewKeyDown" />
                         </Grid>
-                        <Grid Margin="0,5,0,0">
+                        <Grid Margin="0,20,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80"/>
                                 <ColumnDefinition Width="90"/>
@@ -126,15 +126,35 @@
                             <TextBox Grid.Column="1" Text="{Binding ParkedScaleString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                             <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding ParkedScale}" PreviewKeyDown="Slider_PreviewKeyDown" />
                         </Grid>
-                        <Grid Margin="0,5,0,0" x:Name="Frequency_Grid">
+                        <Grid Margin="0,20,0,0" x:Name="MinForce_Grid">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80"/>
                                 <ColumnDefinition Width="90"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Frequency" VerticalAlignment="Center" Width="90" />
-                            <TextBox Grid.Column="1" Text="{Binding FrequencyString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
-                            <Slider x:Name="Frequency_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="16" SmallChange="1" LargeChange="1" Value="{Binding Frequency}" ValueChanged="Frequency_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            <Label Grid.Column="0" Content="Min. Force" VerticalAlignment="Center" ToolTip="For weaker wheels, boost forces below this value up to the minimum." />
+                            <TextBox Grid.Column="1" Text="{Binding MinForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0" Maximum="2" SmallChange="0.05" LargeChange="0.1" Value="{Binding MinForce}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                        </Grid>
+                        <Grid Margin="0,5,0,0" x:Name="MaxForce_Grid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Max. Force" VerticalAlignment="Center" ToolTip="For stronger wheels, forces higher than this value will be clamped to the maximum." />
+                            <TextBox Grid.Column="1" Text="{Binding MaxForceString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="3" Maximum="50" SmallChange="0.1" LargeChange="1" Value="{Binding MaxForce}" PreviewKeyDown="Slider_PreviewKeyDown" />
+                        </Grid>
+                        <Grid Margin="0,5,0,0" x:Name="FFBCurve_Grid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="FFB Curve" VerticalAlignment="Center" ToolTip="This is the curve to apply to the force feedback, to compress and expand the signal." />
+                            <TextBox Grid.Column="1" Text="{Binding FFBCurveString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
+                            <Slider Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="0.5" Maximum="2.0" SmallChange="0.1" LargeChange="0.25" Value="{Binding FFBCurve}" PreviewKeyDown="Slider_PreviewKeyDown" />
                         </Grid>
                     </StackPanel>
                     <StackPanel Margin="0,10,0,0" x:Name="PrettyGraph_StackPanel">
@@ -733,7 +753,6 @@
                                 <TextBox Grid.Column="1" Text="{Binding WindowOpacityString}" VerticalAlignment="Center" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" GotKeyboardFocus="TextBox_GotKeyboardFocus" PreviewTextInput="TextBox_PreviewTextInput" LostKeyboardFocus="TextBox_LostKeyboardFocus" />
                                 <Slider x:Name="WindowOpacity_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="25" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding WindowOpacity}" ValueChanged="WindowOpacity_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
                             </Grid>
-                            <CheckBox x:Name="PauseWhenSimulatorIsNotRunning_CheckBox" Content="Automatically Disable Force Feedback When iRacing Simulator Is Not Running (and re-enable when it is)" IsChecked="{Binding PauseWhenSimulatorIsNotRunning}" Click="PauseWhenSimulatorIsNotRunning_CheckBox_Click" Margin="0,20,0,0"/>
                             <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                 <CheckBox Content="Check For Updates on Startup" IsChecked="{Binding CheckForUpdates}"/>
                                 <Button Grid.Column="2" x:Name="CheckForUpdateNow_Button" Margin="15,0,0,0" Content="CHECK NOW" Click="CheckForUpdateNow_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontWeight="Bold" FontSize="12" BorderThickness="2,2,2,2" BorderBrush="#FF6D6D6D" />
@@ -929,7 +948,18 @@
                     </TabItem>
                     <TabItem Header="Force Feedback" x:Name="Settings_ForceFeedback_TabItem">
                         <StackPanel Margin="10,10,10,10">
-                            <CheckBox Content="Send Force Feedback Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}" Margin="0,0,0,30"/>
+                            <Grid x:Name="Frequency_Grid">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Frequency" VerticalAlignment="Center" Width="90" />
+                                <TextBox Grid.Column="1" Text="{Binding FrequencyString}" VerticalAlignment="Center" IsReadOnly="True" FontWeight="Medium" TextAlignment="Center" Margin="10,0,0,0" IsUndoEnabled="False" MaxLines="1" Padding="0,0,0,0" IsTabStop="False" />
+                                <Slider x:Name="Frequency_Slider" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0" Minimum="2" Maximum="16" SmallChange="1" LargeChange="1" Value="{Binding Frequency}" ValueChanged="Frequency_Slider_ValueChanged" PreviewKeyDown="Slider_PreviewKeyDown" />
+                            </Grid>
+                            <CheckBox x:Name="PauseWhenSimulatorIsNotRunning_CheckBox" Content="Automatically Disable Force Feedback When iRacing Simulator Is Not Running (and re-enable when it is)" IsChecked="{Binding PauseWhenSimulatorIsNotRunning}" Click="PauseWhenSimulatorIsNotRunning_CheckBox_Click" Margin="0,20,0,0"/>
+                            <CheckBox Content="Send Force Feedback Playback To Wheel" IsChecked="{Binding PlaybackSendToDevice}" Margin="0,0,0,20"/>
                             <Label Content="The below slider controls how much clipping you want to allow when using the auto overall scale feature." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                             <Label Content="All the way to the left means no clipping is tolerated." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                             <Label Content="All the way to the right means to allow as much as 100% of the details to be clipped." FontWeight="DemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>

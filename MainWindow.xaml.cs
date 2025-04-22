@@ -867,8 +867,8 @@ namespace MarvinsAIRA
 		{
 			var app = (App) Application.Current;
 
-			var minutes = app._ffb_recordedSteeringWheelTorqueBufferIndex / ( 360 * 60 );
-			var seconds = app._ffb_recordedSteeringWheelTorqueBufferIndex % ( 360 * 60 ) / 360f;
+			var minutes = app._ffb_recordedTorqueNMBufferIndex / ( 360 * 60 );
+			var seconds = app._ffb_recordedTorqueNMBufferIndex % ( 360 * 60 ) / 360f;
 
 			return $"{minutes}:{seconds:00.0}";
 		}
@@ -1006,7 +1006,7 @@ namespace MarvinsAIRA
 			}
 			else
 			{
-				app._ffb_recordedSteeringWheelTorqueBufferIndex = 0;
+				app._ffb_recordedTorqueNMBufferIndex = 0;
 
 				var wasRecording = app._ffb_recordingNow;
 
@@ -1019,7 +1019,7 @@ namespace MarvinsAIRA
 				}
 				else
 				{
-					Array.Clear( app._ffb_recordedSteeringWheelTorqueBuffer );
+					Array.Clear( app._ffb_recordedTorqueNMBuffer );
 				}
 
 				if ( app._ffb_recordingNow && !app._ffb_drawPrettyGraph )
@@ -1054,7 +1054,7 @@ namespace MarvinsAIRA
 					SaveRecording();
 				}
 
-				app._ffb_recordedSteeringWheelTorqueBufferIndex = 0;
+				app._ffb_recordedTorqueNMBufferIndex = 0;
 
 				if ( app._ffb_playingBackNow && !app._ffb_drawPrettyGraph )
 				{
@@ -1147,16 +1147,6 @@ namespace MarvinsAIRA
 			ShowMapButtonsWindow( app.Settings.IncreaseDetailScaleButtons );
 		}
 
-		private void Frequency_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
-		{
-			if ( _win_initialized )
-			{
-				var app = (App) Application.Current;
-
-				app.ScheduleReinitializeForceFeedback();
-			}
-		}
-
 		private void TogglePrettyGraph_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -1181,9 +1171,9 @@ namespace MarvinsAIRA
 					using var stream = new FileStream( filePath, FileMode.Open, FileAccess.Read, FileShare.None );
 					using var reader = new BinaryReader( stream );
 
-					for ( int x = 0; x < app._ffb_recordedSteeringWheelTorqueBuffer.Length; x++ )
+					for ( int x = 0; x < app._ffb_recordedTorqueNMBuffer.Length; x++ )
 					{
-						app._ffb_recordedSteeringWheelTorqueBuffer[ x ] = reader.ReadSingle();
+						app._ffb_recordedTorqueNMBuffer[ x ] = reader.ReadSingle();
 					}
 				}
 				catch ( Exception exception )
@@ -1204,9 +1194,9 @@ namespace MarvinsAIRA
 			using var stream = new FileStream( filePath, FileMode.Create, FileAccess.Write, FileShare.None );
 			using var writer = new BinaryWriter( stream );
 
-			for ( int x = 0; x < app._ffb_recordedSteeringWheelTorqueBuffer.Length; x++ )
+			for ( int x = 0; x < app._ffb_recordedTorqueNMBuffer.Length; x++ )
 			{
-				writer.Write( app._ffb_recordedSteeringWheelTorqueBuffer[ x ] );
+				writer.Write( app._ffb_recordedTorqueNMBuffer[ x ] );
 			}
 		}
 
@@ -1560,6 +1550,20 @@ namespace MarvinsAIRA
 
 		#endregion
 
+		#region Settings tab - Force feedback
+
+		private void Frequency_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.ScheduleReinitializeForceFeedback();
+			}
+		}
+
+		#endregion
+
 		#region Settings tab - Audio tab
 
 		private void ClickSoundVolume_Slider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
@@ -1767,7 +1771,9 @@ namespace MarvinsAIRA
 				Record_Button.Visibility = visibility;
 				Play_Button.Visibility = visibility;
 				ParkedScale_Grid.Visibility = visibility;
-				Frequency_Grid.Visibility = visibility;
+				MinForce_Grid.Visibility = visibility;
+				MaxForce_Grid.Visibility = visibility;
+				FFBCurve_Grid.Visibility = visibility;
 				PrettyGraph_StackPanel.Visibility = visibility;
 
 				// settings tab

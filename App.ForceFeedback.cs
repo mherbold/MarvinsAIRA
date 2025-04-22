@@ -59,31 +59,31 @@ namespace MarvinsAIRA
 		private float _ffb_announceDetailScaleTimer = 0f;
 		private float _ffb_announceLFEScaleTimer = 0f;
 
-		private float _ffb_autoOverallScalePeakForceInNewtonMeters = 0f;
+		private float _ffb_autoTorqueNM = 0f;
 
-		public readonly float[] _ffb_recordedSteeringWheelTorqueBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 60 * 10 ];
-		public int _ffb_recordedSteeringWheelTorqueBufferIndex = 0;
+		public readonly float[] _ffb_recordedTorqueNMBuffer = new float[ FFB_SAMPLES_PER_FRAME * IRSDK_TICK_RATE * 60 * 10 ];
+		public int _ffb_recordedTorqueNMBufferIndex = 0;
 		public bool _ffb_recordingNow = false;
 		public bool _ffb_playingBackNow = false;
 
-		private readonly int[] _ffb_outputWheelMagnitudeBuffer = new int[ FFB_SAMPLES_PER_FRAME + 1 ];
-		private float _ffb_outputWheelMagnitudeBufferTimer = 0f;
-		private int _ffb_resetOutputWheelMagnitudeBufferTimerNow = 0;
+		private readonly int[] _ffb_outputDI = new int[ FFB_SAMPLES_PER_FRAME + 1 ];
+		private float _ffb_outputDITimer = 0f;
+		private int _ffb_resetOutputDITimerNow = 0;
 		private int _ffb_lastMagnitudeSentToWheel = 0;
 
-		private float _ffb_inAmount = 0f;
-		private int _ffb_outAmount = 0;
-		private float _ffb_lfeInAmount = 0f;
-		private float _ffb_lfeOutAmount = 0f;
+		private float _ffb_inTorqueNM = 0f;
+		private float _ffb_outTorqueNM = 0f;
+		private float _ffb_lfeInMagnitude = 0f;
+		private float _ffb_lfeOutTorqueNM = 0f;
 
 		private bool _ffb_startCooldownNow = false;
 		private float _ffb_magnitudeCoolDownTimer = 0f;
 		private int _ffb_lastNonCooldownMagnitudeSentToWheel = 0;
 
-		private float _ffb_previousSteeringWheelTorque = 0f;
-		private float _ffb_runningSteeringWheelTorque = 0f;
-		private float _ffb_rawSteadyStateWheelTorque = 0f;
-		private float _ffb_steadyStateWheelTorque = 0f;
+		private float _ffb_previousTorqueNM = 0f;
+		private float _ffb_runningTorqueNM = 0f;
+		private float _ffb_rawSteadyStateTorqueNM = 0f;
+		private float _ffb_steadyStateTorqueNM = 0f;
 
 		public bool _ffb_drawPrettyGraph = false;
 		public int _ffb_prettyGraphCurrentX = 0;
@@ -96,10 +96,10 @@ namespace MarvinsAIRA
 		private int _ffb_gForceBufferIndex = 0;
 		private float _ffb_peakGForce = 0f;
 
-		private readonly float[] _ffb_shockVelBuffer = new float[ 120 ];
-		private int _ffb_shockVelBufferIndex = 0;
+		private readonly float[] _ffb_maxShockVelBuffer = new float[ 120 ];
+		private int _ffb_maxShockVelBufferIndex = 0;
 		private float _ffb_peakShockVel = 0f;
-		private float _ffb_currentShockVel = 0f;
+		private float _ffb_maxShockVel = 0f;
 
 		private float _ffb_yawRateFactorInstant = 0f;
 		private float _ffb_yawRateFactorAverage = 0f;
@@ -133,8 +133,8 @@ namespace MarvinsAIRA
 		public float FFB_UndersteerAmountLinear { get => _ffb_understeerAmountLinear; }
 		public float FFB_OversteerAmount { get => _ffb_oversteerAmount; }
 		public float FFB_OversteerAmountLinear { get => _ffb_oversteerAmountLinear; }
-		public bool FFB_AutoOverallScaleIsReady { get => _ffb_autoOverallScalePeakForceInNewtonMeters > 1f; }
-		public float FFB_AutoOverallScalePeakForceInNewtonMeters { get => _ffb_autoOverallScalePeakForceInNewtonMeters; }
+		public bool FFB_AutoOverallScaleIsReady { get => _ffb_autoTorqueNM > 1f; }
+		public float FFB_AutoOverallScalePeakForceInNewtonMeters { get => _ffb_autoTorqueNM; }
 		public bool FFB_IsCoolingDown { get => _ffb_startCooldownNow || _ffb_magnitudeCoolDownTimer > 0f; }
 
 		#endregion
@@ -426,12 +426,12 @@ namespace MarvinsAIRA
 
 		public void ResetAutoOverallScaleMetrics()
 		{
-			_ffb_autoOverallScalePeakForceInNewtonMeters = 0f;
+			_ffb_autoTorqueNM = 0f;
 		}
 
 		public void DoAutoOverallScaleNow()
 		{
-			Settings.OverallScale = 100f * Settings.WheelMaxForce / _ffb_autoOverallScalePeakForceInNewtonMeters;
+			Settings.OverallScale = 100f * Settings.WheelMaxForce / _ffb_autoTorqueNM;
 
 			if ( Settings.OverallScale < 10f )
 			{
@@ -1017,22 +1017,22 @@ namespace MarvinsAIRA
 
 		public void UpdateConstantForce( int[] forceMagnitudeList )
 		{
-			for ( var i = 0; i < _ffb_outputWheelMagnitudeBuffer.Length; i++ )
+			for ( var i = 0; i < _ffb_outputDI.Length; i++ )
 			{
 				var value = forceMagnitudeList[ i % forceMagnitudeList.Length ];
 
-				_ffb_outputWheelMagnitudeBuffer[ i ] = value;
+				_ffb_outputDI[ i ] = value;
 			}
 
 			_ffb_updatesToSkip = 6;
-			_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
-			_ffb_previousSteeringWheelTorque = 0f;
-			_ffb_runningSteeringWheelTorque = 0f;
-			_ffb_rawSteadyStateWheelTorque = 0f;
-			_ffb_steadyStateWheelTorque = 0f;
+			_ffb_resetOutputDITimerNow = 1;
+			_ffb_previousTorqueNM = 0f;
+			_ffb_runningTorqueNM = 0f;
+			_ffb_rawSteadyStateTorqueNM = 0f;
+			_ffb_steadyStateTorqueNM = 0f;
 		}
 
-		private void UpdateForceFeedback()
+		private void UFF_ProcessYawRateFactor()
 		{
 			// calculate current instant yaw rate factor
 
@@ -1045,7 +1045,7 @@ namespace MarvinsAIRA
 				_ffb_yawRateFactorInstant = 0f;
 			}
 
-			// keep track of average yaw rate factor over the last two seconds
+			// keep track of average yaw rate factor over the last two seconds (for skid pad)
 
 			_ffb_yawRateFactorBuffer[ _ffb_yawRateFactorBufferIndex ] = _ffb_yawRateFactorInstant;
 
@@ -1059,8 +1059,11 @@ namespace MarvinsAIRA
 			}
 
 			_ffb_yawRateFactorAverage = totalYawRateFactor / _ffb_yawRateFactorBuffer.Length;
+		}
 
-			// keep track of peak g force over the last two seconds
+		private void UFF_ProcessGForce()
+		{
+			// keep track of peak g force over the last two seconds (for skid pad)
 
 			_ffb_gForceBuffer[ _ffb_gForceBufferIndex ] = _irsdk_gForce;
 
@@ -1074,8 +1077,11 @@ namespace MarvinsAIRA
 			}
 
 			_ffb_peakGForce = peakGForce;
+		}
 
-			// keep track of peak shock velocity over the last two seconds
+		private void UFF_ProcessShocks()
+		{
+			// calculate the max shock velocity for this frame
 
 			var maxShockVel = 0f;
 
@@ -1089,20 +1095,29 @@ namespace MarvinsAIRA
 				maxShockVel = MathF.Max( maxShockVel, MathF.Abs( _irsdk_rrShockVel_ST[ i ] ) );
 			}
 
-			_ffb_currentShockVel = maxShockVel;
+			_ffb_maxShockVel = maxShockVel;
 
-			_ffb_shockVelBuffer[ _ffb_shockVelBufferIndex ] = maxShockVel;
+			// keep track of peak shock velocity over the last two seconds (for skid pad)
 
-			_ffb_shockVelBufferIndex = ( _ffb_shockVelBufferIndex + 1 ) % _ffb_shockVelBuffer.Length;
+			_ffb_maxShockVelBuffer[ _ffb_maxShockVelBufferIndex ] = maxShockVel;
+
+			_ffb_maxShockVelBufferIndex = ( _ffb_maxShockVelBufferIndex + 1 ) % _ffb_maxShockVelBuffer.Length;
 
 			var peakShockVel = 0f;
 
-			for ( var i = 0; i < _ffb_shockVelBuffer.Length; i++ )
+			for ( var i = 0; i < _ffb_maxShockVelBuffer.Length; i++ )
 			{
-				peakShockVel = Math.Max( peakShockVel, _ffb_shockVelBuffer[ i ] );
+				peakShockVel = Math.Max( peakShockVel, _ffb_maxShockVelBuffer[ i ] );
 			}
 
 			_ffb_peakShockVel = peakShockVel;
+		}
+
+		private void UpdateForceFeedback()
+		{
+			UFF_ProcessYawRateFactor();
+			UFF_ProcessGForce();
+			UFF_ProcessShocks();
 
 			// stop here if force feedback is not enabled
 
@@ -1122,9 +1137,16 @@ namespace MarvinsAIRA
 
 			var processThisFrame = ( Interlocked.Decrement( ref _ffb_updatesToSkip ) < 0 );
 
-			// get the FFB from the telemetry data
+			// if we just got off track we want to enable cool down mode (cooldown is actually handled in the multimedia thread)
 
-			float[] steeringWheelTorque_ST = [
+			if ( _irsdk_isOnTrackLastFrame && !_irsdk_isOnTrack )
+			{
+				_ffb_startCooldownNow = true;
+			}
+
+			// get the FFB input from the telemetry data (in N*M)
+
+			float[] ffbInputNM = [
 				_irsdk_steeringWheelTorque_ST[ 0 ],
 				_irsdk_steeringWheelTorque_ST[ 1 ],
 				_irsdk_steeringWheelTorque_ST[ 2 ],
@@ -1133,44 +1155,44 @@ namespace MarvinsAIRA
 				_irsdk_steeringWheelTorque_ST[ 5 ]
 			];
 
-			var softLockMagnitude = 0;
+			// override ffb input with playback values if we are playing back a recording (in N*M)
 
 			if ( _ffb_playingBackNow )
 			{
-				for ( var x = 0; x < steeringWheelTorque_ST.Length; x++ )
+				for ( var x = 0; x < ffbInputNM.Length; x++ )
 				{
-					steeringWheelTorque_ST[ x ] = _ffb_recordedSteeringWheelTorqueBuffer[ _ffb_recordedSteeringWheelTorqueBufferIndex ];
+					ffbInputNM[ x ] = _ffb_recordedTorqueNMBuffer[ _ffb_recordedTorqueNMBufferIndex ];
 
-					_ffb_recordedSteeringWheelTorqueBufferIndex = ( _ffb_recordedSteeringWheelTorqueBufferIndex + 1 ) % _ffb_recordedSteeringWheelTorqueBuffer.Length;
+					_ffb_recordedTorqueNMBufferIndex = ( _ffb_recordedTorqueNMBufferIndex + 1 ) % _ffb_recordedTorqueNMBuffer.Length;
 				}
 			}
-			else if ( !_irsdk_isOnTrack || ( _irsdk_simMode == "replay" ) )
+
+			// if we are not on track or the iracing simulator is in replay mode then zero out ffb input forces (in N*M)
+
+			if ( !_irsdk_isOnTrack || ( _irsdk_simMode == "replay" ) )
 			{
-				if ( _irsdk_simMode != "replay" )
-				{
-					if ( _irsdk_isOnTrackLastFrame )
-					{
-						_ffb_startCooldownNow = true;
-					}
-				}
-
-				steeringWheelTorque_ST[ 0 ] = 0f;
-				steeringWheelTorque_ST[ 1 ] = 0f;
-				steeringWheelTorque_ST[ 2 ] = 0f;
-				steeringWheelTorque_ST[ 3 ] = 0f;
-				steeringWheelTorque_ST[ 4 ] = 0f;
-				steeringWheelTorque_ST[ 5 ] = 0f;
+				ffbInputNM[ 0 ] = 0f;
+				ffbInputNM[ 1 ] = 0f;
+				ffbInputNM[ 2 ] = 0f;
+				ffbInputNM[ 3 ] = 0f;
+				ffbInputNM[ 4 ] = 0f;
+				ffbInputNM[ 5 ] = 0f;
 			}
-			else if ( Settings.EnableSoftLock )
+
+			// calculate soft lock magnitude (in N*M)
+
+			var softLockTorqueNM = 0f;
+
+			if ( Settings.EnableSoftLock )
 			{
 				var softLockMarginInRadians = Settings.SoftLockMargin * MathF.PI / 180f;
 
 				var softLockPercentage = Math.Clamp( ( MathF.Abs( _irsdk_steeringWheelAngle ) - ( _irsdk_steeringWheelAngleMax * .5f - softLockMarginInRadians ) ) / softLockMarginInRadians, 0f, 1f );
 
-				softLockMagnitude = (int) ( -MathF.Sign( _irsdk_steeringWheelAngle ) * softLockPercentage * Settings.SoftLockStrength / 100f * DI_FFNOMINALMAX );
+				softLockTorqueNM = -MathF.Sign( _irsdk_steeringWheelAngle ) * softLockPercentage * Settings.WheelMaxForce * Settings.SoftLockStrength / 100f;
 			}
 
-			// crash protection processing
+			// calculate crash protection scale (in 0-1)
 
 			if ( Settings.EnableCrashProtection )
 			{
@@ -1203,11 +1225,11 @@ namespace MarvinsAIRA
 				_ffb_crashProtectionScale = ( _ffb_crashProtectionScale * 0.99f ) + ( 1f * 0.01f );
 			}
 
-			// curb protection processing
+			// calculate curb protection scale (in 0-1)
 
 			if ( Settings.EnableCurbProtection )
 			{
-				if ( MathF.Abs( maxShockVel ) >= Settings.ShockVelocity )
+				if ( MathF.Abs( _ffb_maxShockVel ) >= Settings.ShockVelocity )
 				{
 					_ffb_curbProtectionTimer = Settings.CurbProtectionDuration;
 				}
@@ -1224,7 +1246,7 @@ namespace MarvinsAIRA
 				_ffb_curbProtectionScale = ( _ffb_curbProtectionScale * 0.99f ) + ( 1f * 0.01f );
 			}
 
-			// understeer effect
+			// calculate understeer amount (in 0-1) and frequency (in rads per 1/360sec)
 
 			var understeerFrequency = 0f;
 
@@ -1249,7 +1271,7 @@ namespace MarvinsAIRA
 				_ffb_understeerAmountLinear = 0f;
 			}
 
-			// oversteer effect
+			// calculate oversteer amount (in 0-1) and frequency (in rads per 1/360sec)
 
 			var oversteerFrequency = 0f;
 
@@ -1281,7 +1303,7 @@ namespace MarvinsAIRA
 				_ffb_oversteerAmountLinear = 0f;
 			}
 
-			// we want to reduce forces while the car is moving very slow or parked
+			// calculate speed scale (reduce forces while the car is moving very slow or parked) (in 0-1)
 
 			var speedScale = 1f;
 
@@ -1292,259 +1314,268 @@ namespace MarvinsAIRA
 				speedScale = ( Settings.ParkedScale / 100f ) * ( 1f - t ) + t;
 			}
 
-			// calculate the conversion scale from Newton-meters to (-DI_FFNOMINALMAX, DI_FFNOMINALMAX)
+			// normalize the scale settings ("100%" slider value = 1)
 
-			var newtonMetersToDirectInputUnits = DI_FFNOMINALMAX / Settings.WheelMaxForce;
+			var overallScale = Settings.OverallScale / 100f;
+			var detailScale = Settings.DetailScale / 100f;
+			var lfeScale = Settings.LFEScale / 100f;
+			var autoOverallScaleClipLimit = Settings.AutoOverallScaleClipLimit / 100f;
 
-			// normalize the scale settings ("100" slider value = 1.0)
+			// calculate steering effect strength (in N*M)
 
-			var normalizedOverallScaleSetting = Settings.OverallScale / 100f;
-			var normalizedDetailScaleSetting = Settings.DetailScale / 100f;
-			var normalizedLFEScaleSetting = Settings.LFEScale / 100f;
-			var normalizedAutoOverallScaleClipLimitSetting = Settings.AutoOverallScaleClipLimit / 100f;
-			var normalizedUndersteerEffectStrength = Settings.USEffectStrength / 100f;
-			var normalizedOversteerEffectStrength = Settings.OSEffectStrength / 100f;
+			var understeerEffectStrengthNM = Settings.WheelMaxForce * Settings.USEffectStrength / 100f;
+			var oversteerEffectStrengthNM = Settings.WheelMaxForce * Settings.OSEffectStrength / 100f;
 
-			// apply crash protection to overall and detail scale
+			// apply crash protection to overall scale
 
-			normalizedOverallScaleSetting = ( normalizedOverallScaleSetting * ( 1f - Settings.CrashProtectionOverallScale / 100f ) * ( 1f - _ffb_crashProtectionScale ) ) + ( normalizedOverallScaleSetting * _ffb_crashProtectionScale );
-			normalizedDetailScaleSetting *= _ffb_crashProtectionScale * _ffb_curbProtectionScale;
+			overallScale = ( overallScale * ( 1f - Settings.CrashProtectionOverallScale / 100f ) * ( 1f - _ffb_crashProtectionScale ) ) + ( overallScale * _ffb_crashProtectionScale );
 
-			// map scales into DI units (detail scale will be the same as the overall scale if detail scale slider is set to 100%)
+			// apply crash and curb protection to detail scale
 
-			var overallScaleToDirectInputUnits = normalizedOverallScaleSetting * newtonMetersToDirectInputUnits;
-			var detailScaleToDirectInputUnits = overallScaleToDirectInputUnits + overallScaleToDirectInputUnits * ( normalizedDetailScaleSetting - 1f );
-			var understeerEffectScaleToDirectInputUnits = (int) ( normalizedUndersteerEffectStrength * DI_FFNOMINALMAX );
-			var oversteerEffectScaleToDirectInputUnits = (int) ( normalizedOversteerEffectStrength * DI_FFNOMINALMAX );
-			var lfeScale = normalizedLFEScaleSetting * DI_FFNOMINALMAX;
+			detailScale *= _ffb_crashProtectionScale * _ffb_curbProtectionScale;
 
-			// make a copy of the lfe read index so it doesn't change in the middle of this update (its updated in another thread)
+			// make a copy of the lfe read index so it doesn't change in the middle of this update (its updated in the lfe thread)
 
 			var lfeMagnitudeIndex = _lfe_magnitudeIndex;
 
-			// save the last magnitude sample from the last frame to make interpolation even better
+			// copy the last magnitude sample from the last frame into the first frame to make interpolation even better
 
 			if ( processThisFrame )
 			{
-				_ffb_outputWheelMagnitudeBuffer[ 0 ] = _ffb_outputWheelMagnitudeBuffer[ 6 ];
+				_ffb_outputDI[ 0 ] = _ffb_outputDI[ 6 ];
 			}
 
 			// for telemetry
 
-			var inAmountAbs = 0f;
-			var inAmount = 0f;
-			var outAmountAbs = 0;
-			var outAmount = 0;
+			var inTorqueNMAbs = 0f;
+			var inTorqueNM = 0f;
+			var outTorqueNMAbs = 0f;
+			var outTorqueNM = 0f;
 
-			var lfeInAmountAbs = 0f;
-			var lfeInAmount = 0f;
-			var lfeOutAmountAbs = 0f;
-			var lfeOutAmount = 0f;
+			var lfeInMagnitudeAbs = 0f;
+			var lfeInMagnitude = 0f;
+			var lfeOutTorqueNMAbs = 0f;
+			var lfeOutTorqueNM = 0f;
 
 			// go through each sample
 
-			for ( var x = 0; x < steeringWheelTorque_ST.Length; x++ )
+			for ( var x = 0; x < ffbInputNM.Length; x++ )
 			{
-				// output buffer index
+				// get the next steering wheel torque sample
 
-				var outputWheelMagnitudeBufferIndex = x + 1;
-
-				// get the next steering wheel torque sample (it is in Newton-meters)
-
-				var currentSteeringWheelTorque = steeringWheelTorque_ST[ x ];
+				var torqueNM = ffbInputNM[ x ];
 
 				// for telemetry
 
-				var currentSteeringWheelTorqueAbs = MathF.Abs( currentSteeringWheelTorque );
+				var torqueNMAbs = MathF.Abs( torqueNM );
 
-				if ( currentSteeringWheelTorqueAbs > inAmountAbs )
+				if ( torqueNMAbs > inTorqueNMAbs )
 				{
-					inAmountAbs = currentSteeringWheelTorqueAbs;
-					inAmount = currentSteeringWheelTorque;
+					inTorqueNMAbs = torqueNMAbs;
+					inTorqueNM = torqueNM;
 				}
 
-				// save the original steering wheel torque (for playback feature)
+				// save the torque (for playback feature)
 
 				if ( _ffb_recordingNow )
 				{
-					_ffb_recordedSteeringWheelTorqueBuffer[ _ffb_recordedSteeringWheelTorqueBufferIndex ] = currentSteeringWheelTorque;
+					_ffb_recordedTorqueNMBuffer[ _ffb_recordedTorqueNMBufferIndex ] = torqueNM;
 
-					_ffb_recordedSteeringWheelTorqueBufferIndex = ( _ffb_recordedSteeringWheelTorqueBufferIndex + 1 ) % _ffb_recordedSteeringWheelTorqueBuffer.Length;
+					_ffb_recordedTorqueNMBufferIndex = ( _ffb_recordedTorqueNMBufferIndex + 1 ) % _ffb_recordedTorqueNMBuffer.Length;
 				}
 
 				// calculate the impulse (change in steering wheel torque compared to the last sample)
 
-				var deltaSteeringWheelTorque = currentSteeringWheelTorque - _ffb_previousSteeringWheelTorque;
+				var deltaTorqueNM = torqueNM - _ffb_previousTorqueNM;
 
-				_ffb_previousSteeringWheelTorque = currentSteeringWheelTorque;
+				_ffb_previousTorqueNM = torqueNM;
 
 				// delta limiter
 
-				var limitedDeltaSteeringWheelTorque = Math.Clamp( deltaSteeringWheelTorque, -0.09f, 0.09f );
+				var limitedDeltaTorqueNM = Math.Clamp( deltaTorqueNM, -0.09f, 0.09f ); // TODO make this user customizable
 
 				// calculate raw steady state wheel torque
 
-				var rawSteadyStateWheelTorque = _ffb_rawSteadyStateWheelTorque + limitedDeltaSteeringWheelTorque;
+				var rawSteadyStateTorqueNM = _ffb_rawSteadyStateTorqueNM + limitedDeltaTorqueNM;
 
-				_ffb_rawSteadyStateWheelTorque = ( rawSteadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * 0.1f );
+				_ffb_rawSteadyStateTorqueNM = ( rawSteadyStateTorqueNM * 0.9f ) + ( torqueNM * 0.1f ); // TODO make this user customizable
+
+				// calculate torque for the auto overall scale feature
+
+				var autoTorqueNM = torqueNM * ( 1f - autoOverallScaleClipLimit ) + ( _ffb_rawSteadyStateTorqueNM * autoOverallScaleClipLimit );
 
 				// calculate scaled steady state wheel torque
 
-				_ffb_steadyStateWheelTorque += limitedDeltaSteeringWheelTorque * overallScaleToDirectInputUnits;
+				_ffb_steadyStateTorqueNM += limitedDeltaTorqueNM * overallScale;
 
-				_ffb_steadyStateWheelTorque = ( _ffb_steadyStateWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * 0.1f );
+				_ffb_steadyStateTorqueNM = ( _ffb_steadyStateTorqueNM * 0.9f ) + ( torqueNM * overallScale * 0.1f ); // TODO make this user customizable
 
-				// algorithm is different for detail scale >= 100 and < 100
+				// algorithm is different for detail scale >= 100% and < 100%
 
-				if ( normalizedDetailScaleSetting >= 1 )
+				if ( detailScale >= 1f )
 				{
 					// scale the impulse by our detail scale and add it to our running steering wheel torque
 
-					_ffb_runningSteeringWheelTorque += deltaSteeringWheelTorque * detailScaleToDirectInputUnits;
+					_ffb_runningTorqueNM += deltaTorqueNM * overallScale * detailScale;
 
 					// ramp our running scaled magnitude towards the original signal (feed in steady state signal)
 
-					_ffb_runningSteeringWheelTorque = ( _ffb_runningSteeringWheelTorque * 0.9f ) + ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * 0.1f );
+					_ffb_runningTorqueNM = ( _ffb_runningTorqueNM * 0.9f ) + ( torqueNM * overallScale * 0.1f ); // TODO make this user customizable
 				}
 				else
 				{
 					// blend between steady state force and original force using detail scale amount
 
-					_ffb_runningSteeringWheelTorque = ( currentSteeringWheelTorque * overallScaleToDirectInputUnits * normalizedDetailScaleSetting ) + ( _ffb_steadyStateWheelTorque * ( 1f - normalizedDetailScaleSetting ) );
+					_ffb_runningTorqueNM = ( torqueNM * overallScale * detailScale ) + ( _ffb_steadyStateTorqueNM * ( 1f - detailScale ) );
 				}
 
-				var autoOverallScaleSample = _ffb_runningSteeringWheelTorque * ( 1f - normalizedAutoOverallScaleClipLimitSetting ) + ( _ffb_steadyStateWheelTorque * normalizedAutoOverallScaleClipLimitSetting );
+				// our initial output torque
+
+				var ffbOutputNM = _ffb_runningTorqueNM;
 
 				// apply the speed scale
 
-				if ( processThisFrame )
-				{
-					_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] = (int) ( _ffb_runningSteeringWheelTorque * speedScale );
-
-					autoOverallScaleSample *= speedScale;
-				}
+				ffbOutputNM *= speedScale;
+				autoTorqueNM *= speedScale;
 
 				// mix in the low frequency effects
 
 				if ( Settings.LFEToFFBEnabled )
 				{
-					if ( processThisFrame )
+					var lfeMagnitude = _lfe_magnitude[ lfeMagnitudeIndex, x ];
+
+					var lfeMagnitudeAbs = Math.Abs( lfeMagnitude );
+
+					if ( lfeMagnitudeAbs > lfeInMagnitudeAbs )
 					{
-						var lfeMagnitude = _lfe_magnitude[ lfeMagnitudeIndex, x ];
-
-						var lfeMagnitudeAbs = Math.Abs( lfeMagnitude );
-
-						if ( lfeMagnitudeAbs > lfeInAmountAbs )
-						{
-							lfeInAmountAbs = lfeMagnitudeAbs;
-							lfeInAmount = lfeMagnitude;
-						}
-
-						var lfeSample = lfeMagnitude * lfeScale;
-
-						var lfeSampleAbs = Math.Abs( lfeSample );
-
-						if ( lfeSampleAbs > lfeOutAmountAbs )
-						{
-							lfeOutAmountAbs = lfeSampleAbs;
-							lfeOutAmount = lfeSample;
-						}
-
-						_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) lfeSample;
+						lfeInMagnitudeAbs = lfeMagnitudeAbs;
+						lfeInMagnitude = lfeMagnitude;
 					}
+
+					var lfeTorqueNM = lfeMagnitude * lfeScale * Settings.WheelMaxForce;
+
+					var lfeTorqueNMAbs = Math.Abs( lfeTorqueNM );
+
+					if ( lfeTorqueNMAbs > lfeOutTorqueNMAbs )
+					{
+						lfeOutTorqueNMAbs = lfeTorqueNMAbs;
+						lfeOutTorqueNM = lfeTorqueNM;
+					}
+
+					ffbOutputNM += lfeTorqueNM;
 				}
 
 				// add in the steering wheel stops magnitude
 
-				_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += softLockMagnitude;
+				ffbOutputNM += softLockTorqueNM;
 
 				// mix in the understeer and oversteer effects
 
 				if ( Settings.SteeringEffectsEnabled )
 				{
+					// understeer effects
+
 					_ffb_understeerEffectWaveAngle += understeerFrequency;
-					_ffb_oversteerEffectWaveAngle += oversteerFrequency;
 
 					if ( _ffb_understeerEffectWaveAngle > MathF.PI * 2f )
 					{
 						_ffb_understeerEffectWaveAngle -= MathF.PI * 2f;
 					}
 
+					if ( Settings.USEffectStyle == 0 )
+					{
+						var waveAmplitude = MathF.Sin( _ffb_understeerEffectWaveAngle );
+
+						ffbOutputNM += waveAmplitude * _ffb_understeerAmount * understeerEffectStrengthNM;
+					}
+					else if ( Settings.USEffectStyle == 1 )
+					{
+						var waveAmplitude = _ffb_understeerEffectWaveAngle / ( MathF.PI * 2f );
+
+						ffbOutputNM -= waveAmplitude * _ffb_understeerAmount * understeerEffectStrengthNM;
+					}
+					else if ( Settings.USEffectStyle == 2 )
+					{
+						ffbOutputNM -= _ffb_steadyStateTorqueNM * MathF.Abs( _ffb_understeerAmount ) * Settings.USEffectStrength / 100f;
+					}
+					else if ( Settings.USEffectStyle == 3 )
+					{
+						ffbOutputNM -= _ffb_understeerAmount * understeerEffectStrengthNM;
+					}
+
+					// oversteer effects
+
+					_ffb_oversteerEffectWaveAngle += oversteerFrequency;
+
 					if ( _ffb_oversteerEffectWaveAngle > MathF.PI * 2f )
 					{
 						_ffb_oversteerEffectWaveAngle -= MathF.PI * 2f;
 					}
 
-					if ( processThisFrame )
+					if ( Settings.OSEffectStyle == 0 )
 					{
-						// understeer effects
+						var waveAmplitude = MathF.Sin( _ffb_oversteerEffectWaveAngle );
 
-						if ( Settings.USEffectStyle == 0 )
-						{
-							var waveAmplitude = MathF.Sin( _ffb_understeerEffectWaveAngle );
+						ffbOutputNM += waveAmplitude * _ffb_oversteerAmount * oversteerEffectStrengthNM;
+					}
+					else if ( Settings.OSEffectStyle == 1 )
+					{
+						var waveAmplitude = _ffb_oversteerEffectWaveAngle / ( MathF.PI * 2f );
 
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
-						}
-						else if ( Settings.USEffectStyle == 1 )
-						{
-							var waveAmplitude = _ffb_understeerEffectWaveAngle / ( MathF.PI * 2f );
+						ffbOutputNM -= waveAmplitude * _ffb_oversteerAmount * oversteerEffectStrengthNM;
+					}
+					else if ( Settings.OSEffectStyle == 2 )
+					{
+						ffbOutputNM -= _ffb_steadyStateTorqueNM * MathF.Abs( _ffb_oversteerAmount ) * Settings.OSEffectStrength / 100f;
+					}
+					else if ( Settings.OSEffectStyle == 3 )
+					{
+						ffbOutputNM -= _ffb_oversteerAmount * oversteerEffectStrengthNM;
+					}
+				}
 
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( waveAmplitude * _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
-						}
-						else if ( Settings.USEffectStyle == 2 )
-						{
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_steadyStateWheelTorque * MathF.Abs( _ffb_understeerAmount ) * normalizedUndersteerEffectStrength );
-						}
-						else if ( Settings.USEffectStyle == 3 )
-						{
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_understeerAmount * understeerEffectScaleToDirectInputUnits );
-						}
+				// apply FFB minimum force and curve
 
-						// oversteer effects
+				var ffbOutputNMAbs = MathF.Abs( ffbOutputNM );
 
-						if ( Settings.OSEffectStyle == 0 )
-						{
-							var waveAmplitude = MathF.Sin( _ffb_oversteerEffectWaveAngle );
+				if ( ffbOutputNMAbs < Settings.MinForce )
+				{
+					ffbOutputNMAbs = Settings.MinForce;
+				}
 
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] += (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
-						}
-						else if ( Settings.OSEffectStyle == 1 )
-						{
-							var waveAmplitude = _ffb_oversteerEffectWaveAngle / ( MathF.PI * 2f );
+				var curveScale = 1f / ( Settings.WheelMaxForce - Settings.MinForce );
 
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( waveAmplitude * _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
-						}
-						else if ( Settings.OSEffectStyle == 2 )
-						{
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_steadyStateWheelTorque * MathF.Abs( _ffb_oversteerAmount ) * normalizedOversteerEffectStrength );
-						}
-						else if ( Settings.OSEffectStyle == 3 )
-						{
-							_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] -= (int) ( _ffb_oversteerAmount * oversteerEffectScaleToDirectInputUnits );
-						}
+				ffbOutputNM = MathF.Sign( ffbOutputNM ) * ( MathF.Min( Settings.MaxForce, MathF.Pow( ( ffbOutputNMAbs - Settings.MinForce ) * curveScale, Settings.FFBCurve ) / curveScale + Settings.MinForce ) );
+
+				// finally convert from NM to DI units
+
+				if ( processThisFrame )
+				{
+					if ( _ffb_playingBackNow && !Settings.PlaybackSendToDevice )
+					{
+						_ffb_outputDI[ x + 1 ] = 0;
+					}
+					else
+					{
+						_ffb_outputDI[ x + 1 ] = (int) ( ffbOutputNM * DI_FFNOMINALMAX / Settings.WheelMaxForce );
 					}
 				}
 
 				// reset the magnitude index now
 
-				_ffb_resetOutputWheelMagnitudeBufferTimerNow = 1;
+				_ffb_resetOutputDITimerNow = 1;
 
 				// save the original steering wheel torque (for auto-overall-scale feature)
 
-				if ( processThisFrame )
+				if ( _ffb_playingBackNow || ( _irsdk_isOnTrack && !_irsdk_onPitRoad && ( _irsdk_playerTrackSurface != IRSDKSharper.IRacingSdkEnum.TrkLoc.OffTrack ) ) )
 				{
-					if ( _ffb_playingBackNow || ( _irsdk_isOnTrack && !_irsdk_onPitRoad && ( _irsdk_playerTrackSurface != IRSDKSharper.IRacingSdkEnum.TrkLoc.OffTrack ) ) )
+					autoTorqueNM = MathF.Abs( autoTorqueNM );
+
+					if ( autoTorqueNM > 0f )
 					{
-						autoOverallScaleSample = MathF.Abs( autoOverallScaleSample );
-
-						if ( autoOverallScaleSample > 0f )
+						if ( _ffb_autoTorqueNM < autoTorqueNM )
 						{
-							var outputWheelMagnitudeInNm = autoOverallScaleSample / overallScaleToDirectInputUnits;
-
-							if ( _ffb_autoOverallScalePeakForceInNewtonMeters < outputWheelMagnitudeInNm )
-							{
-								_ffb_autoOverallScalePeakForceInNewtonMeters = outputWheelMagnitudeInNm;
-							}
+							_ffb_autoTorqueNM = autoTorqueNM;
 						}
 					}
 				}
@@ -1553,21 +1584,21 @@ namespace MarvinsAIRA
 
 				if ( _ffb_drawPrettyGraph )
 				{
-					var forceFeedbackMaxToPixelBufferHeightScale = DI_FFNOMINALMAX * 2f / ( FFB_PIXELS_BUFFER_HEIGHT - 40f );
+					var torqueToPixelBufferScale = Settings.WheelMaxForce * 2f / ( FFB_PIXELS_BUFFER_HEIGHT - 40f );
 					var halfPixelBufferHeight = FFB_PIXELS_BUFFER_HEIGHT / 2f;
 
 					var centerLine = FFB_PIXELS_BUFFER_HEIGHT / 2;
 
-					var midPoint1 = (int) ( +5000 / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferHeight );
-					var midPoint2 = (int) ( -5000 / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferHeight );
+					var midPoint1 = (int) ( ( Settings.WheelMaxForce / 2f ) / torqueToPixelBufferScale + halfPixelBufferHeight );
+					var midPoint2 = (int) ( ( Settings.WheelMaxForce / -2f ) / torqueToPixelBufferScale + halfPixelBufferHeight );
 
 					var clipPoint1 = 19;
 					var clipPoint2 = FFB_PIXELS_BUFFER_HEIGHT - 20;
 
-					var iY2 = (int) ( currentSteeringWheelTorque * overallScaleToDirectInputUnits / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferHeight ) + 1;
+					var iY2 = (int) ( torqueNM * overallScale / torqueToPixelBufferScale + halfPixelBufferHeight ) + 1;
 					var iY1 = iY2 - 2;
 
-					var oY2 = (int) ( _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] / forceFeedbackMaxToPixelBufferHeightScale + halfPixelBufferHeight ) + 1;
+					var oY2 = (int) ( ffbOutputNM / torqueToPixelBufferScale + halfPixelBufferHeight ) + 1;
 					var oY1 = oY2 - 2;
 
 					if ( oY1 < clipPoint1 )
@@ -1641,33 +1672,23 @@ namespace MarvinsAIRA
 					_ffb_prettyGraphCurrentX = ( _ffb_prettyGraphCurrentX + 1 ) % FFB_PIXELS_BUFFER_WIDTH;
 				}
 
-				// disable wheel output if we dont want to send the playback to the wheel
-
-				if ( _ffb_playingBackNow && !Settings.PlaybackSendToDevice )
-				{
-					if ( processThisFrame )
-					{
-						_ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] = 0;
-					}
-				}
-
 				// for telemetry
 
-				var outputWheelMagnitudeBufferAbs = Math.Abs( _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ] );
+				ffbOutputNMAbs = Math.Abs( ffbOutputNM );
 
-				if ( outputWheelMagnitudeBufferAbs > outAmountAbs )
+				if ( ffbOutputNMAbs > outTorqueNMAbs )
 				{
-					outAmountAbs = outputWheelMagnitudeBufferAbs;
-					outAmount = _ffb_outputWheelMagnitudeBuffer[ outputWheelMagnitudeBufferIndex ];
+					outTorqueNMAbs = ffbOutputNMAbs;
+					outTorqueNM = ffbOutputNM;
 				}
 			}
 
 			// for telemetry
 
-			_ffb_inAmount = inAmount;
-			_ffb_outAmount = outAmount;
-			_ffb_lfeInAmount = lfeInAmount;
-			_ffb_lfeOutAmount= lfeOutAmount;
+			_ffb_inTorqueNM = inTorqueNM;
+			_ffb_outTorqueNM = outTorqueNM;
+			_ffb_lfeInMagnitude = lfeInMagnitude;
+			_ffb_lfeOutTorqueNM = lfeOutTorqueNM;
 
 			// update the pretty graph
 
@@ -1704,34 +1725,34 @@ namespace MarvinsAIRA
 
 			// update the magnitude buffer timer
 
-			app._ffb_outputWheelMagnitudeBufferTimer += deltaMilliseconds;
+			app._ffb_outputDITimer += deltaMilliseconds;
 
 			// reset the magnitude timer when its time
 
-			if ( Interlocked.Exchange( ref app._ffb_resetOutputWheelMagnitudeBufferTimerNow, 0 ) == 1 )
+			if ( Interlocked.Exchange( ref app._ffb_resetOutputDITimerNow, 0 ) == 1 )
 			{
-				app._ffb_outputWheelMagnitudeBufferTimer = 0f;
+				app._ffb_outputDITimer = 0f;
 			}
 
 			// figure out where we are at in the magnitude buffer
 
-			var outputWheelMagnitudeBufferIndex = 1f + ( app._ffb_outputWheelMagnitudeBufferTimer * 360f / 1000f );
+			var ffbOutputDIIndex = 1f + ( app._ffb_outputDITimer * 360f / 1000f );
 
 			// get the current magnitude, cubic interpolated
 
-			var maxOffset = app._ffb_outputWheelMagnitudeBuffer.Length - 1;
+			var maxOffset = app._ffb_outputDI.Length - 1;
 
-			var i1 = Math.Min( maxOffset, (int) MathF.Truncate( outputWheelMagnitudeBufferIndex ) );
+			var i1 = Math.Min( maxOffset, (int) MathF.Truncate( ffbOutputDIIndex ) );
 			var i2 = Math.Min( maxOffset, i1 + 1 );
 			var i3 = Math.Min( maxOffset, i2 + 1 );
 			var i0 = Math.Max( 0, i1 - 1 );
 
-			var t = Math.Min( 1f, outputWheelMagnitudeBufferIndex - i1 );
+			var t = Math.Min( 1f, ffbOutputDIIndex - i1 );
 
-			var m0 = app._ffb_outputWheelMagnitudeBuffer[ i0 ];
-			var m1 = app._ffb_outputWheelMagnitudeBuffer[ i1 ];
-			var m2 = app._ffb_outputWheelMagnitudeBuffer[ i2 ];
-			var m3 = app._ffb_outputWheelMagnitudeBuffer[ i3 ];
+			var m0 = app._ffb_outputDI[ i0 ];
+			var m1 = app._ffb_outputDI[ i1 ];
+			var m2 = app._ffb_outputDI[ i2 ];
+			var m3 = app._ffb_outputDI[ i3 ];
 
 			var magnitude = (int) InterpolateHermite( m0, m1, m2, m3, t );
 
