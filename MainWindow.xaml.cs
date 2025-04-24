@@ -345,11 +345,52 @@ namespace MarvinsAIRA
 			_ = WinApi.UnregisterDeviceNotification( _win_deviceChangeNotificationHandle );
 		}
 
-		protected IntPtr WndProc( IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled )
-		{
-			switch ( msg )
-			{
-				case WinApi.WM_SYSCOMMAND:
+        private const int WM_APP = 0x8000;
+        private const int WM_MAIRA = WM_APP + 1;
+
+        public enum MSG_TYPE : uint
+        {
+            Overall_Scale = 0,
+            Detail_Scale = 1,
+            Parked_Scale = 2,
+            Min_Force = 3,
+            Max_Force = 4,
+            FFB_Curve = 5,
+            LFE = 6,
+            Scale = 7,
+        }
+
+        protected IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            switch (msg)
+            {
+
+
+                case WM_MAIRA:
+                    MSG_TYPE type = (MSG_TYPE)wParam;
+                    int value = (int)(lParam - 10);
+                    value = (int)Math.Clamp(value, -10, 10);
+                    var appMain = (App)Application.Current;
+                    switch (type)
+                    {
+                        case MSG_TYPE.Overall_Scale:
+                            // Overall scale
+                            appMain.Settings.OverallScale += value;
+                            break;
+
+                        case MSG_TYPE.Detail_Scale:
+                            appMain.Settings.DetailScale += value;
+                            break;
+
+
+                        case MSG_TYPE.LFE:
+                            appMain.Settings.LFEScale += value;
+                            break;
+
+
+                    }
+                    break;
+                case WinApi.WM_SYSCOMMAND:
 				{
 					if ( _win_initialized )
 					{
