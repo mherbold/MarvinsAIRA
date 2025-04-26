@@ -357,7 +357,7 @@ namespace MarvinsAIRA
             Max_Force = 4,
             FFB_Curve = 5,
             LFE = 6,
-            Scale = 7,
+            LFE_Enabled = 7,
         }
 
         protected IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -382,9 +382,16 @@ namespace MarvinsAIRA
                             appMain.Settings.DetailScale += value;
                             break;
 
+                        case MSG_TYPE.FFB_Curve:
+                            appMain.Settings.FFBCurve += value * .01f;
+                            break;
 
                         case MSG_TYPE.LFE:
                             appMain.Settings.LFEScale += value;
+                            break;
+
+                        case MSG_TYPE.LFE_Enabled:
+                            appMain.Settings.LFEToFFBEnabled = !appMain.Settings.LFEToFFBEnabled;
                             break;
 
 
