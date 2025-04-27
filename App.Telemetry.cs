@@ -57,6 +57,8 @@ namespace MarvinsAIRA
 		public float shockVelocity;
 		public float lfeInAmount;
 		public float lfeOutAmount;
+
+		public float ffbCurve;
 	}
 
 	public partial class App : Application
@@ -152,7 +154,9 @@ namespace MarvinsAIRA
 			_telemetry_data.spotterEnabled = Settings.SpotterEnabled;
 
 
-			_telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
+			_telemetry_data.ffbCurve = Settings.FFBCurve;
+
+        _telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
 		}
 	}
 }
