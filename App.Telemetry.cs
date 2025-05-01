@@ -59,6 +59,7 @@ namespace MarvinsAIRA
 		public float lfeOutAmount;
 
 		public float ffbCurve;
+		public float minForce;
 	}
 
 	public partial class App : Application
@@ -155,6 +156,7 @@ namespace MarvinsAIRA
 
 
 			_telemetry_data.ffbCurve = Settings.FFBCurve;
+			_telemetry_data.minForce = Settings.MinForce;
 
         _telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
 		}
