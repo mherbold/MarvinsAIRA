@@ -396,6 +396,12 @@ namespace MarvinsAIRA
 
                         case MSG_TYPE.LFE_Enabled:
                             appMain.Settings.LFEToFFBEnabled = !appMain.Settings.LFEToFFBEnabled;
+							if (appMain.Settings.LFEToFFBEnabled)
+							{
+                                var app = (App)Application.Current;
+
+                                app.InitializeLFE();
+                            }
                             break;
 
 
