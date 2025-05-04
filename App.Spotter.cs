@@ -31,7 +31,7 @@ namespace MarvinsAIRA
 
 		public bool ProcessCarLeftRight( float deltaTime )
 		{
-			_spotter_calloutTimer = Math.Max( 0f, _spotter_calloutTimer - deltaTime );
+			_spotter_calloutTimer = MathF.Max( 0f, _spotter_calloutTimer - deltaTime );
 
 			var carLeftRight = _irsdk_carLeftRight;
 

@@ -109,6 +109,8 @@ namespace MarvinsAIRA
 
 		public string _irsdk_playerCarNumber = string.Empty;
 
+		public int _irsdk_numForwardGears = 10;
+
 		public int _irsdk_tickCountLastFrame = 0;
 
 		public bool _irsdk_brakeABSactiveLastFrame = false;
@@ -270,6 +272,8 @@ namespace MarvinsAIRA
 
 			_irsdk_playerCarNumber = string.Empty;
 
+			_irsdk_numForwardGears = 10;
+
 			_irsdk_tickCountLastFrame = 0;
 
 			_irsdk_brakeABSactiveLastFrame = false;
@@ -293,6 +297,8 @@ namespace MarvinsAIRA
 			_ffb_startCooldownNow = true;
 
 			StopABS();
+
+			ResetHPR();
 
 			UpdateCurrentCar();
 			UpdateCurrentTrack();
@@ -341,6 +347,10 @@ namespace MarvinsAIRA
 			_irsdk_playerCarNumber = driver?.CarNumber ?? string.Empty;
 
 			WriteLine( $"Player's car number = {_irsdk_playerCarNumber}" );
+
+			_irsdk_numForwardGears = sessionInfo.DriverInfo.DriverCarGearNumForward;
+
+			WriteLine( $"Number of forward gears = {_irsdk_numForwardGears}" );
 
 #if DEBUG
 
@@ -557,6 +567,10 @@ namespace MarvinsAIRA
 			if ( _irsdk_tickCount - _irsdk_updateLoopTickCount >= 3 )
 			{
 				_irsdk_updateLoopTickCount = _irsdk_tickCount;
+
+				UpdateHPR();
+
+				mainWindow?.UpdatePedalHapticsPrettyGraphs();
 
 				mainWindow?._win_autoResetEvent.Set();
 			}

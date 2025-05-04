@@ -171,6 +171,8 @@ namespace MarvinsAIRA
 
 				foreach ( var deviceType in deviceTypeArray )
 				{
+					WriteLine( $"...scanning for {deviceType} devices..." );
+
 					bool deviceFound = false;
 
 					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
@@ -272,13 +274,13 @@ namespace MarvinsAIRA
 
 			if ( _ffb_multimediaTimerId != 0 )
 			{
-				WriteLine( "...killing the multimedia timer event..." );
+				WriteLine( "...killing the FFB multimedia timer event..." );
 
 				WinApi.TimeKillEvent( _ffb_multimediaTimerId );
 
 				_ffb_multimediaTimerId = 0;
 
-				WriteLine( "...multimedia timer event killed..." );
+				WriteLine( "...FFB multimedia timer event killed..." );
 			}
 
 			if ( _ffb_constantForceEffect != null )
@@ -392,14 +394,14 @@ namespace MarvinsAIRA
 
 				var periodInMilliseconds = (UInt32) ( 18 - Settings.Frequency );
 
-				WriteLine( $"...starting the multimedia timer event (period = {periodInMilliseconds} ms)..." );
+				WriteLine( $"...starting the FFB multimedia timer event (period = {periodInMilliseconds} ms)..." );
 
 				_ffb_sendStartTimer = 0;
 				_ffb_forceFeedbackExceptionThrown = false;
 
-				_ffb_multimediaTimerId = WinApi.TimeSetEvent( periodInMilliseconds, 0, MultimediaTimerEventCallback, ref userCtx, EVENTTYPE_PERIODIC );
+				_ffb_multimediaTimerId = WinApi.TimeSetEvent( periodInMilliseconds, 0, FFBMultimediaTimerEventCallback, ref userCtx, EVENTTYPE_PERIODIC );
 
-				WriteLine( "...the multimedia timer event has been started..." );
+				WriteLine( "...the FFB multimedia timer event has been started..." );
 				WriteLine( "...the force feedback device has been reinitialized." );
 			}
 			catch ( Exception exception )
@@ -739,7 +741,7 @@ namespace MarvinsAIRA
 			{
 				_ffb_reinitializeNeeded = false;
 
-				_ffb_reinitializeTimer = Math.Max( 1f, _ffb_reinitializeTimer );
+				_ffb_reinitializeTimer = MathF.Max( 1f, _ffb_reinitializeTimer );
 			}
 
 			if ( _ffb_reinitializeTimer > 0f )
@@ -893,8 +895,8 @@ namespace MarvinsAIRA
 
 							var currentWheelPosition = Math.Clamp( Input_CurrentWheelPosition, Settings.WheelMinValue, Settings.WheelMaxValue );
 
-							var leftDelta = (float) -Math.Min( 0f, currentWheelPosition - Settings.WheelCenterValue );
-							var rightDelta = (float) Math.Max( 0f, currentWheelPosition - Settings.WheelCenterValue );
+							var leftDelta = (float) -MathF.Min( 0f, currentWheelPosition - Settings.WheelCenterValue );
+							var rightDelta = (float) MathF.Max( 0f, currentWheelPosition - Settings.WheelCenterValue );
 
 							var leftPercentage = leftDelta / leftRange; // 0 to 1
 							var rightPercentage = rightDelta / rightRange; // 0 to 1
@@ -1073,7 +1075,7 @@ namespace MarvinsAIRA
 
 			for ( var i = 0; i < _ffb_gForceBuffer.Length; i++ )
 			{
-				peakGForce = Math.Max( peakGForce, _ffb_gForceBuffer[ i ] );
+				peakGForce = MathF.Max( peakGForce, _ffb_gForceBuffer[ i ] );
 			}
 
 			_ffb_peakGForce = peakGForce;
@@ -1107,7 +1109,7 @@ namespace MarvinsAIRA
 
 			for ( var i = 0; i < _ffb_maxShockVelBuffer.Length; i++ )
 			{
-				peakShockVel = Math.Max( peakShockVel, _ffb_maxShockVelBuffer[ i ] );
+				peakShockVel = MathF.Max( peakShockVel, _ffb_maxShockVelBuffer[ i ] );
 			}
 
 			_ffb_peakShockVel = peakShockVel;
@@ -1118,6 +1120,63 @@ namespace MarvinsAIRA
 			UFF_ProcessYawRateFactor();
 			UFF_ProcessGForce();
 			UFF_ProcessShocks();
+
+			// calculate understeer amount (in -1 to +1) and frequency (in rads per 1/360sec)
+
+			var understeerFrequency = 0f;
+
+			if ( _ffb_yawRateFactorInstant > 0f )
+			{
+				if ( _irsdk_steeringWheelAngle >= 0f )
+				{
+					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorLeft ) / (float) ( Settings.USEndYawRateFactorLeft - Settings.USStartYawRateFactorLeft ), 0f, 1f );
+				}
+				else
+				{
+					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorRight ) / (float) ( Settings.USEndYawRateFactorRight - Settings.USStartYawRateFactorRight ), 0f, 1f );
+				}
+
+				understeerFrequency = MathF.Max( 0.25f, _ffb_understeerAmountLinear );
+
+				_ffb_understeerAmount = MathF.Sign( _irsdk_steeringWheelAngle ) * MathF.Pow( _ffb_understeerAmountLinear, Settings.USCurve );
+			}
+			else
+			{
+				_ffb_understeerAmount = 0f;
+				_ffb_understeerAmountLinear = 0f;
+			}
+
+			// calculate oversteer amount (in -1 to +1) and frequency (in rads per 1/360sec)
+
+			var oversteerFrequency = 0f;
+
+			if ( _irsdk_velocityX > 0f )
+			{
+				_ffb_oversteerAmountLinear = Math.Clamp( ( MathF.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
+
+				oversteerFrequency = MathF.Max( 0.25f, _ffb_oversteerAmountLinear );
+
+				_ffb_oversteerAmount = -MathF.Sign( _irsdk_velocityY ) * MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
+
+				// apply softness if counter-steering
+
+				if ( MathF.Sign( _irsdk_steeringWheelAngle ) == MathF.Sign( _irsdk_velocityY ) )
+				{
+					if ( ( Settings.OSSoftness >= 1f ) && ( Settings.OSSoftness <= 179f ) )
+					{
+						var fadeDistanceInRadians = Settings.OSSoftness * MathF.PI / 180f;
+
+						var fadeAmount = Math.Clamp( ( fadeDistanceInRadians - MathF.Abs( _irsdk_steeringWheelAngle ) ) / fadeDistanceInRadians, 0f, 1f );
+
+						_ffb_oversteerAmount *= fadeAmount;
+					}
+				}
+			}
+			else
+			{
+				_ffb_oversteerAmount = 0f;
+				_ffb_oversteerAmountLinear = 0f;
+			}
 
 			// stop here if force feedback is not enabled
 
@@ -1213,7 +1272,7 @@ namespace MarvinsAIRA
 			{
 				_ffb_crashProtectionScale = 0f;
 
-				_ffb_crashProtectionTimer = Math.Max( 0f, _ffb_crashProtectionTimer - ( 1f / _irsdk_tickRate ) );
+				_ffb_crashProtectionTimer = MathF.Max( 0f, _ffb_crashProtectionTimer - ( 1f / _irsdk_tickRate ) );
 
 				if ( _ffb_crashProtectionTimer == 0f )
 				{
@@ -1239,68 +1298,11 @@ namespace MarvinsAIRA
 			{
 				_ffb_curbProtectionScale = 1f - Settings.CurbProtectionDetailScale / 100f;
 
-				_ffb_curbProtectionTimer = Math.Max( 0f, _ffb_curbProtectionTimer - ( 1f / _irsdk_tickRate ) );
+				_ffb_curbProtectionTimer = MathF.Max( 0f, _ffb_curbProtectionTimer - ( 1f / _irsdk_tickRate ) );
 			}
 			else
 			{
 				_ffb_curbProtectionScale = ( _ffb_curbProtectionScale * 0.99f ) + ( 1f * 0.01f );
-			}
-
-			// calculate understeer amount (in 0-1) and frequency (in rads per 1/360sec)
-
-			var understeerFrequency = 0f;
-
-			if ( _ffb_yawRateFactorInstant > 0f )
-			{
-				if ( _irsdk_steeringWheelAngle >= 0f )
-				{
-					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorLeft ) / (float) ( Settings.USEndYawRateFactorLeft - Settings.USStartYawRateFactorLeft ), 0f, 1f );
-				}
-				else
-				{
-					_ffb_understeerAmountLinear = Math.Clamp( ( _ffb_yawRateFactorInstant - Settings.USStartYawRateFactorRight ) / (float) ( Settings.USEndYawRateFactorRight - Settings.USStartYawRateFactorRight ), 0f, 1f );
-				}
-
-				understeerFrequency = Math.Max( 0.25f, _ffb_understeerAmountLinear );
-
-				_ffb_understeerAmount = MathF.Sign( _irsdk_steeringWheelAngle ) * MathF.Pow( _ffb_understeerAmountLinear, Settings.USCurve );
-			}
-			else
-			{
-				_ffb_understeerAmount = 0f;
-				_ffb_understeerAmountLinear = 0f;
-			}
-
-			// calculate oversteer amount (in 0-1) and frequency (in rads per 1/360sec)
-
-			var oversteerFrequency = 0f;
-
-			if ( _irsdk_velocityX > 0f )
-			{
-				_ffb_oversteerAmountLinear = Math.Clamp( ( MathF.Abs( _irsdk_velocityY ) - Settings.OSStartYVelocity ) / ( Settings.OSEndYVelocity - Settings.OSStartYVelocity ), 0f, 1f );
-
-				oversteerFrequency = Math.Max( 0.25f, _ffb_oversteerAmountLinear );
-
-				_ffb_oversteerAmount = -MathF.Sign( _irsdk_velocityY ) * MathF.Pow( _ffb_oversteerAmountLinear, Settings.OSCurve );
-
-				// apply softness if counter-steering
-
-				if ( MathF.Sign( _irsdk_steeringWheelAngle ) == MathF.Sign( _irsdk_velocityY ) )
-				{
-					if ( ( Settings.OSSoftness >= 1f ) && ( Settings.OSSoftness <= 179f ) )
-					{
-						var fadeDistanceInRadians = Settings.OSSoftness * MathF.PI / 180f;
-
-						var fadeAmount = Math.Clamp( ( fadeDistanceInRadians - MathF.Abs( _irsdk_steeringWheelAngle ) ) / fadeDistanceInRadians, 0f, 1f );
-
-						_ffb_oversteerAmount *= fadeAmount;
-					}
-				}
-			}
-			else
-			{
-				_ffb_oversteerAmount = 0f;
-				_ffb_oversteerAmountLinear = 0f;
 			}
 
 			// calculate speed scale (reduce forces while the car is moving very slow or parked) (in 0-1)
@@ -1673,7 +1675,7 @@ namespace MarvinsAIRA
 							}
 							else if ( ( _ffb_curbProtectionTimer > 0f ) && ( ( y == shockProtection1 ) || ( y == shockProtection2 ) || ( y == shockProtection3 ) || ( y == shockProtection4 ) ) )
 							{
-								if ( ( _irsdk_tickCount & 1 ) == 0)
+								if ( ( _irsdk_tickCount & 1 ) == 0 )
 								{
 									_ffb_pixels[ offset + 0 ] = 0;
 									_ffb_pixels[ offset + 1 ] = 0;
@@ -1717,7 +1719,7 @@ namespace MarvinsAIRA
 			_ffb_lfeOutTorqueNM = lfeOutTorqueNM;
 		}
 
-		static private void MultimediaTimerEventCallback( uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2 )
+		private static void FFBMultimediaTimerEventCallback( uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2 )
 		{
 			var app = (App) Current;
 
@@ -1758,7 +1760,7 @@ namespace MarvinsAIRA
 			var i3 = Math.Min( maxOffset, i2 + 1 );
 			var i0 = Math.Max( 0, i1 - 1 );
 
-			var t = Math.Min( 1f, ffbOutputDIIndex - i1 );
+			var t = MathF.Min( 1f, ffbOutputDIIndex - i1 );
 
 			var m0 = app._ffb_outputDI[ i0 ];
 			var m1 = app._ffb_outputDI[ i1 ];
@@ -1769,11 +1771,11 @@ namespace MarvinsAIRA
 
 			// update send start timer
 
-			app._ffb_sendStartTimer = Math.Max( 0f, app._ffb_sendStartTimer - deltaSeconds );
+			app._ffb_sendStartTimer = MathF.Max( 0f, app._ffb_sendStartTimer - deltaSeconds );
 
 			// update clipped timer
 
-			app._ffb_clippedTimer = Math.Max( 0f, app._ffb_clippedTimer - deltaSeconds );
+			app._ffb_clippedTimer = MathF.Max( 0f, app._ffb_clippedTimer - deltaSeconds );
 
 			// light clip indicator if we are out of range
 
@@ -1800,9 +1802,9 @@ namespace MarvinsAIRA
 				app.UpdateConstantForce( [ 0 ] );
 			}
 
-			if ( app._ffb_magnitudeCoolDownTimer > 0 )
+			if ( app._ffb_magnitudeCoolDownTimer > 0f )
 			{
-				app._ffb_magnitudeCoolDownTimer = Math.Max( 0, app._ffb_magnitudeCoolDownTimer - deltaSeconds );
+				app._ffb_magnitudeCoolDownTimer = MathF.Max( 0f, app._ffb_magnitudeCoolDownTimer - deltaSeconds );
 
 				magnitude = (int) ( app._ffb_magnitudeCoolDownTimer * app._ffb_lastNonCooldownMagnitudeSentToWheel );
 			}

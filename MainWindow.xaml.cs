@@ -32,6 +32,20 @@ namespace MarvinsAIRA
 		private const int IMAGE_DPI = 96;
 		private const int IMAGE_STRIDE = IMAGE_WIDTH * IMAGE_BYTES_PER_PIXEL;
 
+		private const ushort WM_MAIRA = WinApi.WM_APP + 1;
+
+		public enum MSG_TYPE : int
+		{
+			Overall_Scale = 0,
+			Detail_Scale = 1,
+			Parked_Scale = 2,
+			Min_Force = 3,
+			Max_Force = 4,
+			FFB_Curve = 5,
+			LFE = 6,
+			LFE_Enabled = 7,
+		}
+
 		private bool _win_initialized = false;
 		private bool _win_updateLoopRunning = false;
 		private bool _win_pauseInputProcessing = false;
@@ -330,7 +344,7 @@ namespace MarvinsAIRA
 
 			var devBroadcastDeviceInterfacePtr = Marshal.AllocHGlobal( devBroadcastDeviceInterface.dbcc_size );
 
-			Marshal.StructureToPtr( devBroadcastDeviceInterface, devBroadcastDeviceInterfacePtr, true );
+			Marshal.StructureToPtr( devBroadcastDeviceInterface, devBroadcastDeviceInterfacePtr, false );
 
 			_win_deviceChangeNotificationHandle = WinApi.RegisterDeviceNotification( ( new WindowInteropHelper( this ) ).Handle, devBroadcastDeviceInterfacePtr, DeviceChangeNotification.DEVICE_NOTIFY_WINDOW_HANDLE );
 
@@ -349,6 +363,46 @@ namespace MarvinsAIRA
 		{
 			switch ( msg )
 			{
+				case WM_MAIRA:
+				{
+					var app = (App) Application.Current;
+
+					MSG_TYPE type = (MSG_TYPE) wParam;
+
+					var value = (int) lParam - 10;
+
+					value = Math.Clamp( value, -10, 10 );
+
+					switch ( type )
+					{
+						case MSG_TYPE.Overall_Scale:
+							app.Settings.OverallScale += value;
+							break;
+
+						case MSG_TYPE.Detail_Scale:
+							app.Settings.DetailScale += value;
+							break;
+
+						case MSG_TYPE.Parked_Scale:
+							app.Settings.ParkedScale += value;
+							break;
+
+						case MSG_TYPE.FFB_Curve:
+							app.Settings.FFBCurve += value * .01f;
+							break;
+
+						case MSG_TYPE.LFE:
+							app.Settings.LFEScale += value;
+							break;
+
+						case MSG_TYPE.LFE_Enabled:
+							app.Settings.LFEToFFBEnabled = !app.Settings.LFEToFFBEnabled;
+							break;
+					}
+
+					break;
+				}
+
 				case WinApi.WM_SYSCOMMAND:
 				{
 					if ( _win_initialized )
@@ -493,7 +547,7 @@ namespace MarvinsAIRA
 
 					if ( _win_keepThreadsAlive == 1 )
 					{
-						var deltaTime = Math.Min( 0.1f, (float) _win_stopwatch.Elapsed.TotalSeconds );
+						var deltaTime = MathF.Min( 0.1f, (float) _win_stopwatch.Elapsed.TotalSeconds );
 
 						if ( deltaTime >= 1f / 120f )
 						{
@@ -560,275 +614,288 @@ namespace MarvinsAIRA
 
 							// gui
 
-								Dispatcher.BeginInvoke( () =>
+							Dispatcher.BeginInvoke( () =>
+							{
+								// iRacing FFB warning
+
+								ForceFeedbackWarning_Label.Visibility = app._irsdk_steeringFFBEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+								// Auto overall scale button
+
+								AutoOverallScale_Button.Content = $"{app.FFB_AutoOverallScalePeakForceInNewtonMeters:F1} N⋅m";
+
+								if ( app.FFB_AutoOverallScaleIsReady )
 								{
-									// iRacing FFB warning
+									AutoOverallScale_Button.IsEnabled = true;
+									AutoOverallScale_Button.BorderBrush = Brushes.Green;
+								}
+								else
+								{
+									AutoOverallScale_Button.IsEnabled = false;
+									AutoOverallScale_Button.BorderBrush = Brushes.DarkRed;
+								}
 
-									ForceFeedbackWarning_Label.Visibility = app._irsdk_steeringFFBEnabled ? Visibility.Visible : Visibility.Collapsed;
+								// Recording status
 
-									// Auto overall scale button
+								if ( app._ffb_recordingNow )
+								{
+									var recordTime = GetRecordingIndexAsTime();
 
-									AutoOverallScale_Button.Content = $"{app.FFB_AutoOverallScalePeakForceInNewtonMeters:F1} N⋅m";
+									Recording_Label.Content = $"Recording - {recordTime}";
+									Recording_Label.Visibility = ( ( app._irsdk_tickCount % 60 ) < 15 ) ? Visibility.Hidden : Visibility.Visible;
+								}
+								else
+								{
+									Recording_Label.Visibility = Visibility.Hidden;
+								}
 
-									if ( app.FFB_AutoOverallScaleIsReady )
+								// Playback status
+
+								if ( app._ffb_playingBackNow )
+								{
+									var recordTime = GetRecordingIndexAsTime();
+
+									Playback_Label.Content = $"Playback - {recordTime}";
+									Playback_Label.Visibility = Visibility.Visible;
+								}
+								else
+								{
+									Playback_Label.Visibility = Visibility.Hidden;
+								}
+
+								// Clipping status
+
+								if ( app.FFB_ClippedTimer > 0 )
+								{
+									if ( Clipping_Label.Visibility != Visibility.Visible )
 									{
-										AutoOverallScale_Button.IsEnabled = true;
-										AutoOverallScale_Button.BorderBrush = Brushes.Green;
+										Clipping_Label.Visibility = Visibility.Visible;
+
+										app.Say( app.Settings.SayClipping );
 									}
-									else
-									{
-										AutoOverallScale_Button.IsEnabled = false;
-										AutoOverallScale_Button.BorderBrush = Brushes.DarkRed;
-									}
+								}
+								else
+								{
+									Clipping_Label.Visibility = Visibility.Hidden;
+								}
 
-									// Recording status
+								// Spotter voice synth off warning
 
-									if ( app._ffb_recordingNow )
-									{
-										var recordTime = GetRecordingIndexAsTime();
+								if ( app.Settings.EnableSpeechSynthesizer )
+								{
+									SpotterVoiceSynthOffWarning_Label.Visibility = Visibility.Collapsed;
+								}
+								else
+								{
+									SpotterVoiceSynthOffWarning_Label.Visibility = Visibility.Visible;
+								}
 
-										Recording_Label.Content = $"Recording - {recordTime}";
-										Recording_Label.Visibility = ( ( app._irsdk_tickCount % 60 ) < 15 ) ? Visibility.Hidden : Visibility.Visible;
-									}
-									else
-									{
-										Recording_Label.Visibility = Visibility.Hidden;
-									}
+								// Steering wheel angle
 
-									// Playback status
+								var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / MathF.PI;
 
-									if ( app._ffb_playingBackNow )
-									{
-										var recordTime = GetRecordingIndexAsTime();
-
-										Playback_Label.Content = $"Playback - {recordTime}";
-										Playback_Label.Visibility = Visibility.Visible;
-									}
-									else
-									{
-										Playback_Label.Visibility = Visibility.Hidden;
-									}
-
-									// Clipping status
-
-									if ( app.FFB_ClippedTimer > 0 )
-									{
-										if ( Clipping_Label.Visibility != Visibility.Visible )
-										{
-											Clipping_Label.Visibility = Visibility.Visible;
-
-											app.Say( app.Settings.SayClipping );
-										}
-									}
-									else
-									{
-										Clipping_Label.Visibility = Visibility.Hidden;
-									}
-
-									// Spotter voice synth off warning
+								SteeringWheel_Image.RenderTransform = new RotateTransform( -steeringWheelAngleInDegrees );
 
-									if ( app.Settings.EnableSpeechSynthesizer )
-									{
-										SpotterVoiceSynthOffWarning_Label.Visibility = Visibility.Collapsed;
-									}
-									else
-									{
-										SpotterVoiceSynthOffWarning_Label.Visibility = Visibility.Visible;
-									}
+								SteeringWheel_Label.Content = $"{steeringWheelAngleInDegrees:F0}°";
 
-									// Steering wheel angle
+								if ( (string) SteeringWheel_Label.Content == "-0°" )
+								{
+									SteeringWheel_Label.Content = "0°";
+								}
 
-									var steeringWheelAngleInDegrees = app._irsdk_steeringWheelAngle * 180f / MathF.PI;
+								// Clutch, brake, and throttle minimums
 
-									SteeringWheel_Image.RenderTransform = new RotateTransform( -steeringWheelAngleInDegrees );
+								ClutchMin_Rectangle.Visibility = ( app._irsdk_clutch < 1f ) ? Visibility.Visible : Visibility.Hidden;
+								BrakeMin_Rectangle.Visibility = ( app._irsdk_brake > 0f ) ? Visibility.Visible : Visibility.Hidden;
+								ThrottleMin_Rectangle.Visibility = ( app._irsdk_throttle > 0f ) ? Visibility.Visible : Visibility.Hidden;
 
-									SteeringWheel_Label.Content = $"{steeringWheelAngleInDegrees:F0}°";
+								// Clutch, brake, and throttle
 
-									if ( (string) SteeringWheel_Label.Content == "-0°" )
-									{
-										SteeringWheel_Label.Content = "0°";
-									}
+								var clutchHeight = Math.Clamp( 90f - app._irsdk_clutch * 90f, 0f, 90f );
 
-									// Clutch, brake, and throttle minimums
+								Clutch_Rectangle.Height = clutchHeight;
+								Clutch_Rectangle.Margin = new Thickness( 0, 90f - clutchHeight, 0f, 0f );
 
-									ClutchMin_Rectangle.Visibility = ( app._irsdk_clutch < 1f ) ? Visibility.Visible : Visibility.Hidden;
-									BrakeMin_Rectangle.Visibility = ( app._irsdk_brake > 0f ) ? Visibility.Visible : Visibility.Hidden;
-									ThrottleMin_Rectangle.Visibility = ( app._irsdk_throttle > 0f ) ? Visibility.Visible : Visibility.Hidden;
+								var brakeHeight = Math.Clamp( app._irsdk_brake * 90f, 0f, 90f );
 
-									// Clutch, brake, and throttle
+								Brake_Rectangle.Height = brakeHeight;
+								Brake_Rectangle.Margin = new Thickness( 0, 90f - brakeHeight, 0f, 0f );
 
-									var clutchHeight = Math.Clamp( 90f - app._irsdk_clutch * 90f, 0f, 90f );
+								var throttleHeight = Math.Clamp( app._irsdk_throttle * 90f, 0f, 90f );
 
-									Clutch_Rectangle.Height = clutchHeight;
-									Clutch_Rectangle.Margin = new Thickness( 0, 90f - clutchHeight, 0f, 0f );
+								Throttle_Rectangle.Height = throttleHeight;
+								Throttle_Rectangle.Margin = new Thickness( 0, 90f - throttleHeight, 0f, 0f );
 
-									var brakeHeight = Math.Clamp( app._irsdk_brake * 90f, 0f, 90f );
+								// Clutch, brake, and throttle maximums
 
-									Brake_Rectangle.Height = brakeHeight;
-									Brake_Rectangle.Margin = new Thickness( 0, 90f - brakeHeight, 0f, 0f );
+								ClutchMax_Rectangle.Visibility = ( app._irsdk_clutch == 0f ) ? Visibility.Visible : Visibility.Hidden;
+								BrakeMax_Rectangle.Visibility = ( app._irsdk_brake == 1f ) ? Visibility.Visible : Visibility.Hidden;
+								ThrottleMax_Rectangle.Visibility = ( app._irsdk_throttle == 1f ) ? Visibility.Visible : Visibility.Hidden;
 
-									var throttleHeight = Math.Clamp( app._irsdk_throttle * 90f, 0f, 90f );
+								// Gear
 
-									Throttle_Rectangle.Height = throttleHeight;
-									Throttle_Rectangle.Margin = new Thickness( 0, 90f - throttleHeight, 0f, 0f );
+								if ( app._irsdk_gear == -1 )
+								{
+									Gear_Label.Content = "R";
+								}
+								else if ( app._irsdk_gear == 0 )
+								{
+									Gear_Label.Content = "N";
+								}
+								else
+								{
+									Gear_Label.Content = app._irsdk_gear.ToString();
+								}
 
-									// Clutch, brake, and throttle maximums
+								// ABS
 
-									ClutchMax_Rectangle.Visibility = ( app._irsdk_clutch == 0f ) ? Visibility.Visible : Visibility.Hidden;
-									BrakeMax_Rectangle.Visibility = ( app._irsdk_brake == 1f ) ? Visibility.Visible : Visibility.Hidden;
-									ThrottleMax_Rectangle.Visibility = ( app._irsdk_throttle == 1f ) ? Visibility.Visible : Visibility.Hidden;
+								if ( app._irsdk_brakeABSactive )
+								{
+									ABS_Label.Foreground = Brushes.Orange;
+								}
+								else
+								{
+									ABS_Label.Foreground = Brushes.Gray;
+								}
 
-									// Gear
+								// Speed
 
-									if ( app._irsdk_gear == -1 )
-									{
-										Gear_Label.Content = "R";
-									}
-									else if ( app._irsdk_gear == 0 )
-									{
-										Gear_Label.Content = "N";
-									}
-									else
-									{
-										Gear_Label.Content = app._irsdk_gear.ToString();
-									}
+								if ( app._irsdk_displayUnits == 0 )
+								{
+									Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_MPH:F0} MPH";
+								}
+								else
+								{
+									Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_KPH:F0} KPH";
+								}
 
-									// ABS
+								// X Velocity
 
-									if ( app._irsdk_brakeABSactive )
-									{
-										ABS_Label.Foreground = Brushes.Orange;
-									}
-									else
-									{
-										ABS_Label.Foreground = Brushes.Gray;
-									}
+								XVelocity_Label.Content = $"{app._irsdk_velocityX:F0} m/s";
 
-									// Speed
+								if ( (string) XVelocity_Label.Content == "-0 m/s" )
+								{
+									XVelocity_Label.Content = "0 m/s";
+								}
 
-									if ( app._irsdk_displayUnits == 0 )
-									{
-										Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_MPH:F0} MPH";
-									}
-									else
-									{
-										Speed_Label.Content = $"{app._irsdk_speed * App.MPS_TO_KPH:F0} KPH";
-									}
+								// Y Velocity
 
-									// X Velocity
+								YVelocity_Label.Content = $"{app._irsdk_velocityY:F1} m/s";
 
-									XVelocity_Label.Content = $"{app._irsdk_velocityX:F0} m/s";
+								if ( (string) YVelocity_Label.Content == "-0.0 m/s" )
+								{
+									YVelocity_Label.Content = "0.0 m/s";
+								}
 
-									if ( (string) XVelocity_Label.Content == "-0 m/s" )
-									{
-										XVelocity_Label.Content = "0 m/s";
-									}
+								// Yaw rate
 
-									// Y Velocity
+								var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / MathF.PI;
 
-									YVelocity_Label.Content = $"{app._irsdk_velocityY:F1} m/s";
+								YawRate_Label.Content = $"{yawRateInDegreesPerSecond:F0}°/sec";
 
-									if ( (string) YVelocity_Label.Content == "-0.0 m/s" )
-									{
-										YVelocity_Label.Content = "0.0 m/s";
-									}
+								if ( (string) YawRate_Label.Content == "-0°/sec" )
+								{
+									YawRate_Label.Content = $"0°/sec";
+								}
 
-									// Yaw rate
+								// Yaw rate factor (instant)
 
-									var yawRateInDegreesPerSecond = app._irsdk_yawRate * 180f / MathF.PI;
+								YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F0}";
 
-									YawRate_Label.Content = $"{yawRateInDegreesPerSecond:F0}°/sec";
+								if ( (string) YawRateFactorInstant_Label.Content == "-0" )
+								{
+									YawRateFactorInstant_Label.Content = "0";
+								}
 
-									if ( (string) YawRate_Label.Content == "-0°/sec" )
-									{
-										YawRate_Label.Content = $"0°/sec";
-									}
+								// Yaw rate factor (average)
 
-									// Yaw rate factor (instant)
+								YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F0}";
 
-									YawRateFactorInstant_Label.Content = $"{app.FFB_YawRateFactorInstant:F0}";
+								if ( (string) YawRateFactorAverage_Label.Content == "-0" )
+								{
+									YawRateFactorAverage_Label.Content = "0";
+								}
 
-									if ( (string) YawRateFactorInstant_Label.Content == "-0" )
-									{
-										YawRateFactorInstant_Label.Content = "0";
-									}
+								// Speed / RPM ratio (average for current gear)
 
-									// Yaw rate factor (average)
+								if ( app._irsdk_gear > 0 )
+								{
+									SpeedRpmRatio1_Label.Content = $"{app._hpr_averageRpmSpeedRatioPerGear[ app._irsdk_gear ]:F6}";
+									SpeedRpmRatio2_Label.Content = $"{app._hpr_currentRpmSpeedRatio:F6}";
+								}
+								else
+								{
+									SpeedRpmRatio1_Label.Content = "-";
+									SpeedRpmRatio2_Label.Content = "-";
+								}
 
-									YawRateFactorAverage_Label.Content = $"{app.FFB_YawRateFactorAverage:F0}";
+								// Peak G force (last 2 seconds)
 
-									if ( (string) YawRateFactorAverage_Label.Content == "-0" )
-									{
-										YawRateFactorAverage_Label.Content = "0";
-									}
+								PeakGForce_Label.Content = $"{app.FFB_PeakGForce:F1} G";
 
-									// Peak G force (last 2 seconds)
+								// Shock velocity (last 2 seconds)
 
-									PeakGForce_Label.Content = $"{app.FFB_PeakGForce:F1} G";
+								PeakShockVelocity_Label.Content = $"{app.FFB_PeakShockVel:F2} m/s";
 
-									// Shock velocity (last 2 seconds)
+								// Oversteer amount
 
-									PeakShockVelocity_Label.Content = $"{app.FFB_PeakShockVel:F2} m/s";
+								var oversteerAmount = MathF.Abs( app.FFB_OversteerAmount );
 
-									// Oversteer amount
+								OversteerAmount_Label.Content = $"{oversteerAmount * 100f:F0}%";
 
-									var oversteerAmount = MathF.Abs( app.FFB_OversteerAmount );
+								// Understeer amount
 
-									OversteerAmount_Label.Content = $"{oversteerAmount * 100f:F0}%";
+								var understeerAmount = MathF.Abs( app.FFB_UndersteerAmount );
 
-									// Understeer amount
+								UndersteerAmount_Label.Content = $"{understeerAmount * 100f:F0}%";
 
-									var understeerAmount = MathF.Abs( app.FFB_UndersteerAmount );
+								// Oversteer graph
 
-									UndersteerAmount_Label.Content = $"{understeerAmount * 100f:F0}%";
+								float osRange = app.Settings.OSEndYVelocity - app.Settings.OSStartYVelocity;
 
-									// Oversteer graph
+								var x = app.FFB_OversteerAmountLinear * IMAGE_WIDTH;
+								var y = oversteerAmount * IMAGE_HEIGHT;
 
-									float osRange = app.Settings.OSEndYVelocity - app.Settings.OSStartYVelocity;
+								Oversteer_Ellipse.RenderTransform = new TranslateTransform( IMAGE_WIDTH / 2f - x, IMAGE_HEIGHT / 2f - y );
 
-									var x = app.FFB_OversteerAmountLinear * IMAGE_WIDTH;
-									var y = oversteerAmount * IMAGE_HEIGHT;
+								Oversteer_StartYVelocity_Label.Content = $"{app.Settings.OSStartYVelocity:F1} m/s";
+								Oversteer_EndYVelocity_Label.Content = $"{app.Settings.OSEndYVelocity:F1} m/s";
 
-									Oversteer_Ellipse.RenderTransform = new TranslateTransform( IMAGE_WIDTH / 2f - x, IMAGE_HEIGHT / 2f - y );
+								// Understeer graph
 
-									Oversteer_StartYVelocity_Label.Content = $"{app.Settings.OSStartYVelocity:F1} m/s";
-									Oversteer_EndYVelocity_Label.Content = $"{app.Settings.OSEndYVelocity:F1} m/s";
+								float usRange = 0f;
 
-									// Understeer graph
+								if ( app._irsdk_steeringWheelAngle >= 0 )
+								{
+									usRange = app.Settings.USStartYawRateFactorLeft - app.Settings.USEndYawRateFactorLeft;
+								}
+								else
+								{
+									usRange = app.Settings.USEndYawRateFactorRight - app.Settings.USStartYawRateFactorRight;
+								}
 
-									float usRange = 0f;
+								x = app.FFB_UndersteerAmountLinear * IMAGE_WIDTH;
+								y = understeerAmount * IMAGE_HEIGHT;
 
-									if ( app._irsdk_steeringWheelAngle >= 0 )
-									{
-										usRange = app.Settings.USStartYawRateFactorLeft - app.Settings.USEndYawRateFactorLeft;
-									}
-									else
-									{
-										usRange = app.Settings.USEndYawRateFactorRight - app.Settings.USStartYawRateFactorRight;
-									}
+								Understeer_Ellipse.RenderTransform = new TranslateTransform( x - IMAGE_WIDTH / 2f, IMAGE_HEIGHT / 2f - y );
 
-									x = app.FFB_UndersteerAmountLinear * IMAGE_WIDTH;
-									y = understeerAmount * IMAGE_HEIGHT;
-
-									Understeer_Ellipse.RenderTransform = new TranslateTransform( x - IMAGE_WIDTH / 2f, IMAGE_HEIGHT / 2f - y );
-
-									if ( app._irsdk_steeringWheelAngle >= 0 )
-									{
-										Understeer_StartYawRateFactor_Label.Content = $"YRF {app.Settings.USStartYawRateFactorLeft}";
-										Understeer_EndYawRateFactor_Label.Content = $"YRF {app.Settings.USEndYawRateFactorLeft}";
-									}
-									else
-									{
-										Understeer_StartYawRateFactor_Label.Content = $"YRF {app.Settings.USStartYawRateFactorRight}";
-										Understeer_EndYawRateFactor_Label.Content = $"YRF {app.Settings.USEndYawRateFactorRight}";
-									}
-								} );
+								if ( app._irsdk_steeringWheelAngle >= 0 )
+								{
+									Understeer_StartYawRateFactor_Label.Content = $"YRF {app.Settings.USStartYawRateFactorLeft}";
+									Understeer_EndYawRateFactor_Label.Content = $"YRF {app.Settings.USEndYawRateFactorLeft}";
+								}
+								else
+								{
+									Understeer_StartYawRateFactor_Label.Content = $"YRF {app.Settings.USStartYawRateFactorRight}";
+									Understeer_EndYawRateFactor_Label.Content = $"YRF {app.Settings.USEndYawRateFactorRight}";
+								}
+							} );
 
 							// usb device changes
 
 							if ( _win_inputReinitTimer > 0f )
 							{
-								_win_inputReinitTimer = Math.Max( 0f, _win_inputReinitTimer - deltaTime );
+								_win_inputReinitTimer = MathF.Max( 0f, _win_inputReinitTimer - deltaTime );
 
 								if ( ( _win_inputReinitTimer == 0f ) && app.Settings.ReinitializeWhenDevicesChanged )
 								{
@@ -1256,6 +1323,16 @@ namespace MarvinsAIRA
 			}
 		}
 
+		private void USPedalHaptics_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.Settings.USEffectStyle = 4;
+			}
+		}
+
 		private void UndersteerEffectMap_Button_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -1307,6 +1384,16 @@ namespace MarvinsAIRA
 				var app = (App) Application.Current;
 
 				app.Settings.OSEffectStyle = 3;
+			}
+		}
+
+		private void OSPedalHaptics_RadioButton_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.Settings.OSEffectStyle = 4;
 			}
 		}
 
@@ -1382,8 +1469,81 @@ namespace MarvinsAIRA
 
 		#endregion
 
-		#region Wind simulator tab
+		#region Pedal haptics tab
 
+		private void HprLink1_Label_MouseDown( object sender, MouseButtonEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "HprLink1_Label_MouseDown called." );
+
+			string url = "https://simagic.com/products/simagic-hpb-bundle";
+
+			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
+			{
+				CreateNoWindow = true
+			};
+
+			Process.Start( processStartInfo );
+		}
+
+		private void HprLink2_Label_MouseDown( object sender, MouseButtonEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "HprLink2_Label_MouseDown called." );
+
+			string url = "https://simagic.com/products/p2000-haptic-control-box";
+
+			var processStartInfo = new ProcessStartInfo( "cmd", $"/c start {url}" )
+			{
+				CreateNoWindow = true
+			};
+
+			Process.Start( processStartInfo );
+		}
+
+		private void PedalHaptics_CheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			if ( _win_initialized )
+			{
+				var app = (App) Application.Current;
+
+				app.InitializeHPR();
+			}
+		}
+
+		private void TogglePedalHapticsPrettyGraph_Button_Click( object sender, RoutedEventArgs e )
+		{
+			var app = (App) Application.Current;
+
+			app.WriteLine( "TogglePedalHapticsPrettyGraph_Button_Click called." );
+
+			TogglePedalHapticsPrettyGraph();
+		}
+
+		private void TogglePedalHapticsPrettyGraph()
+		{
+			var app = (App) Application.Current;
+
+			if ( app.TogglePedalHapticsPrettyGraph() )
+			{
+				PedalHapticsPrettyGraph_StackPanel.Visibility = Visibility.Visible;
+
+				TogglePedalHapticsPrettyGraph_Button.Content = "Disable Pretty Graphs";
+			}
+			else
+			{
+				PedalHapticsPrettyGraph_StackPanel.Visibility = Visibility.Collapsed;
+
+				TogglePedalHapticsPrettyGraph_Button.Content = "Enable Pretty Graphs";
+			}
+		}
+
+		#endregion
+
+		#region Wind simulator tab
+		/*
 		private void Test_CheckBox_Click( object sender, RoutedEventArgs e )
 		{
 			var app = (App) Application.Current;
@@ -1418,7 +1578,7 @@ namespace MarvinsAIRA
 				}
 			}
 		}
-
+		*/
 		#endregion
 
 		#region Settings tab - App tab
@@ -1748,7 +1908,8 @@ namespace MarvinsAIRA
 
 				SteeringEffects_TabItem.Visibility = visibility;
 				LFEtoFFB_TabItem.Visibility = visibility;
-				WindSimulator_TabItem.Visibility = visibility;
+				PedalHaptics_TabItem.Visibility = visibility;
+				//WindSimulator_TabItem.Visibility = visibility;
 				Spotter_TabItem.Visibility = visibility;
 				SkidPad_TabItem.Visibility = visibility;
 
@@ -1881,6 +2042,44 @@ namespace MarvinsAIRA
 					{
 						app._ffb_writeableBitmap?.WritePixels( new Int32Rect( rightX, 0, rightWidth, App.FFB_WRITEABLE_BITMAP_HEIGHT ), app._ffb_pixels, App.FFB_PIXELS_BUFFER_STRIDE, leftWidth, 0 );
 					}
+				} );
+			}
+		}
+
+		public void UpdatePedalHapticsPrettyGraphs()
+		{
+			var app = (App) Application.Current;
+
+			if ( app._hpr_drawPrettyGraphs )
+			{
+				Dispatcher.BeginInvoke( () =>
+				{
+					int leftX = app._hpr_prettyGraphCurrentX;
+					int leftWidth = App.HPR_PIXELS_BUFFER_WIDTH - leftX;
+					int rightX = 0;
+					int rightWidth = app._hpr_prettyGraphCurrentX - rightX;
+
+					for ( var i = 0; i < 3; i++ )
+					{
+						if ( leftWidth > 0 )
+						{
+							app._hpr_writeableBitmaps[ i ]?.WritePixels( new Int32Rect( leftX, 0, leftWidth, App.HPR_WRITEABLE_BITMAP_HEIGHT ), app._hpr_pixels[ i ], App.HPR_PIXELS_BUFFER_STRIDE, 0, 0 );
+						}
+
+						if ( rightWidth > 0 )
+						{
+							app._hpr_writeableBitmaps[ i ]?.WritePixels( new Int32Rect( rightX, 0, rightWidth, App.HPR_WRITEABLE_BITMAP_HEIGHT ), app._hpr_pixels[ i ], App.HPR_PIXELS_BUFFER_STRIDE, leftWidth, 0 );
+						}
+					}
+
+					PedalHapticsClutchFrequency_Label.Content = $"F: {app._hpr_frequency[ 0 ],2:F0}";
+					PedalHapticsClutchAmplitude_Label.Content = $"A: {app._hpr_amplitude[ 0 ],2:F0}";
+
+					PedalHapticsBrakeFrequency_Label.Content = $"F: {app._hpr_frequency[ 1 ],2:F0}";
+					PedalHapticsBrakeAmplitude_Label.Content = $"A: {app._hpr_amplitude[ 1 ],2:F0}";
+
+					PedalHapticsThrottleFrequency_Label.Content = $"F: {app._hpr_frequency[ 2 ],2:F0}";
+					PedalHapticsThrottleAmplitude_Label.Content = $"A: {app._hpr_amplitude[ 2 ],2:F0}";
 				} );
 			}
 		}

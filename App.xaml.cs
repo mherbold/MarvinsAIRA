@@ -66,6 +66,7 @@ namespace MarvinsAIRA
 				InitializeInputs( windowHandle );
 				InitializeForceFeedback( windowHandle, true );
 				InitializeLFE();
+				InitializeHPR( true );
 				InitializeIRacingSDK();
 				InitializeWindSimulator();
 				InitializeTelemetry();
@@ -88,6 +89,7 @@ namespace MarvinsAIRA
 				StopTelemetry();
 				StopIRacingSDK();
 				StopForceFeedback();
+				StopHPR();
 				StopLFE();
 				StopWindSimulator();
 				StopConsole();

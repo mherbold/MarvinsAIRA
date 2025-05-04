@@ -41,9 +41,9 @@ namespace MarvinsAIRA
 
 			DeviceInformation? selectedDeviceInformation = null;
 
-			var deviceInformationList = DirectSoundCapture.GetDevices();
-
 			SerializableDictionary<Guid, string> lfeDeviceList = [];
+
+			var deviceInformationList = DirectSoundCapture.GetDevices();
 
 			foreach ( var deviceInformation in deviceInformationList )
 			{
@@ -97,7 +97,7 @@ namespace MarvinsAIRA
 							Offset = i * LFE_FRAME_SIZE_IN_BYTES,
 							WaitHandle = _lfe_autoResetEvent
 						};
-					};
+					}
 
 					_lfe_captureBuffer.SetNotificationPositions( notificationPositionArray );
 
@@ -146,7 +146,7 @@ namespace MarvinsAIRA
 
 				_lfe_captureBuffer = null;
 
-				WriteLine( "...capture buffer uninitialized." );
+				WriteLine( "...capture buffer uninitialized..." );
 			}
 
 			for ( var i = 0; i < FFB_SAMPLES_PER_FRAME; i++ )
@@ -183,7 +183,7 @@ namespace MarvinsAIRA
 						currentCapturePosition = ( currentCapturePosition / LFE_FRAME_SIZE_IN_BYTES ) * LFE_FRAME_SIZE_IN_BYTES;
 
 						var magnitudeIndex = ( _lfe_magnitudeIndex + 1 ) % 2;
-						
+
 						var currentReadPosition = ( currentCapturePosition + LFE_CAPTURE_BUFFER_SIZE_IN_BYTES - LFE_FRAME_SIZE_IN_BYTES ) % LFE_CAPTURE_BUFFER_SIZE_IN_BYTES;
 
 						var dataStream = _lfe_captureBuffer.Lock( currentReadPosition, LFE_FRAME_SIZE_IN_BYTES, LockFlags.None, out var secondPart );

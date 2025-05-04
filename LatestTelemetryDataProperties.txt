@@ -1,0 +1,321 @@
+SessionTime, Double, Seconds since session start, s, 1
+SessionTick, Int, Current update number, , 1
+SessionNum, Int, Session number, , 1
+SessionState, Int, Session state, irsdk_SessionState, 1
+SessionUniqueID, Int, Session ID, , 1
+SessionFlags, BitField, Session flags, irsdk_Flags, 1
+SessionTimeRemain, Double, Seconds left till session ends, s, 1
+SessionLapsRemain, Int, Old laps left till session ends use SessionLapsRemainEx, , 1
+SessionLapsRemainEx, Int, New improved laps left till session ends, , 1
+SessionTimeTotal, Double, Total number of seconds in session, s, 1
+SessionLapsTotal, Int, Total number of laps in session, , 1
+SessionJokerLapsRemain, Int, Joker laps remaining to be taken, , 1
+SessionOnJokerLap, Bool, Player is currently completing a joker lap, , 1
+SessionTimeOfDay, Float, Time of day in seconds, s, 1
+RadioTransmitCarIdx, Int, The car index of the current person speaking on the radio, , 1
+RadioTransmitRadioIdx, Int, The radio index of the current person speaking on the radio, , 1
+RadioTransmitFrequencyIdx, Int, The frequency index of the current person speaking on the radio, , 1
+DisplayUnits, Int, Default units for the user interface 0 = english 1 = metric, , 1
+DriverMarker, Bool, Driver activated flag, , 1
+PushToTalk, Bool, Push to talk button state, , 1
+PushToPass, Bool, Push to pass button state, , 1
+ManualBoost, Bool, Hybrid manual boost state, , 1
+ManualNoBoost, Bool, Hybrid manual no boost state, , 1
+IsOnTrack, Bool, 1=Car on track physics running with player in car, , 1
+IsReplayPlaying, Bool, 0=replay not playing  1=replay playing, , 1
+ReplayFrameNum, Int, Integer replay frame number (60 per second), , 1
+ReplayFrameNumEnd, Int, Integer replay frame number from end of tape, , 1
+IsDiskLoggingEnabled, Bool, 0=disk based telemetry turned off  1=turned on, , 1
+IsDiskLoggingActive, Bool, 0=disk based telemetry file not being written  1=being written, , 1
+FrameRate, Float, Average frames per second, fps, 1
+CpuUsageFG, Float, Percent of available tim fg thread took with a 1 sec avg, %, 1
+GpuUsage, Float, Percent of available tim gpu took with a 1 sec avg, %, 1
+ChanAvgLatency, Float, Communications average latency, s, 1
+ChanLatency, Float, Communications latency, s, 1
+ChanQuality, Float, Communications quality, %, 1
+ChanPartnerQuality, Float, Partner communications quality, %, 1
+CpuUsageBG, Float, Percent of available tim bg thread took with a 1 sec avg, %, 1
+ChanClockSkew, Float, Communications server clock skew, s, 1
+MemPageFaultSec, Float, Memory page faults per second, , 1
+MemSoftPageFaultSec, Float, Memory soft page faults per second, , 1
+PlayerCarPosition, Int, Players position in race, , 1
+PlayerCarClassPosition, Int, Players class position in race, , 1
+PlayerCarClass, Int, Player car class id, , 1
+PlayerTrackSurface, Int, Players car track surface type, irsdk_TrkLoc, 1
+PlayerTrackSurfaceMaterial, Int, Players car track surface material type, irsdk_TrkSurf, 1
+PlayerCarIdx, Int, Players carIdx, , 1
+PlayerCarTeamIncidentCount, Int, Players team incident count for this session, , 1
+PlayerCarMyIncidentCount, Int, Players own incident count for this session, , 1
+PlayerCarDriverIncidentCount, Int, Teams current drivers incident count for this session, , 1
+PlayerCarWeightPenalty, Float, Players weight penalty, kg, 1
+PlayerCarPowerAdjust, Float, Players power adjust, %, 1
+PlayerCarDryTireSetLimit, Int, Players dry tire set limit, , 1
+PlayerCarTowTime, Float, Players car is being towed if time is greater than zero, s, 1
+PlayerCarInPitStall, Bool, Players car is properly in their pitstall, , 1
+PlayerCarPitSvStatus, Int, Players car pit service status bits, irsdk_PitSvStatus, 1
+PlayerTireCompound, Int, Players car current tire compound, , 1
+PlayerFastRepairsUsed, Int, Players car number of fast repairs used, , 1
+CarIdxLap, Int, Laps started by car index, , 64
+CarIdxLapCompleted, Int, Laps completed by car index, , 64
+CarIdxLapDistPct, Float, Percentage distance around lap by car index, %, 64
+CarIdxTrackSurface, Int, Track surface type by car index, irsdk_TrkLoc, 64
+CarIdxTrackSurfaceMaterial, Int, Track surface material type by car index, irsdk_TrkSurf, 64
+CarIdxOnPitRoad, Bool, On pit road between the cones by car index, , 64
+CarIdxPosition, Int, Cars position in race by car index, , 64
+CarIdxClassPosition, Int, Cars class position in race by car index, , 64
+CarIdxClass, Int, Cars class id by car index, , 64
+CarIdxF2Time, Float, Race time behind leader or fastest lap time otherwise, s, 64
+CarIdxEstTime, Float, Estimated time to reach current location on track, s, 64
+CarIdxLastLapTime, Float, Cars last lap time, s, 64
+CarIdxBestLapTime, Float, Cars best lap time, s, 64
+CarIdxBestLapNum, Int, Cars best lap number, , 64
+CarIdxTireCompound, Int, Cars current tire compound, , 64
+CarIdxQualTireCompound, Int, Cars Qual tire compound, , 64
+CarIdxQualTireCompoundLocked, Bool, Cars Qual tire compound is locked-in, , 64
+CarIdxFastRepairsUsed, Int, How many fast repairs each car has used, , 64
+CarIdxSessionFlags, BitField, Session flags for each player, irsdk_Flags, 64
+PaceMode, Int, Are we pacing or not, irsdk_PaceMode, 1
+CarIdxPaceLine, Int, What line cars are pacing in  or -1 if not pacing, , 64
+CarIdxPaceRow, Int, What row cars are pacing in  or -1 if not pacing, , 64
+CarIdxPaceFlags, BitField, Pacing status flags for each car, irsdk_PaceFlags, 64
+OnPitRoad, Bool, Is the player car on pit road between the cones, , 1
+CarIdxSteer, Float, Steering wheel angle by car index, rad, 64
+CarIdxRPM, Float, Engine rpm by car index, revs/min, 64
+CarIdxGear, Int, -1=reverse  0=neutral  1..n=current gear by car index, , 64
+SteeringWheelAngle, Float, Steering wheel angle, rad, 1
+Throttle, Float, 0=off throttle to 1=full throttle, %, 1
+Brake, Float, 0=brake released to 1=max pedal force, %, 1
+Clutch, Float, 0=disengaged to 1=fully engaged, %, 1
+Gear, Int, -1=reverse  0=neutral  1..n=current gear, , 1
+RPM, Float, Engine rpm, revs/min, 1
+PlayerCarSLFirstRPM, Float, Shift light first light rpm, revs/min, 1
+PlayerCarSLShiftRPM, Float, Shift light shift rpm, revs/min, 1
+PlayerCarSLLastRPM, Float, Shift light last light rpm, revs/min, 1
+PlayerCarSLBlinkRPM, Float, Shift light blink rpm, revs/min, 1
+Lap, Int, Laps started count, , 1
+LapCompleted, Int, Laps completed count, , 1
+LapDist, Float, Meters traveled from S/F this lap, m, 1
+LapDistPct, Float, Percentage distance around lap, %, 1
+RaceLaps, Int, Laps completed in race, , 1
+CarDistAhead, Float, Distance to first car in front of player in meters, m, 1
+CarDistBehind, Float, Distance to first car behind player in meters, m, 1
+LapBestLap, Int, Players best lap number, , 1
+LapBestLapTime, Float, Players best lap time, s, 1
+LapLastLapTime, Float, Players last lap time, s, 1
+LapCurrentLapTime, Float, Estimate of players current lap time as shown in F3 box, s, 1
+LapLasNLapSeq, Int, Player num consecutive clean laps completed for N average, , 1
+LapLastNLapTime, Float, Player last N average lap time, s, 1
+LapBestNLapLap, Int, Player last lap in best N average lap time, , 1
+LapBestNLapTime, Float, Player best N average lap time, s, 1
+LapDeltaToBestLap, Float, Delta time for best lap, s, 1
+LapDeltaToBestLap_DD, Float, Rate of change of delta time for best lap, s/s, 1
+LapDeltaToBestLap_OK, Bool, Delta time for best lap is valid, , 1
+LapDeltaToOptimalLap, Float, Delta time for optimal lap, s, 1
+LapDeltaToOptimalLap_DD, Float, Rate of change of delta time for optimal lap, s/s, 1
+LapDeltaToOptimalLap_OK, Bool, Delta time for optimal lap is valid, , 1
+LapDeltaToSessionBestLap, Float, Delta time for session best lap, s, 1
+LapDeltaToSessionBestLap_DD, Float, Rate of change of delta time for session best lap, s/s, 1
+LapDeltaToSessionBestLap_OK, Bool, Delta time for session best lap is valid, , 1
+LapDeltaToSessionOptimalLap, Float, Delta time for session optimal lap, s, 1
+LapDeltaToSessionOptimalLap_DD, Float, Rate of change of delta time for session optimal lap, s/s, 1
+LapDeltaToSessionOptimalLap_OK, Bool, Delta time for session optimal lap is valid, , 1
+LapDeltaToSessionLastlLap, Float, Delta time for session last lap, s, 1
+LapDeltaToSessionLastlLap_DD, Float, Rate of change of delta time for session last lap, s/s, 1
+LapDeltaToSessionLastlLap_OK, Bool, Delta time for session last lap is valid, , 1
+Speed, Float, GPS vehicle speed, m/s, 1
+Yaw, Float, Yaw orientation, rad, 1
+YawNorth, Float, Yaw orientation relative to north, rad, 1
+Pitch, Float, Pitch orientation, rad, 1
+Roll, Float, Roll orientation, rad, 1
+EnterExitReset, Int, Indicate action the reset key will take 0 enter 1 exit 2 reset, , 1
+TrackTemp, Float, Deprecated  set to TrackTempCrew, C, 1
+TrackTempCrew, Float, Temperature of track measured by crew around track, C, 1
+AirTemp, Float, Temperature of air at start/finish line, C, 1
+TrackWetness, Int, How wet is the average track surface, irsdk_TrackWetness, 1
+Skies, Int, Skies (0=clear/1=p cloudy/2=m cloudy/3=overcast), , 1
+AirDensity, Float, Density of air at start/finish line, kg/m^3, 1
+AirPressure, Float, Pressure of air at start/finish line, Pa, 1
+WindVel, Float, Wind velocity at start/finish line, m/s, 1
+WindDir, Float, Wind direction at start/finish line, rad, 1
+RelativeHumidity, Float, Relative Humidity at start/finish line, %, 1
+FogLevel, Float, Fog level at start/finish line, %, 1
+Precipitation, Float, Precipitation at start/finish line, %, 1
+SolarAltitude, Float, Sun angle above horizon in radians, rad, 1
+SolarAzimuth, Float, Sun angle clockwise from north in radians, rad, 1
+WeatherDeclaredWet, Bool, The steward says rain tires can be used, , 1
+SteeringFFBEnabled, Bool, Force feedback is enabled, , 1
+DCLapStatus, Int, Status of driver change lap requirements, , 1
+DCDriversSoFar, Int, Number of team drivers who have run a stint, , 1
+OkToReloadTextures, Bool, True if it is ok to reload car textures at this time, , 1
+LoadNumTextures, Bool, True if the car_num texture will be loaded, , 1
+CarLeftRight, Int, Notify if car is to the left or right of driver, irsdk_CarLeftRight, 1
+PitsOpen, Bool, True if pit stop is allowed for the current player, , 1
+VidCapEnabled, Bool, True if video capture system is enabled, , 1
+VidCapActive, Bool, True if video currently being captured, , 1
+PitRepairLeft, Float, Time left for mandatory pit repairs if repairs are active, s, 1
+PitOptRepairLeft, Float, Time left for optional repairs if repairs are active, s, 1
+PitstopActive, Bool, Is the player getting pit stop service, , 1
+FastRepairUsed, Int, How many fast repairs used so far, , 1
+FastRepairAvailable, Int, How many fast repairs left  255 is unlimited, , 1
+LFTiresUsed, Int, How many left front tires used so far, , 1
+RFTiresUsed, Int, How many right front tires used so far, , 1
+LRTiresUsed, Int, How many left rear tires used so far, , 1
+RRTiresUsed, Int, How many right rear tires used so far, , 1
+LeftTireSetsUsed, Int, How many left tire sets used so far, , 1
+RightTireSetsUsed, Int, How many right tire sets used so far, , 1
+FrontTireSetsUsed, Int, How many front tire sets used so far, , 1
+RearTireSetsUsed, Int, How many rear tire sets used so far, , 1
+TireSetsUsed, Int, How many tire sets used so far, , 1
+LFTiresAvailable, Int, How many left front tires are remaining  255 is unlimited, , 1
+RFTiresAvailable, Int, How many right front tires are remaining  255 is unlimited, , 1
+LRTiresAvailable, Int, How many left rear tires are remaining  255 is unlimited, , 1
+RRTiresAvailable, Int, How many right rear tires are remaining  255 is unlimited, , 1
+LeftTireSetsAvailable, Int, How many left tire sets are remaining  255 is unlimited, , 1
+RightTireSetsAvailable, Int, How many right tire sets are remaining  255 is unlimited, , 1
+FrontTireSetsAvailable, Int, How many front tire sets are remaining  255 is unlimited, , 1
+RearTireSetsAvailable, Int, How many rear tire sets are remaining  255 is unlimited, , 1
+TireSetsAvailable, Int, How many tire sets are remaining  255 is unlimited, , 1
+CamCarIdx, Int, Active camera's focus car index, , 1
+CamCameraNumber, Int, Active camera number, , 1
+CamGroupNumber, Int, Active camera group number, , 1
+CamCameraState, BitField, State of camera system, irsdk_CameraState, 1
+IsOnTrackCar, Bool, 1=Car on track physics running, , 1
+IsInGarage, Bool, 1=Car in garage physics running, , 1
+SteeringWheelAngleMax, Float, Steering wheel max angle, rad, 1
+ShiftPowerPct, Float, Friction torque applied to gears when shifting or grinding, %, 1
+ShiftGrindRPM, Float, RPM of shifter grinding noise, RPM, 1
+ThrottleRaw, Float, Raw throttle input 0=off throttle to 1=full throttle, %, 1
+BrakeRaw, Float, Raw brake input 0=brake released to 1=max pedal force, %, 1
+ClutchRaw, Float, Raw clutch input 0=disengaged to 1=fully engaged, %, 1
+HandbrakeRaw, Float, Raw handbrake input 0=handbrake released to 1=max force, %, 1
+BrakeABSactive, Bool, true if abs is currently reducing brake force pressure, , 1
+EngineWarnings, BitField, Bitfield for warning lights, irsdk_EngineWarnings, 1
+FuelLevelPct, Float, Percent fuel remaining, %, 1
+PitSvFlags, BitField, Bitfield of pit service checkboxes, irsdk_PitSvFlags, 1
+PitSvLFP, Float, Pit service left front tire pressure, kPa, 1
+PitSvRFP, Float, Pit service right front tire pressure, kPa, 1
+PitSvLRP, Float, Pit service left rear tire pressure, kPa, 1
+PitSvRRP, Float, Pit service right rear tire pressure, kPa, 1
+PitSvFuel, Float, Pit service fuel add amount, l or kWh, 1
+PitSvTireCompound, Int, Pit service pending tire compound, , 1
+CarIdxP2P_Status, Bool, Push2Pass active or not, , 64
+CarIdxP2P_Count, Int, Push2Pass count of usage (or remaining in Race), , 64
+P2P_Status, Bool, Push2Pass active or not on your car, , 1
+P2P_Count, Int, Push2Pass count of usage (or remaining in Race) on your car, , 1
+SteeringWheelPctTorque, Float, Force feedback % max torque on steering shaft unsigned, %, 1
+SteeringWheelPctTorqueSign, Float, Force feedback % max torque on steering shaft signed, %, 1
+SteeringWheelPctTorqueSignStops, Float, Force feedback % max torque on steering shaft signed stops, %, 1
+SteeringWheelPctIntensity, Float, Force feedback % max intensity, %, 1
+SteeringWheelPctSmoothing, Float, Force feedback % max smoothing, %, 1
+SteeringWheelPctDamper, Float, Force feedback % max damping, %, 1
+SteeringWheelLimiter, Float, Force feedback limiter strength limits impacts and oscillation, %, 1
+SteeringWheelMaxForceNm, Float, Value of strength or max force slider in Nm for FFB, N*m, 1
+SteeringWheelPeakForceNm, Float, Peak torque mapping to direct input units for FFB, N*m, 1
+SteeringWheelUseLinear, Bool, True if steering wheel force is using linear mode, , 1
+ShiftIndicatorPct, Float, DEPRECATED use DriverCarSLBlinkRPM instead, %, 1
+ReplayPlaySpeed, Int, Replay playback speed, , 1
+ReplayPlaySlowMotion, Bool, 0=not slow motion  1=replay is in slow motion, , 1
+ReplaySessionTime, Double, Seconds since replay session start, s, 1
+ReplaySessionNum, Int, Replay session number, , 1
+TireLF_RumblePitch, Float, Players LF Tire Sound rumblestrip pitch, Hz, 1
+TireRF_RumblePitch, Float, Players RF Tire Sound rumblestrip pitch, Hz, 1
+TireLR_RumblePitch, Float, Players LR Tire Sound rumblestrip pitch, Hz, 1
+TireRR_RumblePitch, Float, Players RR Tire Sound rumblestrip pitch, Hz, 1
+IsGarageVisible, Bool, 1=Garage screen is visible, , 1
+SteeringWheelTorque_ST, Float, Output torque on steering shaft at 360 Hz, N*m, 6
+SteeringWheelTorque, Float, Output torque on steering shaft, N*m, 1
+VelocityZ_ST, Float, Z velocity, m/s at 360 Hz, 6
+VelocityY_ST, Float, Y velocity, m/s at 360 Hz, 6
+VelocityX_ST, Float, X velocity, m/s at 360 Hz, 6
+VelocityZ, Float, Z velocity, m/s, 1
+VelocityY, Float, Y velocity, m/s, 1
+VelocityX, Float, X velocity, m/s, 1
+YawRate_ST, Float, Yaw rate at 360 Hz, rad/s, 6
+PitchRate_ST, Float, Pitch rate at 360 Hz, rad/s, 6
+RollRate_ST, Float, Roll rate at 360 Hz, rad/s, 6
+YawRate, Float, Yaw rate, rad/s, 1
+PitchRate, Float, Pitch rate, rad/s, 1
+RollRate, Float, Roll rate, rad/s, 1
+VertAccel_ST, Float, Vertical acceleration (including gravity) at 360 Hz, m/s^2, 6
+LatAccel_ST, Float, Lateral acceleration (including gravity) at 360 Hz, m/s^2, 6
+LongAccel_ST, Float, Longitudinal acceleration (including gravity) at 360 Hz, m/s^2, 6
+VertAccel, Float, Vertical acceleration (including gravity), m/s^2, 1
+LatAccel, Float, Lateral acceleration (including gravity), m/s^2, 1
+LongAccel, Float, Longitudinal acceleration (including gravity), m/s^2, 1
+dcStarter, Bool, In car trigger car starter, , 1
+dcPitSpeedLimiterToggle, Bool, Track if pit speed limiter system is enabled, , 1
+dpRFTireChange, Float, Pitstop rf tire change request, , 1
+dpLFTireChange, Float, Pitstop lf tire change request, , 1
+dpRRTireChange, Float, Pitstop rr tire change request, , 1
+dpLRTireChange, Float, Pitstop lr tire change request, , 1
+dpFuelFill, Float, Pitstop fuel fill flag, , 1
+dpFuelAutoFillEnabled, Float, Pitstop auto fill fuel system enabled, , 1
+dpFuelAutoFillActive, Float, Pitstop auto fill fuel next stop flag, , 1
+dpWindshieldTearoff, Float, Pitstop windshield tearoff, , 1
+dpFuelAddKg, Float, Pitstop fuel add amount, kg, 1
+dpFastRepair, Float, Pitstop fast repair set, , 1
+dpLFTireColdPress, Float, Pitstop lf tire cold pressure adjustment, Pa, 1
+dpRFTireColdPress, Float, Pitstop rf cold tire pressure adjustment, Pa, 1
+dpLRTireColdPress, Float, Pitstop lr tire cold pressure adjustment, Pa, 1
+dpRRTireColdPress, Float, Pitstop rr cold tire pressure adjustment, Pa, 1
+dcToggleWindshieldWipers, Bool, In car turn wipers on or off, , 1
+dcTriggerWindshieldWipers, Bool, In car momentarily turn on wipers, , 1
+FuelUsePerHour, Float, Engine fuel used instantaneous, kg/h, 1
+Voltage, Float, Engine voltage, V, 1
+WaterTemp, Float, Engine coolant temp, C, 1
+WaterLevel, Float, Engine coolant level, l, 1
+FuelPress, Float, Engine fuel pressure, bar, 1
+OilTemp, Float, Engine oil temperature, C, 1
+OilPress, Float, Engine oil pressure, bar, 1
+OilLevel, Float, Engine oil level, l, 1
+ManifoldPress, Float, Engine manifold pressure, bar, 1
+FuelLevel, Float, Liters of fuel remaining, l, 1
+Engine0_RPM, Float, Engine0Engine rpm, revs/min, 1
+RFbrakeLinePress, Float, RF brake line pressure, bar, 1
+RFcoldPressure, Float, RF tire cold pressure  as set in the garage, kPa, 1
+RFtempCL, Float, RF tire left carcass temperature, C, 1
+RFtempCM, Float, RF tire middle carcass temperature, C, 1
+RFtempCR, Float, RF tire right carcass temperature, C, 1
+RFwearL, Float, RF tire left percent tread remaining, %, 1
+RFwearM, Float, RF tire middle percent tread remaining, %, 1
+RFwearR, Float, RF tire right percent tread remaining, %, 1
+LFbrakeLinePress, Float, LF brake line pressure, bar, 1
+LFcoldPressure, Float, LF tire cold pressure  as set in the garage, kPa, 1
+LFtempCL, Float, LF tire left carcass temperature, C, 1
+LFtempCM, Float, LF tire middle carcass temperature, C, 1
+LFtempCR, Float, LF tire right carcass temperature, C, 1
+LFwearL, Float, LF tire left percent tread remaining, %, 1
+LFwearM, Float, LF tire middle percent tread remaining, %, 1
+LFwearR, Float, LF tire right percent tread remaining, %, 1
+RRbrakeLinePress, Float, RR brake line pressure, bar, 1
+RRcoldPressure, Float, RR tire cold pressure  as set in the garage, kPa, 1
+RRtempCL, Float, RR tire left carcass temperature, C, 1
+RRtempCM, Float, RR tire middle carcass temperature, C, 1
+RRtempCR, Float, RR tire right carcass temperature, C, 1
+RRwearL, Float, RR tire left percent tread remaining, %, 1
+RRwearM, Float, RR tire middle percent tread remaining, %, 1
+RRwearR, Float, RR tire right percent tread remaining, %, 1
+LRbrakeLinePress, Float, LR brake line pressure, bar, 1
+LRcoldPressure, Float, LR tire cold pressure  as set in the garage, kPa, 1
+LRtempCL, Float, LR tire left carcass temperature, C, 1
+LRtempCM, Float, LR tire middle carcass temperature, C, 1
+LRtempCR, Float, LR tire right carcass temperature, C, 1
+LRwearL, Float, LR tire left percent tread remaining, %, 1
+LRwearM, Float, LR tire middle percent tread remaining, %, 1
+LRwearR, Float, LR tire right percent tread remaining, %, 1
+LRshockDefl, Float, LR shock deflection, m, 1
+LRshockDefl_ST, Float, LR shock deflection at 360 Hz, m, 6
+LRshockVel, Float, LR shock velocity, m/s, 1
+LRshockVel_ST, Float, LR shock velocity at 360 Hz, m/s, 6
+RRshockDefl, Float, RR shock deflection, m, 1
+RRshockDefl_ST, Float, RR shock deflection at 360 Hz, m, 6
+RRshockVel, Float, RR shock velocity, m/s, 1
+RRshockVel_ST, Float, RR shock velocity at 360 Hz, m/s, 6
+LFshockDefl, Float, LF shock deflection, m, 1
+LFshockDefl_ST, Float, LF shock deflection at 360 Hz, m, 6
+LFshockVel, Float, LF shock velocity, m/s, 1
+LFshockVel_ST, Float, LF shock velocity at 360 Hz, m/s, 6
+RFshockDefl, Float, RF shock deflection, m, 1
+RFshockDefl_ST, Float, RF shock deflection at 360 Hz, m, 6
+RFshockVel, Float, RF shock velocity, m/s, 1
+RFshockVel_ST, Float, RF shock velocity at 360 Hz, m/s, 6

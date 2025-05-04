@@ -650,6 +650,7 @@ namespace MarvinsAIRA
 		public bool USEffectStyleSawtoothWaveBuzz { get; set; } = false;
 		public bool USEffectStyleConstantForce { get; set; } = false;
 		public bool USEffectStyleConstantForceInverted { get; set; } = false;
+		public bool USEffectStylePedalHaptics { get; set; } = false;
 
 		private int _usEffectStyle = 0;
 
@@ -1018,6 +1019,7 @@ namespace MarvinsAIRA
 		public bool OSEffectStyleSawtoothWaveBuzz { get; set; } = false;
 		public bool OSEffectStyleConstantForce { get; set; } = false;
 		public bool OSEffectStyleConstantForceInverted { get; set; } = true;
+		public bool OSEffectStylePedalHaptics {  get; set; } = false;
 
 		private int _osEffectStyle = 3;
 
@@ -1494,6 +1496,465 @@ namespace MarvinsAIRA
 				if ( _increaseLFEScaleButtons != value )
 				{
 					_increaseLFEScaleButtons = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region Pedal haptics
+
+		/* Pedal haptics enabled */
+
+		private bool _pedalHapticsEnabled = false;
+
+		public bool PedalHapticsEnabled
+		{
+			get => _pedalHapticsEnabled;
+
+			set
+			{
+				if ( _pedalHapticsEnabled != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsEnabled changed - before {_pedalHapticsEnabled} now {value}" );
+
+					_pedalHapticsEnabled = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Clutch effect 1 */
+
+		private int _pedalHapticsClutchEffect1 = 1;
+
+		public int PedalHapticsClutchEffect1
+		{
+			get => _pedalHapticsClutchEffect1;
+
+			set
+			{
+				if ( _pedalHapticsClutchEffect1 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsClutchEffect1 changed - before {_pedalHapticsClutchEffect1} now {value}" );
+
+					_pedalHapticsClutchEffect1 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Clutch effect strength 1 */
+
+		private float _pedalHapticsClutchEffectStrength1 = 1f;
+
+		public float PedalHapticsClutchEffectStrength1
+		{
+			get => _pedalHapticsClutchEffectStrength1;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsClutchEffectStrength1 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsClutchEffectStrength1 changed - before {_pedalHapticsClutchEffectStrength1} now {value}" );
+
+					_pedalHapticsClutchEffectStrength1 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Clutch effect 2 */
+
+		private int _pedalHapticsClutchEffect2 = 8;
+
+		public int PedalHapticsClutchEffect2
+		{
+			get => _pedalHapticsClutchEffect2;
+
+			set
+			{
+				if ( _pedalHapticsClutchEffect2 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsClutchEffect2 changed - before {_pedalHapticsClutchEffect2} now {value}" );
+
+					_pedalHapticsClutchEffect2 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Clutch effect strength 2 */
+
+		private float _pedalHapticsClutchEffectStrength2 = 1f;
+
+		public float PedalHapticsClutchEffectStrength2
+		{
+			get => _pedalHapticsClutchEffectStrength2;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsClutchEffectStrength2 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsClutchEffectStrength2 changed - before {_pedalHapticsClutchEffectStrength2} now {value}" );
+
+					_pedalHapticsClutchEffectStrength2 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Clutch effect 3 */
+
+		private int _pedalHapticsClutchEffect3 = 5;
+
+		public int PedalHapticsClutchEffect3
+		{
+			get => _pedalHapticsClutchEffect3;
+
+			set
+			{
+				if ( _pedalHapticsClutchEffect3 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsClutchEffect3 changed - before {_pedalHapticsClutchEffect3} now {value}" );
+
+					_pedalHapticsClutchEffect3 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Clutch effect strength 3 */
+
+		private float _pedalHapticsClutchEffectStrength3 = 1f;
+
+		public float PedalHapticsClutchEffectStrength3
+		{
+			get => _pedalHapticsClutchEffectStrength3;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsClutchEffectStrength3 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsClutchEffectStrength3 changed - before {_pedalHapticsClutchEffectStrength3} now {value}" );
+
+					_pedalHapticsClutchEffectStrength3 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Brake effect 1 */
+
+		private int _pedalHapticsBrakeEffect1 = 2;
+
+		public int PedalHapticsBrakeEffect1
+		{
+			get => _pedalHapticsBrakeEffect1;
+
+			set
+			{
+				if ( _pedalHapticsBrakeEffect1 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsBrakeEffect1 changed - before {_pedalHapticsBrakeEffect1} now {value}" );
+
+					_pedalHapticsBrakeEffect1 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Brake effect strength 1 */
+
+		private float _pedalHapticsBrakeEffectStrength1 = 1f;
+
+		public float PedalHapticsBrakeEffectStrength1
+		{
+			get => _pedalHapticsBrakeEffectStrength1;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsBrakeEffectStrength1 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsBrakeEffectStrength1 changed - before {_pedalHapticsBrakeEffectStrength1} now {value}" );
+
+					_pedalHapticsBrakeEffectStrength1 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Brake effect 2 */
+
+		private int _pedalHapticsBrakeEffect2 = 6;
+
+		public int PedalHapticsBrakeEffect2
+		{
+			get => _pedalHapticsBrakeEffect2;
+
+			set
+			{
+				if ( _pedalHapticsBrakeEffect2 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsBrakeEffect2 changed - before {_pedalHapticsBrakeEffect2} now {value}" );
+
+					_pedalHapticsBrakeEffect2 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Brake effect strength 2 */
+
+		private float _pedalHapticsBrakeEffectStrength2 = 1f;
+
+		public float PedalHapticsBrakeEffectStrength2
+		{
+			get => _pedalHapticsBrakeEffectStrength2;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsBrakeEffectStrength2 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsBrakeEffectStrength2 changed - before {_pedalHapticsBrakeEffectStrength2} now {value}" );
+
+					_pedalHapticsBrakeEffectStrength2 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Brake effect 3 */
+
+		private int _pedalHapticsBrakeEffect3 = 5;
+
+		public int PedalHapticsBrakeEffect3
+		{
+			get => _pedalHapticsBrakeEffect3;
+
+			set
+			{
+				if ( _pedalHapticsBrakeEffect3 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsBrakeEffect3 changed - before {_pedalHapticsBrakeEffect3} now {value}" );
+
+					_pedalHapticsBrakeEffect3 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Brake effect strength 3 */
+
+		private float _pedalHapticsBrakeEffectStrength3 = 1f;
+
+		public float PedalHapticsBrakeEffectStrength3
+		{
+			get => _pedalHapticsBrakeEffectStrength3;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsBrakeEffectStrength3 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsBrakeEffectStrength3 changed - before {_pedalHapticsBrakeEffectStrength3} now {value}" );
+
+					_pedalHapticsBrakeEffectStrength3 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Throttle effect 1 */
+
+		private int _pedalHapticsThrottleEffect1 = 7;
+
+		public int PedalHapticsThrottleEffect1
+		{
+			get => _pedalHapticsThrottleEffect1;
+
+			set
+			{
+				if ( _pedalHapticsThrottleEffect1 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsThrottleEffect1 changed - before {_pedalHapticsThrottleEffect1} now {value}" );
+
+					_pedalHapticsThrottleEffect1 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Throttle effect strength 1 */
+
+		private float _pedalHapticsThrottleEffectStrength1 = 1f;
+
+		public float PedalHapticsThrottleEffectStrength1
+		{
+			get => _pedalHapticsThrottleEffectStrength1;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsThrottleEffectStrength1 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsThrottleEffectStrength1 changed - before {_pedalHapticsThrottleEffectStrength1} now {value}" );
+
+					_pedalHapticsThrottleEffectStrength1 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Throttle effect 2 */
+
+		private int _pedalHapticsThrottleEffect2 = 3;
+
+		public int PedalHapticsThrottleEffect2
+		{
+			get => _pedalHapticsThrottleEffect2;
+
+			set
+			{
+				if ( _pedalHapticsThrottleEffect2 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsThrottleEffect2 changed - before {_pedalHapticsThrottleEffect2} now {value}" );
+
+					_pedalHapticsThrottleEffect2 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Throttle effect strength 2 */
+
+		private float _pedalHapticsThrottleEffectStrength2 = 1f;
+
+		public float PedalHapticsThrottleEffectStrength2
+		{
+			get => _pedalHapticsThrottleEffectStrength2;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsThrottleEffectStrength2 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsThrottleEffectStrength2 changed - before {_pedalHapticsThrottleEffectStrength2} now {value}" );
+
+					_pedalHapticsThrottleEffectStrength2 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Throttle effect 3 */
+
+		private int _pedalHapticsThrottleEffect3 = 0;
+
+		public int PedalHapticsThrottleEffect3
+		{
+			get => _pedalHapticsThrottleEffect3;
+
+			set
+			{
+				if ( _pedalHapticsThrottleEffect3 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsThrottleEffect3 changed - before {_pedalHapticsThrottleEffect3} now {value}" );
+
+					_pedalHapticsThrottleEffect3 = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		/* Throttle effect strength 3 */
+
+		private float _pedalHapticsThrottleEffectStrength3 = 1f;
+
+		public float PedalHapticsThrottleEffectStrength3
+		{
+			get => _pedalHapticsThrottleEffectStrength3;
+
+			set
+			{
+				value = Math.Clamp( value, 0f, 100f );
+
+				if ( _pedalHapticsThrottleEffectStrength3 != value )
+				{
+					var app = (App) Application.Current;
+
+					app.WriteLine( $"PedalHapticsThrottleEffectStrength3 changed - before {_pedalHapticsThrottleEffectStrength3} now {value}" );
+
+					_pedalHapticsThrottleEffectStrength3 = value;
 
 					OnPropertyChanged();
 				}
@@ -3708,6 +4169,17 @@ namespace MarvinsAIRA
 			OnPropertyChanged( false, nameof( LFEDeviceList ) );
 		}
 
+		private SerializableDictionary<string, string> _pedalHapticsDeviceList = [];
+
+		public SerializableDictionary<string, string> PedalHapticsDeviceList { get => _pedalHapticsDeviceList; }
+
+		public void UpdatePedalHapticsDeviceList( SerializableDictionary<string, string> pedalHapticsDeviceList )
+		{
+			_pedalHapticsDeviceList = pedalHapticsDeviceList;
+
+			OnPropertyChanged( false, nameof( PedalHapticsDeviceList ) );
+		}
+
 		private SerializableDictionary<string, string> _voiceList = [];
 
 		public SerializableDictionary<string, string> VoiceList { get => _voiceList; }
@@ -3731,6 +4203,8 @@ namespace MarvinsAIRA
 		}
 
 		public SerializableDictionary<int, string> AutoCenterWheelTypeList { get; } = new SerializableDictionary<int, string> { { 0, "Slow and Steady" }, { 1, "Springy" } };
+
+		public SerializableDictionary<int, string> PedalHapticsEffectList { get; } = new SerializableDictionary<int, string> { { 0, "None" }, { 1, "Gear Change" }, { 2, "ABS Engaged" }, { 3, "RPM (Wide)" }, { 4, "RPM (Narrow)" }, { 5, "Steering Effects" }, { 6, "Wheel Lock" }, { 7, "Wheel Spin" }, { 8, "Clutch Slip" } };
 
 		#endregion
 

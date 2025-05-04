@@ -41,6 +41,8 @@ namespace MarvinsAIRA
 
 			foreach ( var deviceType in deviceTypeArray )
 			{
+				WriteLine( $"...scanning for {deviceType} devices..." );
+
 				var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
 
 				foreach ( var joystickDeviceInstance in deviceInstanceList )

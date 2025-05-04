@@ -49,6 +49,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IRSDKSharper\IRSDKSharper.csproj" />
+    <ProjectReference Include="..\SimagicHPR\SimagicHPR.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -83,7 +84,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <Version>1.10.$([MSBuild]::Subtract($([System.Math]::Floor($([MSBuild]::Divide($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)))), 20180)).$([MSBuild]::Divide($([MSBuild]::Modulo($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)), 60))    </Version>
+    <Version>1.11.$([MSBuild]::Subtract($([System.Math]::Floor($([MSBuild]::Divide($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)))), 20180)).$([MSBuild]::Divide($([MSBuild]::Modulo($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)), 60))    </Version>
   </PropertyGroup>
 
 </Project>

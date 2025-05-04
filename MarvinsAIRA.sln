@@ -5,12 +5,15 @@ VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarvinsAIRA", "MarvinsAIRA.csproj", "{C8132282-C81C-4CD6-9070-E1C455F2DB4E}"
 	ProjectSection(ProjectDependencies) = postProject
+		{04F921C8-467D-4654-B5C1-1B2434641FE5} = {04F921C8-467D-4654-B5C1-1B2434641FE5}
 		{D5DBE922-0C62-4FDA-A917-CB68DA4F6245} = {D5DBE922-0C62-4FDA-A917-CB68DA4F6245}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRSDKSharper", "..\IRSDKSharper\IRSDKSharper.csproj", "{D5DBE922-0C62-4FDA-A917-CB68DA4F6245}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarvinsAIRASimHub", "..\MarvinsAIRASimHub\MarvinsAIRASimHub.csproj", "{9850AE67-9AC2-40A2-8672-7BEFEE115A68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimagicHPR", "..\SimagicHPR\SimagicHPR.csproj", "{04F921C8-467D-4654-B5C1-1B2434641FE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +61,18 @@ Global
 		{9850AE67-9AC2-40A2-8672-7BEFEE115A68}.Release|x64.Build.0 = Release|Any CPU
 		{9850AE67-9AC2-40A2-8672-7BEFEE115A68}.Release|x86.ActiveCfg = Release|Any CPU
 		{9850AE67-9AC2-40A2-8672-7BEFEE115A68}.Release|x86.Build.0 = Release|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Debug|x64.Build.0 = Debug|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Debug|x86.Build.0 = Debug|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Release|x64.ActiveCfg = Release|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Release|x64.Build.0 = Release|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Release|x86.ActiveCfg = Release|Any CPU
+		{04F921C8-467D-4654-B5C1-1B2434641FE5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

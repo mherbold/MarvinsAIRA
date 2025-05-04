@@ -15,7 +15,7 @@ namespace MarvinsAIRA
 				{
 					try
 					{
-						if ( !LogitechGSDK.LogiPlayLedsDInput( _ffb_drivingJoystick.NativePointer, _irsdk_rpm, _irsdk_shiftLightsFirstRPM, _irsdk_shiftLightsShiftRPM ) )
+						if ( !LogitechGSDK.LogiPlayLedsDInput( _ffb_drivingJoystick.NativePointer, _irsdk_rpm, _irsdk_shiftLightsFirstRPM, _irsdk_shiftLightsBlinkRPM ) )
 						{
 							_logitech_disabled = true;
 						}

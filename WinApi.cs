@@ -24,6 +24,7 @@ namespace MarvinsAIRA
 
 		public const ushort WM_SYSCOMMAND = 0x0112;
 		public const ushort WM_DEVICECHANGE = 0x0219;
+		public const ushort WM_APP = 0x8000;
 
 		public const ushort SC_MINIMIZE = 0xF020;
 		public const ushort SC_RESTORE = 0xF120;
