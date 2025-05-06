@@ -59,6 +59,8 @@ namespace MarvinsAIRA
 		public float lfeOutAmount;
 
 		public float ffbCurve;
+		public float ffbMinForce;
+		public float ffbMaxForce;
 	}
 
 	public partial class App : Application
@@ -138,6 +140,8 @@ namespace MarvinsAIRA
 			_telemetry_data.ffbInAmount = _ffb_inTorqueNM;
 			_telemetry_data.ffbOutAmount = _ffb_outTorqueNM;
 			_telemetry_data.ffbCurve = Settings.FFBCurve;
+			_telemetry_data.ffbMinForce = Settings.MinForce;
+			_telemetry_data.ffbMaxForce = Settings.MaxForce;
 			_telemetry_data.ffbSteadyState = _ffb_rawSteadyStateTorqueNM;
 			_telemetry_data.ffbClipping = _ffb_clippedTimer > 0f;
 
@@ -153,7 +157,6 @@ namespace MarvinsAIRA
 			_telemetry_data.lfeToFFBEnabled = Settings.LFEToFFBEnabled;
 			_telemetry_data.windSimulatorEnabled = Settings.WindSimulatorEnabled;
 			_telemetry_data.spotterEnabled = Settings.SpotterEnabled;
-
 
 			_telemetry_memoryMappedFileViewAccessor?.Write( 0, ref _telemetry_data );
 		}

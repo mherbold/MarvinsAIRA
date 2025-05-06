@@ -11,7 +11,7 @@
         Width="800"
         SizeToContent="Height"
         ResizeMode="NoResize"
-        Icon="/icon.ico"
+        Icon="/white-icon.ico"
         WindowStartupLocation="CenterOwner"
         ui:WindowHelper.UseModernWindowStyle="True">
 

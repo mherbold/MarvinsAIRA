@@ -19,6 +19,7 @@ using ModernWpf.Controls;
 using Hardcodet.Wpf.TaskbarNotification;
 
 using Brushes = System.Windows.Media.Brushes;
+using System;
 
 namespace MarvinsAIRA
 {
@@ -397,6 +398,7 @@ namespace MarvinsAIRA
 
 						case MSG_TYPE.LFE_Enabled:
 							app.Settings.LFEToFFBEnabled = !app.Settings.LFEToFFBEnabled;
+							app.InitializeLFE();
 							break;
 					}
 

@@ -13,14 +13,15 @@
         Width="1000"
         SizeToContent="Height"
         ResizeMode="CanMinimize"
-        Icon="/icon.ico"
+        Icon="/white-icon.ico"
         WindowStartupLocation="CenterScreen"
         ui:WindowHelper.UseModernWindowStyle="True"
         Activated="Window_Activated"
         SourceInitialized="Window_SourceInitialized"
         Closing="Window_Closing"
         Closed="Window_Closed"
-        StateChanged="Window_StateChanged" LocationChanged="Window_LocationChanged">
+        StateChanged="Window_StateChanged"
+        LocationChanged="Window_LocationChanged">
 
     <Window.DataContext>
         <local:Settings />
@@ -1510,7 +1511,7 @@
                 </ui:ToggleSwitch>
             </StatusBarItem>
         </StatusBar>
-        <tb:TaskbarIcon x:Name="MARIA_TaskbarIcon" IconSource="/icon.ico" ToolTipText="Marvin's Awesome iRacing App" TrayLeftMouseDown="TaskbarIcon_TrayLeftMouseDown">
+        <tb:TaskbarIcon x:Name="MARIA_TaskbarIcon" IconSource="/white-icon.ico" ToolTipText="Marvin's Awesome iRacing App" TrayLeftMouseDown="TaskbarIcon_TrayLeftMouseDown">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem x:Name="ShowApp_MenuItem" Header="Show Marvin's Awesome iRacing App" Click="ShowApp_MenuItem_Click" />

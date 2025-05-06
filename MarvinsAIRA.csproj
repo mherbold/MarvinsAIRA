@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationIcon>white-icon.ico</ApplicationIcon>
     <PackageIcon>icon.png</PackageIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -19,9 +19,9 @@
   <ItemGroup>
     <None Remove="a-button.png" />
     <None Remove="ABS.wav" />
+    <None Remove="black-icon.ico" />
     <None Remove="c-button.png" />
     <None Remove="click.wav" />
-    <None Remove="icon.ico" />
     <None Remove="minus-button.png" />
     <None Remove="play-button.png" />
     <None Remove="plus-button.png" />
@@ -29,6 +29,7 @@
     <None Remove="record-button.png" />
     <None Remove="steering-wheel.png" />
     <None Remove="u-button.png" />
+    <None Remove="white-icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,9 +42,9 @@
     <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
     <PackageReference Include="SharpDX.DirectSound" Version="4.2.0" />
     <PackageReference Include="SharpDX.XAudio2" Version="4.2.0" />
-    <PackageReference Include="System.IO.Ports" Version="9.0.3" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.4" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Speech" Version="9.0.3" />
+    <PackageReference Include="System.Speech" Version="9.0.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
@@ -55,11 +56,9 @@
   <ItemGroup>
     <Resource Include="a-button.png" />
     <Resource Include="abs.wav" />
+    <Resource Include="black-icon.ico" />
     <Resource Include="c-button.png" />
     <Resource Include="click.wav" />
-    <Resource Include="icon.ico">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="minus-button.png" />
     <Resource Include="play-button.png" />
     <Resource Include="plus-button.png" />
@@ -67,16 +66,36 @@
     <Resource Include="record-button.png" />
     <Resource Include="steering-wheel.png" />
     <Resource Include="u-button.png" />
+    <Resource Include="white-icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="LogitechSteeringWheelEnginesWrapper.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Update="vJoyInterfaceWrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -84,7 +103,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <Version>1.11.$([MSBuild]::Subtract($([System.Math]::Floor($([MSBuild]::Divide($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)))), 20180)).$([MSBuild]::Divide($([MSBuild]::Modulo($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)), 60))    </Version>
+    <Version>1.12.$([MSBuild]::Subtract($([System.Math]::Floor($([MSBuild]::Divide($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)))), 20180)).$([MSBuild]::Divide($([MSBuild]::Modulo($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)), 60))    </Version>
   </PropertyGroup>
 
 </Project>

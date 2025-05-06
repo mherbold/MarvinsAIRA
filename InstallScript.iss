@@ -17,7 +17,7 @@ OutputBaseFilename=MarvinsAIRA-Setup-{#ApplicationVersion}
 OutputDir=userdocs:MarvinsAIRA
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-SetupIconFile="C:\Users\marvi\Documents\GitHub\MarvinsAIRA\icon.ico"
+SetupIconFile="C:\Users\marvi\Documents\GitHub\MarvinsAIRA\white-icon.ico"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
