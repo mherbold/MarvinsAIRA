@@ -163,68 +163,34 @@ namespace MarvinsAIRA
 
 			DeviceInstance? forceFeedbackDeviceInstance = null;
 
-			DeviceType[] deviceTypeArray = [ DeviceType.Keyboard, DeviceType.Joystick, DeviceType.Gamepad, DeviceType.Driving, DeviceType.Flight, DeviceType.FirstPerson, DeviceType.ControlDevice, DeviceType.ScreenPointer, DeviceType.Remote, DeviceType.Supplemental ];
+			var deviceInstanceList = directInput.GetDevices( DeviceClass.All, DeviceEnumerationFlags.AttachedOnly | DeviceEnumerationFlags.ForceFeedback );
 
-			if ( Settings.SelectedFFBDeviceGuid == Guid.Empty )
+			foreach ( var deviceInstance in deviceInstanceList )
 			{
-				WriteLine( "...there is not already a selected force feedback device, looking for the first attached force feedback driving device..." );
-
-				foreach ( var deviceType in deviceTypeArray )
+				if ( ( deviceInstance.Type != DeviceType.Device ) && ( deviceInstance.Type != DeviceType.Mouse ) )
 				{
-					WriteLine( $"...scanning for {deviceType} devices..." );
+					WriteLine( $"..." );
+					WriteLine( $"Type: {deviceInstance.Type}" );
+					WriteLine( $"Subtype: {deviceInstance.Subtype}" );
+					WriteLine( $"Product name: {deviceInstance.ProductName}" );
+					WriteLine( $"Product GUID: {deviceInstance.ProductGuid}" );
+					WriteLine( $"Instance name: {deviceInstance.InstanceName}" );
+					WriteLine( $"Instance GUID: {deviceInstance.InstanceGuid}" );
+					WriteLine( $"Force feedback driver GUID: {deviceInstance.ForceFeedbackDriverGuid}" );
 
-					bool deviceFound = false;
-
-					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
-
-					foreach ( var joystickDeviceInstance in deviceInstanceList )
+					if ( Settings.SelectedFFBDeviceGuid == Guid.Empty )
 					{
-						var hasForceFeedback = joystickDeviceInstance.ForceFeedbackDriverGuid != Guid.Empty;
+						Settings.SelectedFFBDeviceGuid = deviceInstance.InstanceGuid;
 
-						if ( hasForceFeedback )
+						forceFeedbackDeviceInstance = deviceInstance;
+					}
+					else if ( deviceInstance.InstanceGuid == Settings.SelectedFFBDeviceGuid )
+					{
+						if ( forceFeedbackDeviceInstance == null )
 						{
-							Settings.SelectedFFBDeviceGuid = joystickDeviceInstance.InstanceGuid;
-							forceFeedbackDeviceInstance = joystickDeviceInstance;
-							deviceFound = true;
-							break;
+							forceFeedbackDeviceInstance = deviceInstance;
 						}
 					}
-
-					if ( deviceFound )
-					{
-						break;
-					}
-				}
-			}
-			else
-			{
-				WriteLine( "...there is already a selected force feedback device, looking for it..." );
-
-				foreach ( var deviceType in deviceTypeArray )
-				{
-					bool deviceFound = false;
-
-					var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
-
-					foreach ( var joystickDeviceInstance in deviceInstanceList )
-					{
-						if ( joystickDeviceInstance.InstanceGuid == Settings.SelectedFFBDeviceGuid )
-						{
-							forceFeedbackDeviceInstance = joystickDeviceInstance;
-							deviceFound = true;
-							break;
-						}
-					}
-
-					if ( deviceFound )
-					{
-						break;
-					}
-				}
-
-				if ( forceFeedbackDeviceInstance == null )
-				{
-					WriteLine( "...we could not find this device again - could it be unplugged or turned off?..." );
 				}
 			}
 
@@ -264,7 +230,14 @@ namespace MarvinsAIRA
 			}
 			else
 			{
-				WriteLine( "...no force feedback driving device was selected!" );
+				if ( Settings.SelectedFFBDeviceGuid != Guid.Empty )
+				{
+					WriteLine( "...we could not find your selected device - could it be unplugged or turned off?..." );
+				}
+				else
+				{
+					WriteLine( "...no force feedback driving device was selected!" );
+				}
 			}
 		}
 

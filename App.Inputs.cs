@@ -37,23 +37,25 @@ namespace MarvinsAIRA
 
 			SerializableDictionary<Guid, string> ffbDeviceList = [];
 
-			DeviceType[] deviceTypeArray = [ DeviceType.Keyboard, DeviceType.Joystick, DeviceType.Gamepad, DeviceType.Driving, DeviceType.Flight, DeviceType.FirstPerson, DeviceType.ControlDevice, DeviceType.ScreenPointer, DeviceType.Remote, DeviceType.Supplemental ];
+			var deviceInstanceList = directInput.GetDevices( DeviceClass.All, DeviceEnumerationFlags.AttachedOnly );
 
-			foreach ( var deviceType in deviceTypeArray )
+			foreach ( var deviceInstance in deviceInstanceList )
 			{
-				WriteLine( $"...scanning for {deviceType} devices..." );
-
-				var deviceInstanceList = directInput.GetDevices( deviceType, DeviceEnumerationFlags.AttachedOnly );
-
-				foreach ( var joystickDeviceInstance in deviceInstanceList )
+				if ( ( deviceInstance.Type != DeviceType.Device ) && ( deviceInstance.Type != DeviceType.Mouse ) )
 				{
-					WriteLine( $"...we found the {joystickDeviceInstance.ProductName} device..." );
+					WriteLine( $"..." );
+					WriteLine( $"Type: {deviceInstance.Type}" );
+					WriteLine( $"Subtype: {deviceInstance.Subtype}" );
+					WriteLine( $"Product name: {deviceInstance.ProductName}" );
+					WriteLine( $"Product GUID: {deviceInstance.ProductGuid}" );
+					WriteLine( $"Instance name: {deviceInstance.InstanceName}" );
+					WriteLine( $"Instance GUID: {deviceInstance.InstanceGuid}" );
 
 					var deviceAlreadyAdded = false;
 
 					foreach ( var otherJoystick in _input_joystickList )
 					{
-						if ( otherJoystick.Information.InstanceGuid == joystickDeviceInstance.InstanceGuid )
+						if ( otherJoystick.Information.InstanceGuid == deviceInstance.InstanceGuid )
 						{
 							deviceAlreadyAdded = true;
 							break;
@@ -66,18 +68,16 @@ namespace MarvinsAIRA
 					}
 					else
 					{
-						var hasForceFeedback = joystickDeviceInstance.ForceFeedbackDriverGuid != Guid.Empty;
+						var hasForceFeedback = deviceInstance.ForceFeedbackDriverGuid != Guid.Empty;
 
 						if ( hasForceFeedback )
 						{
-							ffbDeviceList.Add( joystickDeviceInstance.InstanceGuid, joystickDeviceInstance.ProductName );
+							ffbDeviceList.Add( deviceInstance.InstanceGuid, deviceInstance.ProductName );
 						}
-
-						WriteLine( $"...this devices identifies as Type: {joystickDeviceInstance.Type}, Subtype: {joystickDeviceInstance.Subtype}, Has FF: {hasForceFeedback}, GUID: {joystickDeviceInstance.InstanceGuid}..." );
 
 						WriteLine( $"...creating joystick type interface..." );
 
-						var joystick = new Joystick( directInput, joystickDeviceInstance.InstanceGuid );
+						var joystick = new Joystick( directInput, deviceInstance.InstanceGuid );
 
 						joystick.Properties.BufferSize = 128;
 

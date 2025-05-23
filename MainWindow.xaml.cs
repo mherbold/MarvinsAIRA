@@ -19,7 +19,6 @@ using ModernWpf.Controls;
 using Hardcodet.Wpf.TaskbarNotification;
 
 using Brushes = System.Windows.Media.Brushes;
-using System;
 
 namespace MarvinsAIRA
 {
